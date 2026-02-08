@@ -1,0 +1,446 @@
+{
+  "name": "bb20agent(Binance)",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://testnet.binancefuture.com/fapi/v1/ticker/price?symbol=ETHUSDT",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "90544de2-2e01-4fe8-93c4-87c8a088f0ad",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "u51mxpZTYjFZAeoc",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "language": "pythonNative",
+        "pythonCode": "# VORA Core Logic: Anti-Gravity & Tail Filter\n\ndef check_signal(candle):\n    # 데이터 추출 (이전 노드의 JSON 데이터에 접근)\n    close_p = float(candle.get('price', 0))\n    # 현재 데이터에 맞춰 기본값 설정\n    open_p = float(candle.get('open', close_p))\n    high_p = float(candle.get('high', close_p))\n    low_p = float(candle.get('low', close_p))\n    \n    # 안티 그래비티 가짜 꼬리 판별\n    candle_range = high_p - low_p\n    lower_shadow = min(open_p, close_p) - low_p\n    tail_ratio = (lower_shadow / candle_range) if candle_range > 0 else 0\n    \n    # 전략 파라미터 (손절 25pt / 익절 50pt)\n    tp_price = close_p + 50\n    sl_price = close_p - 25\n    \n    # 테스트를 위해 무조건 LONG 신호 발생 (실전엔 로직 적용)\n    is_anti_gravity_active = True \n    \n    if is_anti_gravity_active:\n        return {\n            \"signal\": \"LONG\",\n            \"entry_amount\": 100,\n            \"tp\": tp_price,\n            \"sl\": sl_price,\n            \"reason\": f\"VORA: 테스트 진입 (Price: {close_p})\"\n        }\n    return {\"signal\": \"WAIT\", \"reason\": \"VORA: 관망 중\"}\n\n# --- n8n 데이터 처리 (여기가 핵심!) ---\nresults = []\n\n# 괄호()를 제거하고 _items 리스트를 직접 반복문으로 돌려야 해\nfor item in _items: \n    # n8n의 Native Python은 대괄호 [] 로 데이터에 접근해\n    input_data = item[\"json\"] \n    analysis = check_signal(input_data)\n    results.append({\"json\": analysis})\n\nreturn results"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        240
+      ],
+      "id": "118d721e-5260-4c03-97fb-c188411d1cd2",
+      "name": "Code in Python"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8542cd00-a16e-4640-8f41-bb12d5e1b236",
+              "leftValue": "={{ $json.signal }}",
+              "rightValue": "LONG",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "632e29f3-1edf-4dc0-b64c-7667c2037d4b",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        640,
+        240
+      ],
+      "id": "98f56267-e29e-4629-853b-e55dafed4be5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://testnet.binancefuture.com/fapi/v1/order",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-MBX-APIKEY",
+              "value": "FKn2XIsfBDYfGziMnFsClI6WwC5IakzkyXqeX5LuYi0DHvWWI7CSdUQmUGde7Yq8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "quantity",
+              "value": "={{ $json.quantity }}"
+            },
+            {
+              "name": "recvWindow",
+              "value": "={{ $json.recvWindow }}"
+            },
+            {
+              "name": "side",
+              "value": "={{ $json.side }}"
+            },
+            {
+              "name": "symbol",
+              "value": "={{ $json.symbol }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ $json.timestamp }}"
+            },
+            {
+              "name": "type",
+              "value": "={{ $json.type }}"
+            },
+            {
+              "name": "signature",
+              "value": "={{ $json.signature }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "c73818b0-b78c-4ee5-b970-ebe0e64402cc",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\n\nconst apiSecret = \"aqXhBNXjFMAzgihBY6AQqaeQDShXPbK5hqlutZMIEdnIlxBLLKwKH76iOdPtYbf2\".trim();\n\n// 모든 값 **문자열** + quantity 정밀도 고정 (ETHUSDT 기준 보통 3~5 decimal)\nconst params = {\n  quantity:   (0.05).toFixed(8),     // '0.05000000' 로 강제 – Binance가 선호하는 형태\n  recvWindow: '120000',\n  side:       'BUY',\n  symbol:     'ETHUSDT',\n  timestamp:  Date.now().toString(),\n  type:       'MARKET'\n};\n\n// 알파벳 순 정렬 (이미 잘 함)\nconst sortedKeys = Object.keys(params).sort();\nconst queryString = sortedKeys.map(key => `${key}=${params[key]}`).join('&');\n\nconst signature = crypto.createHmac('sha256', apiSecret)\n  .update(queryString)\n  .digest('hex');\n\nreturn [{\n  json: {\n    ...params,\n    signature,\n    debug_queryString: queryString,\n    debug_quantity_raw: '0.05',               // 비교용\n    debug_quantity_fixed: params.quantity     // 실제 보낼 값\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        0
+      ],
+      "id": "0393dcc2-f24c-4738-8a93-42c59d7ee3b8",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "url": "https://testnet.binancefuture.com/fapi/v1/time",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        640,
+        0
+      ],
+      "id": "c138e8ab-4c69-43c7-9af8-637b7d17a080",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const crypto = require('crypto');\n\nconst apiSecret = \"aqXhBNXjFMAzgihBY6AQqaeQDShXPbK5hqlutZMIEdnIlxBLLKwKH76iOdPtYbf2\".trim();\n\nconst params = {\n  symbol: 'ETHUSDT',\n  side: 'SELL',\n  algoType: 'CONDITIONAL',\n  type: 'STOP_MARKET',\n  stopPrice: '1994.58',\n  triggerPrice: '1994.58',\n  closePosition: 'true',       // 반드시 문자열 'true'\n  recvWindow: '120000',\n  timestamp: Date.now().toString()\n};\n\nconst sortedKeys = Object.keys(params).sort((a, b) => a.localeCompare(b));\nconst queryString = sortedKeys.map(key => `${key}=${params[key]}`).join('&');\n\nconst signature = crypto\n  .createHmac('sha256', apiSecret)\n  .update(queryString)\n  .digest('hex');\n\n// 디버깅용 전체 출력\nreturn [{\n  json: {\n    queryString: queryString,\n    signature: signature,\n    // 개별 필드도 그대로 넘겨서 필요 시 사용 가능\n    symbol: params.symbol,\n    side: params.side,\n    algoType: params.algoType,\n    type: params.type,\n    stopPrice: params.stopPrice,\n    closePosition: params.closePosition,\n    positionSide: params.positionSide,\n    recvWindow: params.recvWindow,\n    timestamp: params.timestamp\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1216,
+        0
+      ],
+      "id": "ef99a844-cbe3-4372-bdf7-29c5ad7dba37",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://testnet.binancefuture.com/fapi/v1/algoOrder",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-MBX-APIKEY",
+              "value": "FKn2XIsfBDYfGziMnFsClI6WwC5IakzkyXqeX5LuYi0DHvWWI7CSdUQmUGde7Yq8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/x-www-form-urlencoded",
+        "body": "={{ $json.queryString }}&signature={{ $json.signature }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1424,
+        0
+      ],
+      "id": "692d5f5d-459b-4fd6-84ba-78594ab54594",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "content": "## 진입 시그널",
+        "height": 576,
+        "width": 1056,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -64,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "9e618d5f-24b8-4d23-98a4-fc167264d750",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 손절 시그널",
+        "height": 576,
+        "width": 800,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        896,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "90a7dbca-666e-4053-8ab6-3d98bca1594e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "url": "https://testnet.binancefuture.com/fapi/v1/klines",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "ETHUSDT"
+            },
+            {
+              "name": "interval",
+              "value": "5m"
+            },
+            {
+              "name": "limit",
+              "value": "100"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        912,
+        -304
+      ],
+      "id": "be035341-9051-44a9-a6db-9470f39f0739",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "content": "##전략 시그널",
+        "height": 512,
+        "width": 800
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        896,
+        -640
+      ],
+      "typeVersion": 1,
+      "id": "d752c244-577b-4ad4-83bf-2a7ce82b80bf",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        912,
+        -448
+      ],
+      "id": "37537d51-0b3b-435d-9939-17e323085ae5",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "38d56da3-59c7-4dad-a982-c5a7f2efb940",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        96,
+        0
+      ],
+      "id": "7e1779ad-1fd0-4a62-a226-3cf517d8a5e5",
+      "name": "Webhook",
+      "webhookId": "38d56da3-59c7-4dad-a982-c5a7f2efb940"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in Python",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in Python": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "efa37d9d-6021-4e1b-a210-4ce53d7ca944",
+  "meta": {
+    "instanceId": "c193a30341cdb6564a97bc4ade3223da2d1e0e663a3328ec624449cbd0ba8f9b"
+  },
+  "id": "iHXYTA7hSplRzwb9LS3tt",
+  "tags": []
+}
