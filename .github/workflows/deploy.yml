@@ -1,11 +1,13 @@
-echo name: Simbora-Auto-Webhook > .github\workflows\deploy.yml
-echo on: >> .github\workflows\deploy.yml
-echo   push: >> .github\workflows\deploy.yml
-echo     branches: [ main ] >> .github\workflows\deploy.yml
-echo jobs: >> .github\workflows\deploy.yml
-echo   notify: >> .github\workflows\deploy.yml
-echo     runs-on: ubuntu-latest >> .github\workflows\deploy.yml
-echo     steps: >> .github\workflows\deploy.yml
-echo       - name: Send Webhook to n8n >> .github\workflows\deploy.yml
-echo         run: ^| >> .github\workflows\deploy.yml
-echo           curl -X POST "https://bb20agent.app.n8n.cloud/webhook/iHXYTA7hSplRzwb9LS3tt" -H "Content-Type: application/json" -d "{\"event\":\"push\", \"repo\":\"antigravity-bot\"}" >> .github\workflows\deploy.yml
+name: Simbora-Auto-Webhook
+on:
+  push:
+    branches: [ main ]
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Webhook to n8n
+        run: |
+          curl -X POST "https://bb20agent.app.n8n.cloud/webhook/iHXYTA7hSplRzwb9LS3tt" \
+          -H "Content-Type: application/json" \
+          -d "{\"event\":\"push\", \"repo\":\"antigravity-bot\"}"
