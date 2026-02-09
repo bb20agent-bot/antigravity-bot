@@ -1,0 +1,7 @@
+{
+  "name": "VORA TradeFi",
+  "description": "A high-performance TradeFi dashboard for Telegram Mini Apps featuring live trading strategies, leverage controls, and social copy-trading.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
