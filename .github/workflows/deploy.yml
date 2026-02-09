@@ -11,3 +11,7 @@ jobs:
           curl -X POST "https://bb20agent.app.n8n.cloud/webhook/iHXYTA7hSplRzwb9LS3tt" \
           -H "Content-Type: application/json" \
           -d "{\"event\":\"push\", \"repo\":\"antigravity-bot\"}"
+
+
+simvora-gervanence-system url
+https://bb20agent.app.n8n.cloud/webhook-test/iHXYTA7hSplRzwb9LS3tt
