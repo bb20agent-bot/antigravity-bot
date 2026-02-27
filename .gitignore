@@ -1,0 +1,13 @@
+
+# Security: Exclude Admin Logic & Secrets
+pages/
+services/geminiService.ts
+.env
+scripts/deploy-admin
+metadata.json
+
+# Build & Dependencies
+node_modules/
+dist/
+.DS_Store
+*.logDESIGN_GUIDE.md
