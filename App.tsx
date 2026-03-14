@@ -575,23 +575,27 @@ const App: React.FC = () => {
       </div>
 
       {/* Navigation Bar */}
-      <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-black/40 backdrop-blur-3xl border border-white/10 rounded-full py-4.5 px-8 z-50 flex justify-between items-center shadow-2xl ring-1 ring-white/5">
+      <nav aria-label="Main Navigation" className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-black/40 backdrop-blur-3xl border border-white/10 rounded-full py-4.5 px-8 z-50 flex justify-between items-center shadow-2xl ring-1 ring-white/5">
         <NavItem 
+          label="Home"
           icon={<LayoutDashboard size={22} strokeWidth={activeTab === NavTab.HOME ? 3 : 2} />} 
           active={activeTab === NavTab.HOME} 
           onClick={() => setActiveTab(NavTab.HOME)} 
         />
         <NavItem 
+          label="My Office"
           icon={<Gamepad2 size={22} strokeWidth={activeTab === NavTab.MY_OFFICE ? 3 : 2} />} 
           active={activeTab === NavTab.MY_OFFICE} 
           onClick={() => setActiveTab(NavTab.MY_OFFICE)} 
         />
         <NavItem 
+          label="Marketplace"
           icon={<ShoppingBag size={22} strokeWidth={activeTab === NavTab.MARKETPLACE ? 3 : 2} />} 
           active={activeTab === NavTab.MARKETPLACE} 
           onClick={() => setActiveTab(NavTab.MARKETPLACE)} 
         />
         <NavItem 
+          label="Info"
           icon={<FileText size={22} strokeWidth={activeTab === NavTab.INFO ? 3 : 2} />} 
           active={activeTab === NavTab.INFO} 
           onClick={() => setActiveTab(NavTab.INFO)} 
@@ -618,10 +622,12 @@ const App: React.FC = () => {
   );
 };
 
-const NavItem = ({ icon, active, onClick }: { icon: React.ReactNode, active: boolean, onClick: () => void }) => (
+const NavItem = ({ icon, active, onClick, label }: { icon: React.ReactNode, active: boolean, onClick: () => void, label: string }) => (
   <button 
+    aria-label={label}
+    title={label}
     onClick={onClick}
-    className={`p-2 transition-all duration-500 relative ${active ? 'text-[#0088cc] scale-125' : 'text-gray-600'}`}
+    className={`p-2 transition-all duration-500 relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0088cc] focus-visible:rounded-lg ${active ? 'text-[#0088cc] scale-125' : 'text-gray-600'}`}
   >
     {icon}
     {active && (
