@@ -580,21 +580,25 @@ const App: React.FC = () => {
           icon={<LayoutDashboard size={22} strokeWidth={activeTab === NavTab.HOME ? 3 : 2} />} 
           active={activeTab === NavTab.HOME} 
           onClick={() => setActiveTab(NavTab.HOME)} 
+          ariaLabel="Home"
         />
         <NavItem 
           icon={<Gamepad2 size={22} strokeWidth={activeTab === NavTab.MY_OFFICE ? 3 : 2} />} 
           active={activeTab === NavTab.MY_OFFICE} 
           onClick={() => setActiveTab(NavTab.MY_OFFICE)} 
+          ariaLabel="My Office"
         />
         <NavItem 
           icon={<ShoppingBag size={22} strokeWidth={activeTab === NavTab.MARKETPLACE ? 3 : 2} />} 
           active={activeTab === NavTab.MARKETPLACE} 
           onClick={() => setActiveTab(NavTab.MARKETPLACE)} 
+          ariaLabel="Marketplace"
         />
         <NavItem 
           icon={<FileText size={22} strokeWidth={activeTab === NavTab.INFO ? 3 : 2} />} 
           active={activeTab === NavTab.INFO} 
           onClick={() => setActiveTab(NavTab.INFO)} 
+          ariaLabel="Info"
         />
       </nav>
 
@@ -618,10 +622,11 @@ const App: React.FC = () => {
   );
 };
 
-const NavItem = ({ icon, active, onClick }: { icon: React.ReactNode, active: boolean, onClick: () => void }) => (
+const NavItem = ({ icon, active, onClick, ariaLabel }: { icon: React.ReactNode, active: boolean, onClick: () => void, ariaLabel?: string }) => (
   <button 
     onClick={onClick}
-    className={`p-2 transition-all duration-500 relative ${active ? 'text-[#0088cc] scale-125' : 'text-gray-600'}`}
+    aria-label={ariaLabel}
+    className={`p-2 transition-all duration-500 relative focus-visible:ring-2 focus-visible:ring-white/50 focus:outline-none ${active ? 'text-[#0088cc] scale-125' : 'text-gray-600'}`}
   >
     {icon}
     {active && (
