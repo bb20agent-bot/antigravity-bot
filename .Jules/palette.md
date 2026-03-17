@@ -1,0 +1,3 @@
+## 2024-05-18 - Icon-only Bottom Navigation Needs Explicit Accessible Names
+**Learning:** The bottom navigation bar uses icon-only buttons for primary tab switching. Without explicitly setting `aria-label`s on these buttons, screen reader users miss crucial context about where these primary actions lead. The design lacked focus states for tab navigation, hurting keyboard accessibility.
+**Action:** Always add explicit, descriptive `aria-label` attributes to icon-only buttons (especially navigation components). Use `aria-current="page"` for active navigation items to provide state to assistive technologies. Apply visible focus states (`focus-visible:ring-2`) to allow keyboard users to see their tab position clearly.
