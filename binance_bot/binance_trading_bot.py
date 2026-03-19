@@ -9,9 +9,9 @@ load_dotenv()
 
 # 환경변수 설정
 API_KEY = os.getenv('BINANCE_API_KEY')
-API_SECRET = os.getenv('BINANCE_API_SECRET')
-WEBHOOK_URL = os.getenv('GOOGLE_SHEET_WEBHOOK')
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_TOKEN')
+API_SECRET = os.getenv('BINANCE_SECRET_KEY', os.getenv('BINANCE_API_SECRET'))
+WEBHOOK_URL = os.getenv('GOOGLE_SHEET_WEBHOOK_URL', os.getenv('GOOGLE_SHEET_WEBHOOK'))
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN', os.getenv('TELEGRAM_TOKEN'))
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 # 설정값 (여기서 수정해 사용 가능)
 # [주의] 이 값들은 투입 원금(ROE) 대비 손익 퍼센트입니다. 
@@ -102,6 +102,9 @@ def set_sl_tp_for_position(symbol, side, amount, entry_price, leverage):
         
         # 처리 완료 로그 및 시트 반영
         print(f"✅ {symbol} {side.upper()} SL/TP 설정 완료!")
+        
+        msg = f"🔔 [수동 진입 보호 작동]\n🚀 코인: {symbol}\n방향: {side.upper()}\n진입가: {entry_price}\n자동 SL: {sl_price:.4f}\n자동 TP: {tp_price:.4f}"
+        send_telegram_message(msg)
         
         # 텔레그램 알림 전송 (단순 텍스트 대신 Vora 영상 렌더링(Puppeteer) 서버 API로 전송)
         try:
@@ -197,6 +200,10 @@ def check_positions():
                 }
                 requests.post(url, json=payload, timeout=5)
                 print(f"👉 Vora 백엔드 플랫폼에 실시간 매매 로그 기록 완료 (PnL: {recent_pnl:.4f})")
+                
+                # 포지션 종료 시 텔레그램 알람 전송
+                end_msg = f"📉 [포지션 청산 완료]\n코인: {sym}\n방향: {sd.upper()}\n최종 PnL: <b>{recent_pnl:.4f}</b>"
+                send_telegram_message(end_msg)
             except Exception as e:
                 print(f"백엔드 실적 로깅 실패: {e}")
 

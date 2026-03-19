@@ -7,10 +7,9 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 
 # ==========================================
 # 환경 변수 로드
-# ==========================================
 load_dotenv()
-JOY_TELEGRAM_TOKEN = os.getenv('JOY_TELEGRAM_TOKEN', 'YOUR_TELEGRAM_BOT_TOKEN')
-GOOGLE_SHEET_WEBHOOK = os.getenv('GOOGLE_SHEET_WEBHOOK')
+JOY_TELEGRAM_TOKEN = os.getenv('JOY_TELEGRAM_TOKEN', os.getenv('TELEGRAM_BOT_TOKEN', 'YOUR_TELEGRAM_BOT_TOKEN'))
+GOOGLE_SHEET_WEBHOOK = os.getenv('GOOGLE_SHEET_WEBHOOK_URL', os.getenv('GOOGLE_SHEET_WEBHOOK'))
 
 # 대화 상태 정의 (Conversation States)
 ASK_EMAIL = 1
