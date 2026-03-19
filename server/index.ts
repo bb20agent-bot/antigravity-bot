@@ -62,6 +62,26 @@ async function initializeDB() {
             FOREIGN KEY(referrerId) REFERENCES User(id)
         )
     `);
+    
+    // -- Fandom 8 Mechanics Columns --
+    try { await db.exec(`ALTER TABLE User ADD COLUMN dnftLevel INTEGER DEFAULT 1`); } catch (e) {}
+    try { await db.exec(`ALTER TABLE User ADD COLUMN nVolume REAL DEFAULT 0`); } catch (e) {}
+    try { await db.exec(`ALTER TABLE User ADD COLUMN isCrew BOOLEAN DEFAULT 0`); } catch (e) {}
+    try { await db.exec(`ALTER TABLE User ADD COLUMN accumulatedVora REAL DEFAULT 0`); } catch (e) {}
+
+    // -- System Controls --
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS SystemState (
+            id TEXT PRIMARY KEY,
+            stakingPoolTotal REAL DEFAULT 0,
+            joyCmoLiquidityTon REAL DEFAULT 0,
+            joyCmoLiquidityUsdc REAL DEFAULT 0,
+            p2pTaxAccumulated REAL DEFAULT 0,
+            p2pBurnAccumulated REAL DEFAULT 0
+        )
+    `);
+    try { await db.exec(`INSERT INTO SystemState (id) VALUES ('global')`); } catch (e) {}
+
     console.log("SQLite Database initialized.");
 }
 
@@ -1419,6 +1439,74 @@ if (joyTelegramToken) {
 } else {
     console.log("⚠️ No Telegram Token found for Joy Seo AI (JOY_TELEGRAM_TOKEN).");
 }
+
+// ==========================================
+// 🛡️ VORA Admin Control Endpoints
+// ==========================================
+app.get('/api/admin/overview', async (req, res) => {
+    try {
+        const globalState = await db.get(`SELECT * FROM SystemState WHERE id = 'global'`);
+        const totalUsers = await db.get(`SELECT COUNT(*) as count FROM User`);
+        const totalLiquidity = globalState ? (globalState.joyCmoLiquidityTon + globalState.joyCmoLiquidityUsdc) : 0;
+        
+        res.json({
+            status: "success",
+            data: {
+                users: totalUsers.count,
+                liquidityUsdc: totalLiquidity,
+                stakingPool: globalState ? globalState.stakingPoolTotal : 0,
+                p2pTax: globalState ? globalState.p2pTaxAccumulated : 0,
+                globalState
+            }
+        });
+    } catch (e: any) {
+        res.status(500).json({ status: "error", message: e.message });
+    }
+});
+
+app.get('/api/admin/users/fandom', async (req, res) => {
+    try {
+        const users = await db.all(`SELECT id, telegramId, nVolume, dnftLevel, isCrew, createdAt FROM User ORDER BY nVolume DESC, createdAt DESC`);
+        res.json({ status: "success", data: users });
+    } catch (e: any) {
+        res.status(500).json({ status: "error", message: e.message });
+    }
+});
+
+app.post('/api/admin/action/upgrade-dnft', async (req, res) => {
+    try {
+        const { userId, level } = req.body;
+        if (!userId || !level) throw new Error("Missing parameters");
+        await db.run(`UPDATE User SET dnftLevel = ? WHERE id = ?`, [level, userId]);
+        res.json({ status: "success", message: `User ${userId} dnftLevel upgraded to ${level}` });
+    } catch (e: any) {
+        res.status(500).json({ status: "error", message: e.message });
+    }
+});
+
+app.post('/api/admin/action/airdrop-crew', async (req, res) => {
+    try {
+        const { userId, amount } = req.body;
+        if (!userId || !amount) throw new Error("Missing parameters");
+        // Update both accumulatedVora and isCrew marker
+        await db.run(`UPDATE User SET isCrew = 1, accumulatedVora = accumulatedVora + ? WHERE id = ?`, [amount, userId]);
+        res.json({ status: "success", message: `Crew Airdrop of ${amount} VORA sent to User ${userId}` });
+    } catch (e: any) {
+        res.status(500).json({ status: "error", message: e.message });
+    }
+});
+
+app.post('/api/admin/action/bot-deploy', async (req, res) => {
+    try {
+        const { botType, action } = req.body;
+        if (!botType || !action) throw new Error("Missing parameters");
+        console.log(`[Admin Control] COMMAND 🚀: ${action} -> ${botType}`);
+        // In production, this spawns child_process.exec()
+        res.json({ status: "success", message: `${botType} successfully set to ${action}` });
+    } catch (e: any) {
+        res.status(500).json({ status: "error", message: e.message });
+    }
+});
 
 const PORT = 3001;
 app.listen(PORT, () => {
