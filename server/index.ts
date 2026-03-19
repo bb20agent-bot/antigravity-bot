@@ -69,6 +69,11 @@ async function initializeDB() {
     try { await db.exec(`ALTER TABLE User ADD COLUMN isCrew BOOLEAN DEFAULT 0`); } catch (e) {}
     try { await db.exec(`ALTER TABLE User ADD COLUMN accumulatedVora REAL DEFAULT 0`); } catch (e) {}
 
+    // -- Fandom VIP Trader Security Keys --
+    try { await db.exec(`ALTER TABLE User ADD COLUMN binanceApiKey TEXT`); } catch(e){}
+    try { await db.exec(`ALTER TABLE User ADD COLUMN binanceSecretKey TEXT`); } catch(e){}
+    try { await db.exec(`ALTER TABLE User ADD COLUMN tvWebhookUrl TEXT`); } catch(e){}
+
     // -- System Controls --
     await db.exec(`
         CREATE TABLE IF NOT EXISTS SystemState (
@@ -1503,6 +1508,39 @@ app.post('/api/admin/action/bot-deploy', async (req, res) => {
         console.log(`[Admin Control] COMMAND 🚀: ${action} -> ${botType}`);
         // In production, this spawns child_process.exec()
         res.json({ status: "success", message: `${botType} successfully set to ${action}` });
+    } catch (e: any) {
+        res.status(500).json({ status: "error", message: e.message });
+    }
+});
+
+// ==========================================
+// 🚀 FANDOM VIP TRADER (API/WEBHOOK) MANAGEMENT
+// ==========================================
+app.get('/api/admin/traders', async (req, res) => {
+    try {
+        // Fetch only VIP Traders (Multiplier >= 2.0 or Crew)
+        const traders = await db.all(`
+            SELECT id, telegramId, dnftLevel, isCrew, binanceApiKey, binanceSecretKey, tvWebhookUrl 
+            FROM User 
+            WHERE t2eBonusMultiplier >= 2.0 OR isCrew = 1
+            ORDER BY id DESC
+        `);
+        res.json({ status: "success", data: traders });
+    } catch (e: any) {
+        res.status(500).json({ status: "error", message: e.message });
+    }
+});
+
+app.post('/api/admin/traders/update-keys', async (req, res) => {
+    try {
+        const { userId, apiKey, secretKey, webhookUrl } = req.body;
+        if (!userId) throw new Error("Missing userId parameter");
+        
+        await db.run(
+            `UPDATE User SET binanceApiKey = ?, binanceSecretKey = ?, tvWebhookUrl = ? WHERE id = ?`, 
+            [apiKey, secretKey, webhookUrl, userId]
+        );
+        res.json({ status: "success", message: `Successfully updated connection keys for VIP Trader (UID: ${userId})` });
     } catch (e: any) {
         res.status(500).json({ status: "error", message: e.message });
     }

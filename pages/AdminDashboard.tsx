@@ -4,10 +4,10 @@ import {
   Activity, ArrowUpRight, ShieldCheck, Crown, Lock, Flame,
   LineChart, Video, FileText, Search, Bell, Settings,
   CheckCircle2, TrendingUp, AlertTriangle, ArrowRight,
-  Database, Network, Cuboid, Globe, ShieldAlert, Cpu
+  Database, Network, Cuboid, Globe, ShieldAlert, Cpu, Key
 } from 'lucide-react';
 
-type TabType = 'DASHBOARD' | 'FANDOM' | 'T2E' | 'LIQUIDITY' | 'STAKING' | 'COMMUNITY';
+type TabType = 'DASHBOARD' | 'FANDOM' | 'TRADER_MGMT' | 'T2E' | 'LIQUIDITY' | 'STAKING' | 'COMMUNITY';
 
 const BASE_API_URL = 'http://localhost:3001/api/admin';
 
@@ -45,6 +45,7 @@ const AdminDashboard = () => {
            <SidebarItem icon={<LayoutDashboard size={18} />} label="통합 대시보드 홈" active={activeTab === 'DASHBOARD'} onClick={() => setActiveTab('DASHBOARD')} />
            <p className="px-4 pt-4 pb-1 text-[8px] font-black text-gray-600 uppercase tracking-widest">Fandom Universe</p>
            <SidebarItem icon={<Users size={18} />} label="유니레벨 & dNFT 관리" active={activeTab === 'FANDOM'} onClick={() => setActiveTab('FANDOM')} />
+           <SidebarItem icon={<Key size={18} />} label="VIP 트레이더(API) 관제" active={activeTab === 'TRADER_MGMT'} onClick={() => setActiveTab('TRADER_MGMT')} />
            <SidebarItem icon={<Zap size={18} />} label="T2E 배수 & 크루 에어드랍" active={activeTab === 'T2E'} onClick={() => setActiveTab('T2E')} />
            
            <p className="px-4 pt-4 pb-1 text-[8px] font-black text-gray-600 uppercase tracking-widest">Finance & Auto-Trading</p>
@@ -96,6 +97,7 @@ const AdminDashboard = () => {
            <div className="relative z-10 max-w-7xl mx-auto animate-in fade-in duration-500">
              {activeTab === 'DASHBOARD' && <DashboardPanel />}
              {activeTab === 'FANDOM' && <FandomPanel />}
+             {activeTab === 'TRADER_MGMT' && <TraderPanel />}
              {activeTab === 'T2E' && <T2EPanel />}
              {activeTab === 'LIQUIDITY' && <LiquidityPanel />}
              {activeTab === 'STAKING' && <StakingPanel />}
@@ -214,6 +216,81 @@ const FandomPanel = () => {
                   <td className="py-3 text-center text-green-400">{u.isCrew ? 'CREW' : '-'}</td>
                   <td className="py-3 text-right flex gap-2 justify-end">
                     <button onClick={() => handleLevelUp(u.id, u.dnftLevel)} className="text-[9px] font-black uppercase text-amber-500 border border-amber-500/30 px-2 py-1 rounded hover:bg-amber-500 hover:text-black transition">등업 승인</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// -------------------------------------------------------------
+// X. VIP Trader Management Panel
+// -------------------------------------------------------------
+const TraderPanel = () => {
+  const [traders, setTraders] = useState<any[]>([]);
+
+  const loadTraders = async () => {
+    const res = await fetchApi('/traders');
+    if (res.status === 'success') setTraders(res.data);
+  };
+
+  useEffect(() => { loadTraders(); }, []);
+
+  const handleSupportConnect = async (userId: number) => {
+    const apiKey = prompt(`[VIP 대리 지원] User ${userId}의 Binance API Key를 입력하세요 (비워두면 기존 유지):`);
+    if (apiKey === null) return; // Cancelled
+    const secretKey = prompt(`[VIP 대리 지원] User ${userId}의 Binance Secret Key를 입력하세요:`);
+    const webhookUrl = prompt(`[VIP 대리 지원] User ${userId}의 TradingView Webhook URL을 입력하세요:`);
+    
+    const res = await fetchApi('/traders/update-keys', { 
+        method: 'POST', 
+        body: JSON.stringify({ userId, apiKey: apiKey || '', secretKey: secretKey || '', webhookUrl: webhookUrl || '' }) 
+    });
+    if (res.status === 'success') {
+        alert(res.message);
+        loadTraders();
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="mb-6">
+        <h2 className="text-2xl font-black uppercase tracking-tight mb-1">VIP Trader Security Command</h2>
+        <p className="text-xs text-gray-400 font-bold tracking-widest uppercase">매일 매매를 하는 트레이더들의 API 및 웹훅 연동 특별 관제소</p>
+      </div>
+
+      <div className="bg-white/5 border border-white/10 rounded-3xl p-6 overflow-hidden">
+        <h3 className="text-sm font-black uppercase tracking-widest mb-6 flex items-center gap-2 text-blue-400">
+          <Key size={16} /> 실시간 Security Key 체결 현황 모니터링
+        </h3>
+        {traders.length === 0 ? (
+           <p className="text-gray-500 font-black italic">현재 등록된 VIP 트레이더가 없습니다.</p>
+        ) : (
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/10 text-[9px] uppercase tracking-widest text-gray-500">
+                <th className="pb-3 px-2">User ID</th>
+                <th className="pb-3 text-center">Binance API Key</th>
+                <th className="pb-3 text-center">TV Webhook</th>
+                <th className="pb-3 text-right pr-2">중앙 대리 지원 (Intervene)</th>
+              </tr>
+            </thead>
+            <tbody className="text-xs font-bold">
+              {traders.map(t => (
+                <tr key={t.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                  <td className="py-4 px-2 text-cyan-400">@{t.telegramId} <span className="text-[9px] text-gray-500 ml-1">(UID: {t.id})</span></td>
+                  <td className="py-4 text-center">
+                     {t.binanceApiKey ? <span className="text-green-400 font-black uppercase tracking-widest text-[9px] border border-green-500/30 px-1 py-0.5 rounded">Connected</span> : <span className="text-red-500 px-2 py-0.5 bg-red-500/10 rounded border border-red-500/30 uppercase tracking-widest text-[9px]">Missing</span>}
+                  </td>
+                  <td className="py-4 text-center">
+                     {t.tvWebhookUrl ? <span className="text-green-400 font-black uppercase tracking-widest text-[9px] border border-green-500/30 px-1 py-0.5 rounded">Active</span> : <span className="text-red-500 px-2 py-0.5 bg-red-500/10 rounded border border-red-500/30 uppercase tracking-widest text-[9px]">Missing</span>}
+                  </td>
+                  <td className="py-4 text-right pr-2">
+                    <button onClick={() => handleSupportConnect(t.id)} className="text-[9px] font-black uppercase text-blue-400 border border-blue-400/30 px-3 py-1.5 rounded-lg hover:bg-blue-500 hover:text-white transition shadow-lg">대리 연결</button>
                   </td>
                 </tr>
               ))}

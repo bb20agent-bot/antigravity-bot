@@ -20,6 +20,11 @@ model User {
   nVolume               Float    @default(0)    // 1, 2레벨 직/간접 N추천 볼륨 추적
   isCrew                Boolean  @default(false)// 브라운 AI 우수자 / 크루 발탁 여부
   accumulatedVora       Float    @default(0)    // T2E 에어드랍 누적 획득량 VORA
+  
+  // -- Fandom Trader (VIP) Security Keys --
+  binanceApiKey         String?
+  binanceSecretKey      String?
+  tvWebhookUrl          String?
   // ---------------------------------------------
 
   referrerId            Int?
