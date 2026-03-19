@@ -1,9 +1,9 @@
 # Tact compilation report
 Contract: VoraToken
-BoC Size: 603 bytes
+BoC Size: 2019 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 22
+Total structures: 25
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -57,50 +57,62 @@ Signature: `DeployOk{queryId:uint64}`
 TL-B: `factory_deploy#6d0ff13b queryId:uint64 cashback:address = FactoryDeploy`
 Signature: `FactoryDeploy{queryId:uint64,cashback:address}`
 
-### TreasuryBalanceRequest
-TL-B: `treasury_balance_request#433452c9 queryId:int257 mintAmount:int257 receiver:address = TreasuryBalanceRequest`
-Signature: `TreasuryBalanceRequest{queryId:int257,mintAmount:int257,receiver:address}`
+### TokenTransfer
+TL-B: `token_transfer#0f8a7ea5 queryId:uint64 amount:coins destination:address response_destination:address custom_payload:Maybe ^cell forward_ton_amount:coins forward_payload:remainder<slice> = TokenTransfer`
+Signature: `TokenTransfer{queryId:uint64,amount:coins,destination:address,response_destination:address,custom_payload:Maybe ^cell,forward_ton_amount:coins,forward_payload:remainder<slice>}`
 
-### TreasuryBalanceResponse
-TL-B: `treasury_balance_response#894f25e2 queryId:int257 mintAmount:int257 receiver:address treasuryBalance:int257 = TreasuryBalanceResponse`
-Signature: `TreasuryBalanceResponse{queryId:int257,mintAmount:int257,receiver:address,treasuryBalance:int257}`
+### TokenTransferInternal
+TL-B: `token_transfer_internal#178d4519 queryId:uint64 amount:coins from:address response_destination:address forward_ton_amount:coins forward_payload:remainder<slice> = TokenTransferInternal`
+Signature: `TokenTransferInternal{queryId:uint64,amount:coins,from:address,response_destination:address,forward_ton_amount:coins,forward_payload:remainder<slice>}`
 
-### SetBotWalletAddress
-TL-B: `set_bot_wallet_address#44c4d544 botWalletAddress:address = SetBotWalletAddress`
-Signature: `SetBotWalletAddress{botWalletAddress:address}`
+### TokenNotification
+TL-B: `token_notification#7362d09c queryId:uint64 amount:coins from:address forward_payload:remainder<slice> = TokenNotification`
+Signature: `TokenNotification{queryId:uint64,amount:coins,from:address,forward_payload:remainder<slice>}`
 
-### BotWithdraw
-TL-B: `bot_withdraw#fb28c5f1 amount:int257 destination:address = BotWithdraw`
-Signature: `BotWithdraw{amount:int257,destination:address}`
+### TokenBurn
+TL-B: `token_burn#595f07bc queryId:uint64 amount:coins response_destination:address custom_payload:Maybe ^cell = TokenBurn`
+Signature: `TokenBurn{queryId:uint64,amount:coins,response_destination:address,custom_payload:Maybe ^cell}`
 
-### SetVoraTokenAddress
-TL-B: `set_vora_token_address#f27a9e54 voraTokenAddress:address = SetVoraTokenAddress`
-Signature: `SetVoraTokenAddress{voraTokenAddress:address}`
+### TokenBurnNotification
+TL-B: `token_burn_notification#7bdd97de queryId:uint64 amount:coins sender:address response_destination:address = TokenBurnNotification`
+Signature: `TokenBurnNotification{queryId:uint64,amount:coins,sender:address,response_destination:address}`
 
-### Treasury$Data
-TL-B: `_ owner:address voraTokenAddress:address botWalletAddress:address = Treasury`
-Signature: `Treasury{owner:address,voraTokenAddress:address,botWalletAddress:address}`
+### TokenExcesses
+TL-B: `token_excesses#d53276db queryId:uint64 = TokenExcesses`
+Signature: `TokenExcesses{queryId:uint64}`
+
+### TokenUpdateContent
+TL-B: `token_update_content#af1ca26a content:^cell = TokenUpdateContent`
+Signature: `TokenUpdateContent{content:^cell}`
 
 ### Mint
 TL-B: `mint#fc708bd2 amount:int257 receiver:address = Mint`
 Signature: `Mint{amount:int257,receiver:address}`
 
-### TokenNotification
-TL-B: `token_notification#f676e459 queryId:int257 amount:int257 from:address forwardPayload:remainder<slice> = TokenNotification`
-Signature: `TokenNotification{queryId:int257,amount:int257,from:address,forwardPayload:remainder<slice>}`
+### JettonData
+TL-B: `_ totalSupply:int257 mintable:bool owner:address content:Maybe ^cell walletCode:^cell = JettonData`
+Signature: `JettonData{totalSupply:int257,mintable:bool,owner:address,content:Maybe ^cell,walletCode:^cell}`
+
+### JettonWalletData
+TL-B: `_ balance:int257 owner:address master:address walletCode:^cell = JettonWalletData`
+Signature: `JettonWalletData{balance:int257,owner:address,master:address,walletCode:^cell}`
 
 ### VoraToken$Data
-TL-B: `_ owner:address treasuryAddress:address totalSupply:coins maxSupply:coins = VoraToken`
-Signature: `VoraToken{owner:address,treasuryAddress:address,totalSupply:coins,maxSupply:coins}`
+TL-B: `_ totalSupply:coins owner:address content:Maybe ^cell mintable:bool = VoraToken`
+Signature: `VoraToken{totalSupply:coins,owner:address,content:Maybe ^cell,mintable:bool}`
+
+### VoraJettonWallet$Data
+TL-B: `_ balance:coins owner:address master:address = VoraJettonWallet`
+Signature: `VoraJettonWallet{balance:coins,owner:address,master:address}`
 
 ## Get methods
 Total get methods: 2
 
-## get_total_supply
+## get_jetton_data
 No arguments
 
-## get_max_supply
-No arguments
+## get_wallet_address
+Argument: owner
 
 ## Exit codes
 * 2: Stack underflow
@@ -139,17 +151,10 @@ No arguments
 * 135: Code of a contract was not found
 * 136: Invalid standard address
 * 138: Not a basechain address
-* 14438: Unauthorized request for Treasury Balance
-* 14796: Exceeds max supply
-* 22230: Already set
-* 24170: Mint amount exceeds 10x Treasury TON balance limit
-* 37849: Bot wallet not set
+* 3688: Not mintable
+* 4429: Invalid sender
+* 14534: Not owner
 * 54615: Insufficient balance
-* 55238: Only bot can withdraw
-* 56382: Only Treasury can respond
-* 57579: Only owner can mint
-* 58190: Only owner can set
-* 59518: Only owner can withdraw directly
 
 ## Trait inheritance diagram
 
@@ -166,4 +171,5 @@ Deployable --> BaseTrait
 ```mermaid
 graph TD
 VoraToken
+VoraToken --> VoraJettonWallet
 ```

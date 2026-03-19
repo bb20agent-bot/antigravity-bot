@@ -8,6 +8,12 @@
 ;; NOTE: declarations are sorted for optimal order
 ;;
 
+;; __tact_store_address_opt
+builder __tact_store_address_opt(builder b, slice address) inline;
+
+;; __tact_not_null
+forall X -> X __tact_not_null(X x) impure inline;
+
 ;; __tact_context_get
 (int, slice, int, slice) __tact_context_get() inline;
 
@@ -20,50 +26,89 @@ builder $DeployOk$_store(builder build_0, (int) v) inline;
 ;; $DeployOk$_store_cell
 cell $DeployOk$_store_cell((int) v, builder b) inline;
 
-;; $TreasuryBalanceRequest$_store
-builder $TreasuryBalanceRequest$_store(builder build_0, (int, int, slice) v) inline;
+;; $TokenTransferInternal$_store
+builder $TokenTransferInternal$_store(builder build_0, (int, int, slice, slice, int, slice) v) inline;
 
-;; $TreasuryBalanceRequest$_store_cell
-cell $TreasuryBalanceRequest$_store_cell((int, int, slice) v, builder b) inline;
+;; $TokenTransferInternal$_store_cell
+cell $TokenTransferInternal$_store_cell((int, int, slice, slice, int, slice) v, builder b) inline;
+
+;; $TokenExcesses$_store
+builder $TokenExcesses$_store(builder build_0, (int) v) inline;
+
+;; $TokenExcesses$_store_cell
+cell $TokenExcesses$_store_cell((int) v, builder b) inline;
 
 ;; $VoraToken$_store
-builder $VoraToken$_store(builder build_0, (slice, slice, int, int) v) inline;
+builder $VoraToken$_store(builder build_0, (int, slice, cell, int) v) inline;
 
 ;; $VoraToken$_load
-(slice, ((slice, slice, int, int))) $VoraToken$_load(slice sc_0) inline;
+(slice, ((int, slice, cell, int))) $VoraToken$_load(slice sc_0) inline;
+
+;; $StateInit$_get_code
+_ $StateInit$_get_code((cell, cell) v) inline;
 
 ;; $Context$_get_value
 _ $Context$_get_value((int, slice, int, slice) v) inline;
 
+;; $JettonData$_to_external
+(int, int, slice, cell, cell) $JettonData$_to_external(((int, int, slice, cell, cell)) v) inline;
+
 ;; $VoraToken$init$_load
-(slice, ((slice, slice))) $VoraToken$init$_load(slice sc_0) inline;
+(slice, ((slice, cell))) $VoraToken$init$_load(slice sc_0) inline;
+
+;; $VoraJettonWallet$init$_store
+builder $VoraJettonWallet$init$_store(builder build_0, (slice, slice) v) inline;
 
 ;; $VoraToken$_contract_init
-(slice, slice, int, int) $VoraToken$_contract_init(slice $owner, slice $treasuryAddress) impure inline;
+(int, slice, cell, int) $VoraToken$_contract_init(slice $owner, cell $content) impure inline;
 
 ;; $VoraToken$_contract_load
-(slice, slice, int, int) $VoraToken$_contract_load() impure inline;
+(int, slice, cell, int) $VoraToken$_contract_load() impure inline;
 
 ;; $VoraToken$_contract_store
-() $VoraToken$_contract_store((slice, slice, int, int) v) impure inline;
+() $VoraToken$_contract_store((int, slice, cell, int) v) impure inline;
+
+;; $Cell$_fun_asSlice
+slice $Cell$_fun_asSlice(cell $self) impure inline;
+
+;; $global_newAddress
+slice $global_newAddress(int $chain, int $hash) impure inline;
+
+;; $global_contractAddressExt
+slice $global_contractAddressExt(int $chain, cell $code, cell $data) impure inline;
+
+;; $global_contractAddress
+slice $global_contractAddress((cell, cell) $s) impure inline;
+
+;; $JettonData$_constructor_totalSupply_mintable_owner_content_walletCode
+((int, int, slice, cell, cell)) $JettonData$_constructor_totalSupply_mintable_owner_content_walletCode(int $totalSupply, int $mintable, slice $owner, cell $content, cell $walletCode) inline;
+
+;; $VoraJettonWallet$_init_child
+(cell, cell) $VoraJettonWallet$_init_child(slice $owner, slice $master) inline_ref;
+
+;; $VoraToken$_fun_get_jetton_data
+((int, slice, cell, int), (int, int, slice, cell, cell)) $VoraToken$_fun_get_jetton_data((int, slice, cell, int) $self) impure inline_ref;
+
+;; $VoraToken$_fun_get_wallet_address
+((int, slice, cell, int), slice) $VoraToken$_fun_get_wallet_address((int, slice, cell, int) $self, slice $owner) impure inline_ref;
 
 ;; $MessageParameters$_constructor_bounce_to_value_mode_body
 ((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
 
-;; $VoraToken$_fun_get_total_supply
-((slice, slice, int, int), int) $VoraToken$_fun_get_total_supply((slice, slice, int, int) $self) impure inline_ref;
-
-;; $VoraToken$_fun_get_max_supply
-((slice, slice, int, int), int) $VoraToken$_fun_get_max_supply((slice, slice, int, int) $self) impure inline_ref;
-
 ;; $VoraToken$_fun_notify
-((slice, slice, int, int), ()) $VoraToken$_fun_notify((slice, slice, int, int) $self, cell $body) impure inline;
+((int, slice, cell, int), ()) $VoraToken$_fun_notify((int, slice, cell, int) $self, cell $body) impure inline;
 
-;; $SendParameters$_constructor_to_value_mode_body
-((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline;
+;; $SendParameters$_constructor_to_value_bounce_mode_body_code_data
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_bounce_mode_body_code_data(slice $to, int $value, int $bounce, int $mode, cell $body, cell $code, cell $data) inline;
 
-;; $TreasuryBalanceRequest$_constructor_queryId_mintAmount_receiver
-((int, int, slice)) $TreasuryBalanceRequest$_constructor_queryId_mintAmount_receiver(int $queryId, int $mintAmount, slice $receiver) inline;
+;; $TokenTransferInternal$_constructor_queryId_amount_from_response_destination_forward_ton_amount_forward_payload
+((int, int, slice, slice, int, slice)) $TokenTransferInternal$_constructor_queryId_amount_from_response_destination_forward_ton_amount_forward_payload(int $queryId, int $amount, slice $from, slice $response_destination, int $forward_ton_amount, slice $forward_payload) inline;
+
+;; $SendParameters$_constructor_to_value_bounce_mode_body
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_bounce_mode_body(slice $to, int $value, int $bounce, int $mode, cell $body) inline;
+
+;; $TokenExcesses$_constructor_queryId
+((int)) $TokenExcesses$_constructor_queryId(int $queryId) inline;
 
 ;; $DeployOk$_constructor_queryId
 ((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
@@ -75,6 +120,32 @@ global slice __tact_context_sender;
 global cell __tact_child_contract_codes;
 global int __tact_randomized;
 
+(slice, slice) __tact_load_address_opt(slice cs) asm """
+
+            b{00} SDBEGINSQ
+            IF:<{
+              PUSHNULL
+            }>ELSE<{
+              LDMSGADDR
+              SWAP
+            }>
+
+""";
+
+builder __tact_store_addr_none(builder b) asm "b{00} STSLICECONST";
+
+builder __tact_store_address_opt(builder b, slice address) inline {
+    if (null?(address)) {
+        return __tact_store_addr_none(b);
+    } else {
+        return b.store_slice(address);
+    }
+}
+
+forall X -> X __tact_not_null(X x) impure inline {
+    throw_if(128, null?(x)); return x;
+}
+
 (int, slice, int, slice) __tact_context_get() inline {
     return __tact_context;
 }
@@ -82,6 +153,68 @@ global int __tact_randomized;
 slice __tact_context_get_sender() inline {
     return __tact_context_sender;
 }
+
+builder $global_beginCell() impure asm """
+    NEWC
+""";
+
+slice $global_emptySlice() impure asm """
+    b{} PUSHSLICE
+""";
+
+int $global_contractHash(cell $code, cell $data) impure asm """
+    s0 PUSH HASHCU // `data` hash
+    s2 PUSH HASHCU // `code` hash
+    SWAP2
+    CDEPTH         // `data` depth
+    SWAP
+    CDEPTH         // `code` depth
+    131380 INT     // (2 << 16) | (1 << 8) | 0x34
+
+    // Group 2: Composition of the Builder
+    NEWC
+    24 STU  // store refs_descriptor | bits_descriptor | data
+    16 STU  // store depth_descriptor for `code`
+    16 STU  // store depth_descriptor for `data`
+    256 STU // store `code` hash
+    256 STU // store `data` hash
+
+    // Group 3: SHA256 hash of the resulting Builder
+    ONE HASHEXT_SHA256
+""";
+
+slice $Slice$_fun_asAddressUnsafe(slice $self) impure asm "NOP";
+
+slice $Cell$_fun_beginParse(cell $self) impure asm """
+    CTOS
+""";
+
+slice $Cell$_fun_asSlice(cell $self) impure inline {
+    var ($self) = $self;
+    return $Cell$_fun_beginParse($self);
+}
+
+cell $Builder$_fun_endCell(builder $self) impure asm """
+    ENDC
+""";
+
+slice $global_newAddress(int $chain, int $hash) impure inline {
+    return $Slice$_fun_asAddressUnsafe($Cell$_fun_asSlice($Builder$_fun_endCell(store_uint(store_int(store_uint($global_beginCell(), 4, 3), $chain, 8), $hash, 256))));
+}
+
+slice $global_contractAddressExt(int $chain, cell $code, cell $data) impure inline {
+    int $hash = $global_contractHash($code, $data);
+    return $global_newAddress($chain, $hash);
+}
+
+slice $global_contractAddress((cell, cell) $s) impure inline {
+    var (($s'code, $s'data)) = $s;
+    return $global_contractAddressExt(0, $s'code, $s'data);
+}
+
+slice $global_myAddress() impure asm """
+    MYADDR
+""";
 
 int $global_myBalance() impure asm """
     BALANCE FIRST
@@ -186,8 +319,8 @@ int $global_myBalance() impure asm """
     SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
 """;
 
-((slice, slice, int, int), ()) $VoraToken$_fun_notify((slice, slice, int, int) $self, cell $body) impure inline {
-    var (($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply)) = $self;
+((int, slice, cell, int), ()) $VoraToken$_fun_notify((int, slice, cell, int) $self, cell $body) impure inline {
+    var (($self'totalSupply, $self'owner, $self'content, $self'mintable)) = $self;
     slice $to = __tact_context_get_sender();
     int $bounce = false;
     if (false) {
@@ -196,14 +329,24 @@ int $global_myBalance() impure asm """
         if (($balanceBeforeMessage < 0)) {
             $global_nativeReserve(0, 0);
             $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
-            return (($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply), ());
+            return (($self'totalSupply, $self'owner, $self'content, $self'mintable), ());
         }
     }
     $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
-    return (($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply), ());
+    return (($self'totalSupply, $self'owner, $self'content, $self'mintable), ());
 }
 
 ;; VoraToken_VoraToken.storage.fc
+;;
+;; Type: StateInit
+;; TLB: _ code:^cell data:^cell = StateInit
+;;
+
+_ $StateInit$_get_code((cell, cell) v) inline {
+    var (v'code, v'data) = v;
+    return v'code;
+}
+
 ;;
 ;; Type: Context
 ;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
@@ -219,8 +362,12 @@ _ $Context$_get_value((int, slice, int, slice) v) inline {
 ;; TLB: _ mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell value:int257 to:address bounce:bool = SendParameters
 ;;
 
-((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline {
-    return ($mode, $body, null(), null(), $value, $to, true);
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_bounce_mode_body_code_data(slice $to, int $value, int $bounce, int $mode, cell $body, cell $code, cell $data) inline {
+    return ($mode, $body, $code, $data, $value, $to, $bounce);
+}
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_bounce_mode_body(slice $to, int $value, int $bounce, int $mode, cell $body) inline {
+    return ($mode, $body, null(), null(), $value, $to, $bounce);
 }
 
 ;;
@@ -254,70 +401,108 @@ cell $DeployOk$_store_cell((int) v, builder b) inline {
 }
 
 ;;
-;; Type: TreasuryBalanceRequest
-;; Header: 0x433452c9
-;; TLB: treasury_balance_request#433452c9 queryId:int257 mintAmount:int257 receiver:address = TreasuryBalanceRequest
+;; Type: TokenTransferInternal
+;; Header: 0x178d4519
+;; TLB: token_transfer_internal#178d4519 queryId:uint64 amount:coins from:address response_destination:address forward_ton_amount:coins forward_payload:remainder<slice> = TokenTransferInternal
 ;;
 
-builder $TreasuryBalanceRequest$_store(builder build_0, (int, int, slice) v) inline {
-    var (v'queryId, v'mintAmount, v'receiver) = v;
-    build_0 = store_uint(build_0, 1127502537, 32);
-    build_0 = build_0.store_int(v'queryId, 257);
-    build_0 = build_0.store_int(v'mintAmount, 257);
-    build_0 = build_0.store_slice(v'receiver);
+builder $TokenTransferInternal$_store(builder build_0, (int, int, slice, slice, int, slice) v) inline {
+    var (v'queryId, v'amount, v'from, v'response_destination, v'forward_ton_amount, v'forward_payload) = v;
+    build_0 = store_uint(build_0, 395134233, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    build_0 = build_0.store_varuint16(v'amount);
+    build_0 = build_0.store_slice(v'from);
+    build_0 = __tact_store_address_opt(build_0, v'response_destination);
+    build_0 = build_0.store_varuint16(v'forward_ton_amount);
+    build_0 = build_0.store_slice(v'forward_payload);
     return build_0;
 }
 
-cell $TreasuryBalanceRequest$_store_cell((int, int, slice) v, builder b) inline {
-    return $TreasuryBalanceRequest$_store(b, v).end_cell();
+cell $TokenTransferInternal$_store_cell((int, int, slice, slice, int, slice) v, builder b) inline {
+    return $TokenTransferInternal$_store(b, v).end_cell();
 }
 
-((int, int, slice)) $TreasuryBalanceRequest$_constructor_queryId_mintAmount_receiver(int $queryId, int $mintAmount, slice $receiver) inline {
-    return ($queryId, $mintAmount, $receiver);
+((int, int, slice, slice, int, slice)) $TokenTransferInternal$_constructor_queryId_amount_from_response_destination_forward_ton_amount_forward_payload(int $queryId, int $amount, slice $from, slice $response_destination, int $forward_ton_amount, slice $forward_payload) inline {
+    return ($queryId, $amount, $from, $response_destination, $forward_ton_amount, $forward_payload);
+}
+
+;;
+;; Type: TokenExcesses
+;; Header: 0xd53276db
+;; TLB: token_excesses#d53276db queryId:uint64 = TokenExcesses
+;;
+
+builder $TokenExcesses$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 3576854235, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $TokenExcesses$_store_cell((int) v, builder b) inline {
+    return $TokenExcesses$_store(b, v).end_cell();
+}
+
+((int)) $TokenExcesses$_constructor_queryId(int $queryId) inline {
+    return ($queryId);
+}
+
+;;
+;; Type: JettonData
+;; TLB: _ totalSupply:int257 mintable:bool owner:address content:Maybe ^cell walletCode:^cell = JettonData
+;;
+
+(int, int, slice, cell, cell) $JettonData$_to_external(((int, int, slice, cell, cell)) v) inline {
+    var (v'totalSupply, v'mintable, v'owner, v'content, v'walletCode) = v; 
+    return (v'totalSupply, v'mintable, v'owner, v'content, v'walletCode);
+}
+
+((int, int, slice, cell, cell)) $JettonData$_constructor_totalSupply_mintable_owner_content_walletCode(int $totalSupply, int $mintable, slice $owner, cell $content, cell $walletCode) inline {
+    return ($totalSupply, $mintable, $owner, $content, $walletCode);
 }
 
 ;;
 ;; Type: VoraToken
-;; TLB: _ owner:address treasuryAddress:address totalSupply:coins maxSupply:coins = VoraToken
+;; TLB: _ totalSupply:coins owner:address content:Maybe ^cell mintable:bool = VoraToken
 ;;
 
-builder $VoraToken$_store(builder build_0, (slice, slice, int, int) v) inline {
-    var (v'owner, v'treasuryAddress, v'totalSupply, v'maxSupply) = v;
-    build_0 = build_0.store_slice(v'owner);
-    build_0 = build_0.store_slice(v'treasuryAddress);
+builder $VoraToken$_store(builder build_0, (int, slice, cell, int) v) inline {
+    var (v'totalSupply, v'owner, v'content, v'mintable) = v;
     build_0 = build_0.store_varuint16(v'totalSupply);
-    build_0 = build_0.store_varuint16(v'maxSupply);
+    build_0 = build_0.store_slice(v'owner);
+    build_0 = build_0.store_maybe_ref(v'content);
+    build_0 = build_0.store_int(v'mintable, 1);
     return build_0;
 }
 
-(slice, ((slice, slice, int, int))) $VoraToken$_load(slice sc_0) inline {
-    var v'owner = sc_0~load_msg_addr();
-    var v'treasuryAddress = sc_0~load_msg_addr();
+(slice, ((int, slice, cell, int))) $VoraToken$_load(slice sc_0) inline {
     var v'totalSupply = sc_0~load_varuint16();
-    var v'maxSupply = sc_0~load_varuint16();
-    return (sc_0, (v'owner, v'treasuryAddress, v'totalSupply, v'maxSupply));
-}
-
-(slice, ((slice, slice))) $VoraToken$init$_load(slice sc_0) inline {
     var v'owner = sc_0~load_msg_addr();
-    var v'treasuryAddress = sc_0~load_msg_addr();
-    return (sc_0, (v'owner, v'treasuryAddress));
+    var v'content = sc_0~load_maybe_ref();
+    var v'mintable = sc_0~load_int(1);
+    return (sc_0, (v'totalSupply, v'owner, v'content, v'mintable));
 }
 
-(slice, slice, int, int) $VoraToken$_contract_load() impure inline {
+(slice, ((slice, cell))) $VoraToken$init$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'content = sc_0~load_maybe_ref();
+    return (sc_0, (v'owner, v'content));
+}
+
+(int, slice, cell, int) $VoraToken$_contract_load() impure inline {
     slice $sc = get_data().begin_parse();
     int $loaded = $sc~load_int(1);
     if ($loaded) {
         return $sc~$VoraToken$_load();
     }
     else {
-        (slice $owner, slice $treasuryAddress) = $sc~$VoraToken$init$_load();
+        (slice $owner, cell $content) = $sc~$VoraToken$init$_load();
         $sc.end_parse();
-        return $VoraToken$_contract_init($owner, $treasuryAddress);
+        return $VoraToken$_contract_init($owner, $content);
     }
 }
 
-() $VoraToken$_contract_store((slice, slice, int, int) v) impure inline {
+() $VoraToken$_contract_store((int, slice, cell, int) v) impure inline {
     builder b = begin_cell();
     b = b.store_int(true, 1);
     b = $VoraToken$_store(b, v);
@@ -325,43 +510,73 @@ builder $VoraToken$_store(builder build_0, (slice, slice, int, int) v) inline {
 }
 
 ;;
+;; Type: VoraJettonWallet
+;; TLB: _ balance:coins owner:address master:address = VoraJettonWallet
+;;
+
+builder $VoraJettonWallet$init$_store(builder build_0, (slice, slice) v) inline {
+    var (v'owner, v'master) = v;
+    build_0 = build_0.store_slice(v'owner);
+    build_0 = build_0.store_slice(v'master);
+    return build_0;
+}
+
+cell $VoraJettonWallet$_child_get_code() impure asm """
+    B{b5ee9c720102100100041300022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d901020149a65ec0bb513434800066be803e903e9015481b04e6be903e901640b4405c1678b6cf1b0d200304b401d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019afa00fa40fa4055206c139afa40fa405902d1017059e204e30202d70d1ff2e0822182100f8a7ea5bae302218210178d4519bae302018210595f07bcba0405060701125cdb3c3054633052300900b6028020d7217021d749c21f9430d31f01de208210178d4519ba8e1a30d33ffa00596c21a002c87f01ca0055205afa0212cecec9ed54e082107bdd97deba8e19d33ffa00596c21a002c87f01ca0055205afa0212cecec9ed54e05f0402de31d33ffa00fa40d72c01916d93fa4001e201f40431fa00f8416f245b81114d3229c705f2f48200d5575375bef2f45164a15138db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076707f80402c4813507cc8090804f831d33ffa00fa40d72c01916d93fa4001e201fa00f8416f24532cc705b38ebb537cdb3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d024c705f2f4de51a8a054414b4330fa40fa0071d721fa00fa00306c6170f83a23c200e30f216eb3090a0b0c010ee3025f04f2c0820d00e855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec91056105710344013071036453304c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205afa0212cecec9ed540018f82ac87001ca005a02cecec900c25183a15008a172702848135074c8553082107362d09c5005cb1f13cb3f01fa02cecec9284614505510246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb005003000a3010356c4100e29303c200923370e28e53206ef2d0807080427004c8018210d53276db58cb1fcb3fc91034413010246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00915be202c87f01ca0055205afa0212cecec9ed5402fed33ffa00d72c01916d93fa4001e231f8416f245b81114d3226c705f2f48200d5575342bef2f45131a17080405414367f07c8553082107bdd97de5005cb1f13cb3f01fa02ce01206e9430cf84809201cee2c926044313505510246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf818ae2f400c90e0f001a58cf8680cf8480f400f400cf81002801fb0002c87f01ca0055205afa0212cecec9ed54} B>boc PUSHREF
+""";
+
+(cell, cell) $VoraJettonWallet$_init_child(slice $owner, slice $master) inline_ref {
+    ;; Build init code cell
+
+    ;; Contract Code: VoraJettonWallet
+    cell init_code = $VoraJettonWallet$_child_get_code();
+
+
+    builder b = begin_cell();
+    b = b.store_int(false, 1);
+    b = $VoraJettonWallet$init$_store(b, ($owner, $master));
+    return (init_code, b.end_cell());
+}
+
+;;
 ;; Contract VoraToken functions
 ;;
 
-(slice, slice, int, int) $VoraToken$_contract_init(slice $owner, slice $treasuryAddress) impure inline {
-    var (($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply)) = (null(), null(), null(), null());
-    $self'owner = $owner;
-    $self'treasuryAddress = $treasuryAddress;
+(int, slice, cell, int) $VoraToken$_contract_init(slice $owner, cell $content) impure inline {
+    var (($self'totalSupply, $self'owner, $self'content, $self'mintable)) = (null(), null(), null(), null());
     $self'totalSupply = 0;
-    $self'maxSupply = 1000000000000000000;
-    return ($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply);
+    $self'owner = $owner;
+    $self'mintable = true;
+    $self'content = $content;
+    return ($self'totalSupply, $self'owner, $self'content, $self'mintable);
 }
 
-((slice, slice, int, int), int) $VoraToken$_fun_get_total_supply((slice, slice, int, int) $self) impure inline_ref {
-    var (($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply)) = $self;
-    var $fresh$ret_4 = $self'totalSupply;
-    return (($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply), $fresh$ret_4);
+((int, slice, cell, int), (int, int, slice, cell, cell)) $VoraToken$_fun_get_jetton_data((int, slice, cell, int) $self) impure inline_ref {
+    var (($self'totalSupply, $self'owner, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_3 = $JettonData$_constructor_totalSupply_mintable_owner_content_walletCode($self'totalSupply, $self'mintable, $self'owner, $self'content, $StateInit$_get_code($VoraJettonWallet$_init_child($self'owner, $global_myAddress())));
+    return (($self'totalSupply, $self'owner, $self'content, $self'mintable), $fresh$ret_3);
 }
 
-((slice, slice, int, int), int) $VoraToken$_fun_get_max_supply((slice, slice, int, int) $self) impure inline_ref {
-    var (($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply)) = $self;
-    var $fresh$ret_5 = $self'maxSupply;
-    return (($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply), $fresh$ret_5);
+((int, slice, cell, int), slice) $VoraToken$_fun_get_wallet_address((int, slice, cell, int) $self, slice $owner) impure inline_ref {
+    var (($self'totalSupply, $self'owner, $self'content, $self'mintable)) = $self;
+    var $fresh$ret_4 = $global_contractAddress($VoraJettonWallet$_init_child($owner, $global_myAddress()));
+    return (($self'totalSupply, $self'owner, $self'content, $self'mintable), $fresh$ret_4);
 }
 
 ;;
 ;; Get methods of a Contract VoraToken
 ;;
 
-_ %get_total_supply() method_id(122870) {
+_ %get_jetton_data() method_id(106029) {
     var self = $VoraToken$_contract_load();
-    var res = self~$VoraToken$_fun_get_total_supply();
-    return res;
+    var res = self~$VoraToken$_fun_get_jetton_data();
+    return $JettonData$_to_external(res);
 }
 
-_ %get_max_supply() method_id(94740) {
+_ %get_wallet_address(slice $owner) method_id(103289) {
+    slice $owner = $owner;
     var self = $VoraToken$_contract_load();
-    var res = self~$VoraToken$_fun_get_max_supply();
+    var res = self~$VoraToken$_fun_get_wallet_address($owner);
     return res;
 }
 
@@ -385,56 +600,73 @@ _ %get_max_supply() method_id(94740) {
     __tact_context_sender = msg_sender_addr;
     
     ;; Load contract data
-    var ($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply) = $VoraToken$_contract_load();
+    var ($self'totalSupply, $self'owner, $self'content, $self'mintable) = $VoraToken$_contract_load();
     
     ;; Handle bounced messages
     if (msg_bounced) { return (); }
-    var op = in_msg~load_opcode_internal();
-    ;; Receive Mint message
-    if (op == 4235234258) {
-        var $msg'amount = in_msg~load_int(257);
-        var $msg'receiver = in_msg~load_msg_addr();
-        throw_unless(57579, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
-        throw_unless(14796, (($self'totalSupply + $msg'amount) <= $self'maxSupply));
-        $global_send($SendParameters$_constructor_to_value_mode_body($self'treasuryAddress, 50000000, 2, $TreasuryBalanceRequest$_store_cell($TreasuryBalanceRequest$_constructor_queryId_mintAmount_receiver(0, $msg'amount, $msg'receiver), begin_cell())));
-        $VoraToken$_contract_store(($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply));
+    int op = 0;
+    int in_msg_length = slice_bits(in_msg);
+    if (in_msg_length >= 32) {
+        op = in_msg~load_uint(32);
+        ;; Receive Mint message
+        if (op == 4235234258) {
+            var $msg'amount = in_msg~load_int(257);
+            var $msg'receiver = in_msg~load_msg_addr();
+            var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+            throw_unless(14534, ( equal_slices_bits($ctx'sender, $self'owner) ));
+            throw_unless(3688, $self'mintable);
+            $self'totalSupply = ($self'totalSupply + $msg'amount);
+            var ($winit'code, $winit'data) = $VoraJettonWallet$_init_child($msg'receiver, $global_myAddress());
+            $global_send($SendParameters$_constructor_to_value_bounce_mode_body_code_data($global_contractAddress(($winit'code, $winit'data)), 0, true, 64, $TokenTransferInternal$_store_cell($TokenTransferInternal$_constructor_queryId_amount_from_response_destination_forward_ton_amount_forward_payload(0, $msg'amount, $self'owner, $self'owner, 0, $global_emptySlice()), begin_cell()), $winit'code, $winit'data));
+            $VoraToken$_contract_store(($self'totalSupply, $self'owner, $self'content, $self'mintable));
+            return ();
+        }
+        
+        ;; Receive TokenUpdateContent message
+        if (op == 2937889386) {
+            var $msg'content = in_msg~load_ref();
+            var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+            throw_unless(14534, ( equal_slices_bits($ctx'sender, $self'owner) ));
+            $self'content = $msg'content;
+            $VoraToken$_contract_store(($self'totalSupply, $self'owner, $self'content, $self'mintable));
+            return ();
+        }
+        
+        ;; Receive TokenBurnNotification message
+        if (op == 0x7bdd97de) {
+            var $msg'queryId = in_msg~load_uint(64);
+            var $msg'amount = in_msg~load_varuint16();
+            var $msg'sender = in_msg~load_msg_addr();
+            var $msg'response_destination = in_msg~__tact_load_address_opt();
+            var ($winit'code, $winit'data) = $VoraJettonWallet$_init_child($msg'sender, $global_myAddress());
+            throw_unless(4429, ( equal_slices_bits($global_contractAddress(($winit'code, $winit'data)), __tact_context_get_sender()) ));
+            $self'totalSupply = ($self'totalSupply - $msg'amount);
+            if ((~ null?($msg'response_destination))) {
+                $global_send($SendParameters$_constructor_to_value_bounce_mode_body(__tact_not_null($msg'response_destination), 0, false, 66, $TokenExcesses$_store_cell($TokenExcesses$_constructor_queryId($msg'queryId), begin_cell())));
+            }
+            $VoraToken$_contract_store(($self'totalSupply, $self'owner, $self'content, $self'mintable));
+            return ();
+        }
+        
+        ;; Receive Deploy message
+        if (op == 0x946a98b6) {
+            var $deploy'queryId = in_msg~load_uint(64);
+            ($self'totalSupply, $self'owner, $self'content, $self'mintable)~$VoraToken$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+            $VoraToken$_contract_store(($self'totalSupply, $self'owner, $self'content, $self'mintable));
+            return ();
+        }
+        
+    }
+    ;; Empty Receiver and Text Receivers
+    var text_op = slice_hash(in_msg);
+    ;; Receive "Stop Mint" message
+    if (text_op == 0xfecddb47ca07c20310b95b33924e9a9492497c67c42678fcbf8c464effdc4772) {
+        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        throw_unless(14534, ( equal_slices_bits($ctx'sender, $self'owner) ));
+        $self'mintable = false;
+        $VoraToken$_contract_store(($self'totalSupply, $self'owner, $self'content, $self'mintable));
         return ();
     }
-    
-    ;; Receive TreasuryBalanceResponse message
-    if (op == 2303665634) {
-        var $msg'queryId = in_msg~load_int(257);
-        var $msg'mintAmount = in_msg~load_int(257);
-        var $msg'receiver = in_msg~load_msg_addr();
-        slice sc_1 = in_msg~load_ref().begin_parse();
-        var $msg'treasuryBalance = sc_1~load_int(257);
-        throw_unless(56382, ( equal_slices_bits(__tact_context_get_sender(), $self'treasuryAddress) ));
-        int $allowedMint = ($msg'treasuryBalance * 10);
-        int $hypotheticalSupply = ($self'totalSupply + $msg'mintAmount);
-        throw_unless(24170, ($hypotheticalSupply <= $allowedMint));
-        $self'totalSupply = ($self'totalSupply + $msg'mintAmount);
-        $VoraToken$_contract_store(($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply));
-        return ();
-    }
-    
-    ;; Receive TokenNotification message
-    if (op == 4134986841) {
-        var $msg'queryId = in_msg~load_int(257);
-        var $msg'amount = in_msg~load_int(257);
-        var $msg'from = in_msg~load_msg_addr();
-        var $msg'forwardPayload = in_msg;
-        $VoraToken$_contract_store(($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply));
-        return ();
-    }
-    
-    ;; Receive Deploy message
-    if (op == 0x946a98b6) {
-        var $deploy'queryId = in_msg~load_uint(64);
-        ($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply)~$VoraToken$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
-        $VoraToken$_contract_store(($self'owner, $self'treasuryAddress, $self'totalSupply, $self'maxSupply));
-        return ();
-    }
-    
     ;; Throw if not handled
     throw(130);
 }

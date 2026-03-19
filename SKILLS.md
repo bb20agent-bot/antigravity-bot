@@ -1,4 +1,4 @@
 "## Skills Used" 
-"- Automation: n8n" 
+"- Automation: Webhook" 
 "- Language: Python" 
 "- API: Binance, Google Sheets" 

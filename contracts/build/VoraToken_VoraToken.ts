@@ -756,333 +756,451 @@ export function dictValueParserFactoryDeploy(): DictionaryValue<FactoryDeploy> {
     }
 }
 
-export type TreasuryBalanceRequest = {
-    $$type: 'TreasuryBalanceRequest';
+export type TokenTransfer = {
+    $$type: 'TokenTransfer';
     queryId: bigint;
-    mintAmount: bigint;
-    receiver: Address;
-}
-
-export function storeTreasuryBalanceRequest(src: TreasuryBalanceRequest) {
-    return (builder: Builder) => {
-        const b_0 = builder;
-        b_0.storeUint(1127502537, 32);
-        b_0.storeInt(src.queryId, 257);
-        b_0.storeInt(src.mintAmount, 257);
-        b_0.storeAddress(src.receiver);
-    };
-}
-
-export function loadTreasuryBalanceRequest(slice: Slice) {
-    const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 1127502537) { throw Error('Invalid prefix'); }
-    const _queryId = sc_0.loadIntBig(257);
-    const _mintAmount = sc_0.loadIntBig(257);
-    const _receiver = sc_0.loadAddress();
-    return { $$type: 'TreasuryBalanceRequest' as const, queryId: _queryId, mintAmount: _mintAmount, receiver: _receiver };
-}
-
-export function loadTupleTreasuryBalanceRequest(source: TupleReader) {
-    const _queryId = source.readBigNumber();
-    const _mintAmount = source.readBigNumber();
-    const _receiver = source.readAddress();
-    return { $$type: 'TreasuryBalanceRequest' as const, queryId: _queryId, mintAmount: _mintAmount, receiver: _receiver };
-}
-
-export function loadGetterTupleTreasuryBalanceRequest(source: TupleReader) {
-    const _queryId = source.readBigNumber();
-    const _mintAmount = source.readBigNumber();
-    const _receiver = source.readAddress();
-    return { $$type: 'TreasuryBalanceRequest' as const, queryId: _queryId, mintAmount: _mintAmount, receiver: _receiver };
-}
-
-export function storeTupleTreasuryBalanceRequest(source: TreasuryBalanceRequest) {
-    const builder = new TupleBuilder();
-    builder.writeNumber(source.queryId);
-    builder.writeNumber(source.mintAmount);
-    builder.writeAddress(source.receiver);
-    return builder.build();
-}
-
-export function dictValueParserTreasuryBalanceRequest(): DictionaryValue<TreasuryBalanceRequest> {
-    return {
-        serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeTreasuryBalanceRequest(src)).endCell());
-        },
-        parse: (src) => {
-            return loadTreasuryBalanceRequest(src.loadRef().beginParse());
-        }
-    }
-}
-
-export type TreasuryBalanceResponse = {
-    $$type: 'TreasuryBalanceResponse';
-    queryId: bigint;
-    mintAmount: bigint;
-    receiver: Address;
-    treasuryBalance: bigint;
-}
-
-export function storeTreasuryBalanceResponse(src: TreasuryBalanceResponse) {
-    return (builder: Builder) => {
-        const b_0 = builder;
-        b_0.storeUint(2303665634, 32);
-        b_0.storeInt(src.queryId, 257);
-        b_0.storeInt(src.mintAmount, 257);
-        b_0.storeAddress(src.receiver);
-        const b_1 = new Builder();
-        b_1.storeInt(src.treasuryBalance, 257);
-        b_0.storeRef(b_1.endCell());
-    };
-}
-
-export function loadTreasuryBalanceResponse(slice: Slice) {
-    const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2303665634) { throw Error('Invalid prefix'); }
-    const _queryId = sc_0.loadIntBig(257);
-    const _mintAmount = sc_0.loadIntBig(257);
-    const _receiver = sc_0.loadAddress();
-    const sc_1 = sc_0.loadRef().beginParse();
-    const _treasuryBalance = sc_1.loadIntBig(257);
-    return { $$type: 'TreasuryBalanceResponse' as const, queryId: _queryId, mintAmount: _mintAmount, receiver: _receiver, treasuryBalance: _treasuryBalance };
-}
-
-export function loadTupleTreasuryBalanceResponse(source: TupleReader) {
-    const _queryId = source.readBigNumber();
-    const _mintAmount = source.readBigNumber();
-    const _receiver = source.readAddress();
-    const _treasuryBalance = source.readBigNumber();
-    return { $$type: 'TreasuryBalanceResponse' as const, queryId: _queryId, mintAmount: _mintAmount, receiver: _receiver, treasuryBalance: _treasuryBalance };
-}
-
-export function loadGetterTupleTreasuryBalanceResponse(source: TupleReader) {
-    const _queryId = source.readBigNumber();
-    const _mintAmount = source.readBigNumber();
-    const _receiver = source.readAddress();
-    const _treasuryBalance = source.readBigNumber();
-    return { $$type: 'TreasuryBalanceResponse' as const, queryId: _queryId, mintAmount: _mintAmount, receiver: _receiver, treasuryBalance: _treasuryBalance };
-}
-
-export function storeTupleTreasuryBalanceResponse(source: TreasuryBalanceResponse) {
-    const builder = new TupleBuilder();
-    builder.writeNumber(source.queryId);
-    builder.writeNumber(source.mintAmount);
-    builder.writeAddress(source.receiver);
-    builder.writeNumber(source.treasuryBalance);
-    return builder.build();
-}
-
-export function dictValueParserTreasuryBalanceResponse(): DictionaryValue<TreasuryBalanceResponse> {
-    return {
-        serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeTreasuryBalanceResponse(src)).endCell());
-        },
-        parse: (src) => {
-            return loadTreasuryBalanceResponse(src.loadRef().beginParse());
-        }
-    }
-}
-
-export type SetBotWalletAddress = {
-    $$type: 'SetBotWalletAddress';
-    botWalletAddress: Address;
-}
-
-export function storeSetBotWalletAddress(src: SetBotWalletAddress) {
-    return (builder: Builder) => {
-        const b_0 = builder;
-        b_0.storeUint(1153750340, 32);
-        b_0.storeAddress(src.botWalletAddress);
-    };
-}
-
-export function loadSetBotWalletAddress(slice: Slice) {
-    const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 1153750340) { throw Error('Invalid prefix'); }
-    const _botWalletAddress = sc_0.loadAddress();
-    return { $$type: 'SetBotWalletAddress' as const, botWalletAddress: _botWalletAddress };
-}
-
-export function loadTupleSetBotWalletAddress(source: TupleReader) {
-    const _botWalletAddress = source.readAddress();
-    return { $$type: 'SetBotWalletAddress' as const, botWalletAddress: _botWalletAddress };
-}
-
-export function loadGetterTupleSetBotWalletAddress(source: TupleReader) {
-    const _botWalletAddress = source.readAddress();
-    return { $$type: 'SetBotWalletAddress' as const, botWalletAddress: _botWalletAddress };
-}
-
-export function storeTupleSetBotWalletAddress(source: SetBotWalletAddress) {
-    const builder = new TupleBuilder();
-    builder.writeAddress(source.botWalletAddress);
-    return builder.build();
-}
-
-export function dictValueParserSetBotWalletAddress(): DictionaryValue<SetBotWalletAddress> {
-    return {
-        serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeSetBotWalletAddress(src)).endCell());
-        },
-        parse: (src) => {
-            return loadSetBotWalletAddress(src.loadRef().beginParse());
-        }
-    }
-}
-
-export type BotWithdraw = {
-    $$type: 'BotWithdraw';
     amount: bigint;
     destination: Address;
+    response_destination: Address | null;
+    custom_payload: Cell | null;
+    forward_ton_amount: bigint;
+    forward_payload: Slice;
 }
 
-export function storeBotWithdraw(src: BotWithdraw) {
+export function storeTokenTransfer(src: TokenTransfer) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeUint(4213753329, 32);
-        b_0.storeInt(src.amount, 257);
+        b_0.storeUint(260734629, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeCoins(src.amount);
         b_0.storeAddress(src.destination);
+        b_0.storeAddress(src.response_destination);
+        if (src.custom_payload !== null && src.custom_payload !== undefined) { b_0.storeBit(true).storeRef(src.custom_payload); } else { b_0.storeBit(false); }
+        b_0.storeCoins(src.forward_ton_amount);
+        b_0.storeBuilder(src.forward_payload.asBuilder());
     };
 }
 
-export function loadBotWithdraw(slice: Slice) {
+export function loadTokenTransfer(slice: Slice) {
     const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 4213753329) { throw Error('Invalid prefix'); }
-    const _amount = sc_0.loadIntBig(257);
+    if (sc_0.loadUint(32) !== 260734629) { throw Error('Invalid prefix'); }
+    const _queryId = sc_0.loadUintBig(64);
+    const _amount = sc_0.loadCoins();
     const _destination = sc_0.loadAddress();
-    return { $$type: 'BotWithdraw' as const, amount: _amount, destination: _destination };
+    const _response_destination = sc_0.loadMaybeAddress();
+    const _custom_payload = sc_0.loadBit() ? sc_0.loadRef() : null;
+    const _forward_ton_amount = sc_0.loadCoins();
+    const _forward_payload = sc_0;
+    return { $$type: 'TokenTransfer' as const, queryId: _queryId, amount: _amount, destination: _destination, response_destination: _response_destination, custom_payload: _custom_payload, forward_ton_amount: _forward_ton_amount, forward_payload: _forward_payload };
 }
 
-export function loadTupleBotWithdraw(source: TupleReader) {
+export function loadTupleTokenTransfer(source: TupleReader) {
+    const _queryId = source.readBigNumber();
     const _amount = source.readBigNumber();
     const _destination = source.readAddress();
-    return { $$type: 'BotWithdraw' as const, amount: _amount, destination: _destination };
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    const _forward_ton_amount = source.readBigNumber();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'TokenTransfer' as const, queryId: _queryId, amount: _amount, destination: _destination, response_destination: _response_destination, custom_payload: _custom_payload, forward_ton_amount: _forward_ton_amount, forward_payload: _forward_payload };
 }
 
-export function loadGetterTupleBotWithdraw(source: TupleReader) {
+export function loadGetterTupleTokenTransfer(source: TupleReader) {
+    const _queryId = source.readBigNumber();
     const _amount = source.readBigNumber();
     const _destination = source.readAddress();
-    return { $$type: 'BotWithdraw' as const, amount: _amount, destination: _destination };
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    const _forward_ton_amount = source.readBigNumber();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'TokenTransfer' as const, queryId: _queryId, amount: _amount, destination: _destination, response_destination: _response_destination, custom_payload: _custom_payload, forward_ton_amount: _forward_ton_amount, forward_payload: _forward_payload };
 }
 
-export function storeTupleBotWithdraw(source: BotWithdraw) {
+export function storeTupleTokenTransfer(source: TokenTransfer) {
     const builder = new TupleBuilder();
+    builder.writeNumber(source.queryId);
     builder.writeNumber(source.amount);
     builder.writeAddress(source.destination);
+    builder.writeAddress(source.response_destination);
+    builder.writeCell(source.custom_payload);
+    builder.writeNumber(source.forward_ton_amount);
+    builder.writeSlice(source.forward_payload.asCell());
     return builder.build();
 }
 
-export function dictValueParserBotWithdraw(): DictionaryValue<BotWithdraw> {
+export function dictValueParserTokenTransfer(): DictionaryValue<TokenTransfer> {
     return {
         serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeBotWithdraw(src)).endCell());
+            builder.storeRef(beginCell().store(storeTokenTransfer(src)).endCell());
         },
         parse: (src) => {
-            return loadBotWithdraw(src.loadRef().beginParse());
+            return loadTokenTransfer(src.loadRef().beginParse());
         }
     }
 }
 
-export type SetVoraTokenAddress = {
-    $$type: 'SetVoraTokenAddress';
-    voraTokenAddress: Address;
+export type TokenTransferInternal = {
+    $$type: 'TokenTransferInternal';
+    queryId: bigint;
+    amount: bigint;
+    from: Address;
+    response_destination: Address | null;
+    forward_ton_amount: bigint;
+    forward_payload: Slice;
 }
 
-export function storeSetVoraTokenAddress(src: SetVoraTokenAddress) {
+export function storeTokenTransferInternal(src: TokenTransferInternal) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeUint(4068122196, 32);
-        b_0.storeAddress(src.voraTokenAddress);
+        b_0.storeUint(395134233, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeCoins(src.amount);
+        b_0.storeAddress(src.from);
+        b_0.storeAddress(src.response_destination);
+        b_0.storeCoins(src.forward_ton_amount);
+        b_0.storeBuilder(src.forward_payload.asBuilder());
     };
 }
 
-export function loadSetVoraTokenAddress(slice: Slice) {
+export function loadTokenTransferInternal(slice: Slice) {
     const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 4068122196) { throw Error('Invalid prefix'); }
-    const _voraTokenAddress = sc_0.loadAddress();
-    return { $$type: 'SetVoraTokenAddress' as const, voraTokenAddress: _voraTokenAddress };
+    if (sc_0.loadUint(32) !== 395134233) { throw Error('Invalid prefix'); }
+    const _queryId = sc_0.loadUintBig(64);
+    const _amount = sc_0.loadCoins();
+    const _from = sc_0.loadAddress();
+    const _response_destination = sc_0.loadMaybeAddress();
+    const _forward_ton_amount = sc_0.loadCoins();
+    const _forward_payload = sc_0;
+    return { $$type: 'TokenTransferInternal' as const, queryId: _queryId, amount: _amount, from: _from, response_destination: _response_destination, forward_ton_amount: _forward_ton_amount, forward_payload: _forward_payload };
 }
 
-export function loadTupleSetVoraTokenAddress(source: TupleReader) {
-    const _voraTokenAddress = source.readAddress();
-    return { $$type: 'SetVoraTokenAddress' as const, voraTokenAddress: _voraTokenAddress };
+export function loadTupleTokenTransferInternal(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _from = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    const _forward_ton_amount = source.readBigNumber();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'TokenTransferInternal' as const, queryId: _queryId, amount: _amount, from: _from, response_destination: _response_destination, forward_ton_amount: _forward_ton_amount, forward_payload: _forward_payload };
 }
 
-export function loadGetterTupleSetVoraTokenAddress(source: TupleReader) {
-    const _voraTokenAddress = source.readAddress();
-    return { $$type: 'SetVoraTokenAddress' as const, voraTokenAddress: _voraTokenAddress };
+export function loadGetterTupleTokenTransferInternal(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _from = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    const _forward_ton_amount = source.readBigNumber();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'TokenTransferInternal' as const, queryId: _queryId, amount: _amount, from: _from, response_destination: _response_destination, forward_ton_amount: _forward_ton_amount, forward_payload: _forward_payload };
 }
 
-export function storeTupleSetVoraTokenAddress(source: SetVoraTokenAddress) {
+export function storeTupleTokenTransferInternal(source: TokenTransferInternal) {
     const builder = new TupleBuilder();
-    builder.writeAddress(source.voraTokenAddress);
+    builder.writeNumber(source.queryId);
+    builder.writeNumber(source.amount);
+    builder.writeAddress(source.from);
+    builder.writeAddress(source.response_destination);
+    builder.writeNumber(source.forward_ton_amount);
+    builder.writeSlice(source.forward_payload.asCell());
     return builder.build();
 }
 
-export function dictValueParserSetVoraTokenAddress(): DictionaryValue<SetVoraTokenAddress> {
+export function dictValueParserTokenTransferInternal(): DictionaryValue<TokenTransferInternal> {
     return {
         serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeSetVoraTokenAddress(src)).endCell());
+            builder.storeRef(beginCell().store(storeTokenTransferInternal(src)).endCell());
         },
         parse: (src) => {
-            return loadSetVoraTokenAddress(src.loadRef().beginParse());
+            return loadTokenTransferInternal(src.loadRef().beginParse());
         }
     }
 }
 
-export type Treasury$Data = {
-    $$type: 'Treasury$Data';
-    owner: Address;
-    voraTokenAddress: Address | null;
-    botWalletAddress: Address | null;
+export type TokenNotification = {
+    $$type: 'TokenNotification';
+    queryId: bigint;
+    amount: bigint;
+    from: Address;
+    forward_payload: Slice;
 }
 
-export function storeTreasury$Data(src: Treasury$Data) {
+export function storeTokenNotification(src: TokenNotification) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeAddress(src.owner);
-        b_0.storeAddress(src.voraTokenAddress);
-        b_0.storeAddress(src.botWalletAddress);
+        b_0.storeUint(1935855772, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeCoins(src.amount);
+        b_0.storeAddress(src.from);
+        b_0.storeBuilder(src.forward_payload.asBuilder());
     };
 }
 
-export function loadTreasury$Data(slice: Slice) {
+export function loadTokenNotification(slice: Slice) {
     const sc_0 = slice;
-    const _owner = sc_0.loadAddress();
-    const _voraTokenAddress = sc_0.loadMaybeAddress();
-    const _botWalletAddress = sc_0.loadMaybeAddress();
-    return { $$type: 'Treasury$Data' as const, owner: _owner, voraTokenAddress: _voraTokenAddress, botWalletAddress: _botWalletAddress };
+    if (sc_0.loadUint(32) !== 1935855772) { throw Error('Invalid prefix'); }
+    const _queryId = sc_0.loadUintBig(64);
+    const _amount = sc_0.loadCoins();
+    const _from = sc_0.loadAddress();
+    const _forward_payload = sc_0;
+    return { $$type: 'TokenNotification' as const, queryId: _queryId, amount: _amount, from: _from, forward_payload: _forward_payload };
 }
 
-export function loadTupleTreasury$Data(source: TupleReader) {
-    const _owner = source.readAddress();
-    const _voraTokenAddress = source.readAddressOpt();
-    const _botWalletAddress = source.readAddressOpt();
-    return { $$type: 'Treasury$Data' as const, owner: _owner, voraTokenAddress: _voraTokenAddress, botWalletAddress: _botWalletAddress };
+export function loadTupleTokenNotification(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _from = source.readAddress();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'TokenNotification' as const, queryId: _queryId, amount: _amount, from: _from, forward_payload: _forward_payload };
 }
 
-export function loadGetterTupleTreasury$Data(source: TupleReader) {
-    const _owner = source.readAddress();
-    const _voraTokenAddress = source.readAddressOpt();
-    const _botWalletAddress = source.readAddressOpt();
-    return { $$type: 'Treasury$Data' as const, owner: _owner, voraTokenAddress: _voraTokenAddress, botWalletAddress: _botWalletAddress };
+export function loadGetterTupleTokenNotification(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _from = source.readAddress();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'TokenNotification' as const, queryId: _queryId, amount: _amount, from: _from, forward_payload: _forward_payload };
 }
 
-export function storeTupleTreasury$Data(source: Treasury$Data) {
+export function storeTupleTokenNotification(source: TokenNotification) {
     const builder = new TupleBuilder();
-    builder.writeAddress(source.owner);
-    builder.writeAddress(source.voraTokenAddress);
-    builder.writeAddress(source.botWalletAddress);
+    builder.writeNumber(source.queryId);
+    builder.writeNumber(source.amount);
+    builder.writeAddress(source.from);
+    builder.writeSlice(source.forward_payload.asCell());
     return builder.build();
 }
 
-export function dictValueParserTreasury$Data(): DictionaryValue<Treasury$Data> {
+export function dictValueParserTokenNotification(): DictionaryValue<TokenNotification> {
     return {
         serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeTreasury$Data(src)).endCell());
+            builder.storeRef(beginCell().store(storeTokenNotification(src)).endCell());
         },
         parse: (src) => {
-            return loadTreasury$Data(src.loadRef().beginParse());
+            return loadTokenNotification(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type TokenBurn = {
+    $$type: 'TokenBurn';
+    queryId: bigint;
+    amount: bigint;
+    response_destination: Address | null;
+    custom_payload: Cell | null;
+}
+
+export function storeTokenBurn(src: TokenBurn) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(1499400124, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeCoins(src.amount);
+        b_0.storeAddress(src.response_destination);
+        if (src.custom_payload !== null && src.custom_payload !== undefined) { b_0.storeBit(true).storeRef(src.custom_payload); } else { b_0.storeBit(false); }
+    };
+}
+
+export function loadTokenBurn(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 1499400124) { throw Error('Invalid prefix'); }
+    const _queryId = sc_0.loadUintBig(64);
+    const _amount = sc_0.loadCoins();
+    const _response_destination = sc_0.loadMaybeAddress();
+    const _custom_payload = sc_0.loadBit() ? sc_0.loadRef() : null;
+    return { $$type: 'TokenBurn' as const, queryId: _queryId, amount: _amount, response_destination: _response_destination, custom_payload: _custom_payload };
+}
+
+export function loadTupleTokenBurn(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    return { $$type: 'TokenBurn' as const, queryId: _queryId, amount: _amount, response_destination: _response_destination, custom_payload: _custom_payload };
+}
+
+export function loadGetterTupleTokenBurn(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    return { $$type: 'TokenBurn' as const, queryId: _queryId, amount: _amount, response_destination: _response_destination, custom_payload: _custom_payload };
+}
+
+export function storeTupleTokenBurn(source: TokenBurn) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.queryId);
+    builder.writeNumber(source.amount);
+    builder.writeAddress(source.response_destination);
+    builder.writeCell(source.custom_payload);
+    return builder.build();
+}
+
+export function dictValueParserTokenBurn(): DictionaryValue<TokenBurn> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeTokenBurn(src)).endCell());
+        },
+        parse: (src) => {
+            return loadTokenBurn(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type TokenBurnNotification = {
+    $$type: 'TokenBurnNotification';
+    queryId: bigint;
+    amount: bigint;
+    sender: Address;
+    response_destination: Address | null;
+}
+
+export function storeTokenBurnNotification(src: TokenBurnNotification) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(2078119902, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeCoins(src.amount);
+        b_0.storeAddress(src.sender);
+        b_0.storeAddress(src.response_destination);
+    };
+}
+
+export function loadTokenBurnNotification(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 2078119902) { throw Error('Invalid prefix'); }
+    const _queryId = sc_0.loadUintBig(64);
+    const _amount = sc_0.loadCoins();
+    const _sender = sc_0.loadAddress();
+    const _response_destination = sc_0.loadMaybeAddress();
+    return { $$type: 'TokenBurnNotification' as const, queryId: _queryId, amount: _amount, sender: _sender, response_destination: _response_destination };
+}
+
+export function loadTupleTokenBurnNotification(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _sender = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    return { $$type: 'TokenBurnNotification' as const, queryId: _queryId, amount: _amount, sender: _sender, response_destination: _response_destination };
+}
+
+export function loadGetterTupleTokenBurnNotification(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _sender = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    return { $$type: 'TokenBurnNotification' as const, queryId: _queryId, amount: _amount, sender: _sender, response_destination: _response_destination };
+}
+
+export function storeTupleTokenBurnNotification(source: TokenBurnNotification) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.queryId);
+    builder.writeNumber(source.amount);
+    builder.writeAddress(source.sender);
+    builder.writeAddress(source.response_destination);
+    return builder.build();
+}
+
+export function dictValueParserTokenBurnNotification(): DictionaryValue<TokenBurnNotification> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeTokenBurnNotification(src)).endCell());
+        },
+        parse: (src) => {
+            return loadTokenBurnNotification(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type TokenExcesses = {
+    $$type: 'TokenExcesses';
+    queryId: bigint;
+}
+
+export function storeTokenExcesses(src: TokenExcesses) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(3576854235, 32);
+        b_0.storeUint(src.queryId, 64);
+    };
+}
+
+export function loadTokenExcesses(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 3576854235) { throw Error('Invalid prefix'); }
+    const _queryId = sc_0.loadUintBig(64);
+    return { $$type: 'TokenExcesses' as const, queryId: _queryId };
+}
+
+export function loadTupleTokenExcesses(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    return { $$type: 'TokenExcesses' as const, queryId: _queryId };
+}
+
+export function loadGetterTupleTokenExcesses(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    return { $$type: 'TokenExcesses' as const, queryId: _queryId };
+}
+
+export function storeTupleTokenExcesses(source: TokenExcesses) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.queryId);
+    return builder.build();
+}
+
+export function dictValueParserTokenExcesses(): DictionaryValue<TokenExcesses> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeTokenExcesses(src)).endCell());
+        },
+        parse: (src) => {
+            return loadTokenExcesses(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type TokenUpdateContent = {
+    $$type: 'TokenUpdateContent';
+    content: Cell;
+}
+
+export function storeTokenUpdateContent(src: TokenUpdateContent) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(2937889386, 32);
+        b_0.storeRef(src.content);
+    };
+}
+
+export function loadTokenUpdateContent(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 2937889386) { throw Error('Invalid prefix'); }
+    const _content = sc_0.loadRef();
+    return { $$type: 'TokenUpdateContent' as const, content: _content };
+}
+
+export function loadTupleTokenUpdateContent(source: TupleReader) {
+    const _content = source.readCell();
+    return { $$type: 'TokenUpdateContent' as const, content: _content };
+}
+
+export function loadGetterTupleTokenUpdateContent(source: TupleReader) {
+    const _content = source.readCell();
+    return { $$type: 'TokenUpdateContent' as const, content: _content };
+}
+
+export function storeTupleTokenUpdateContent(source: TokenUpdateContent) {
+    const builder = new TupleBuilder();
+    builder.writeCell(source.content);
+    return builder.build();
+}
+
+export function dictValueParserTokenUpdateContent(): DictionaryValue<TokenUpdateContent> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeTokenUpdateContent(src)).endCell());
+        },
+        parse: (src) => {
+            return loadTokenUpdateContent(src.loadRef().beginParse());
         }
     }
 }
@@ -1140,120 +1258,187 @@ export function dictValueParserMint(): DictionaryValue<Mint> {
     }
 }
 
-export type TokenNotification = {
-    $$type: 'TokenNotification';
-    queryId: bigint;
-    amount: bigint;
-    from: Address;
-    forwardPayload: Slice;
+export type JettonData = {
+    $$type: 'JettonData';
+    totalSupply: bigint;
+    mintable: boolean;
+    owner: Address;
+    content: Cell | null;
+    walletCode: Cell;
 }
 
-export function storeTokenNotification(src: TokenNotification) {
+export function storeJettonData(src: JettonData) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeUint(4134986841, 32);
-        b_0.storeInt(src.queryId, 257);
-        b_0.storeInt(src.amount, 257);
-        b_0.storeAddress(src.from);
-        b_0.storeBuilder(src.forwardPayload.asBuilder());
+        b_0.storeInt(src.totalSupply, 257);
+        b_0.storeBit(src.mintable);
+        b_0.storeAddress(src.owner);
+        if (src.content !== null && src.content !== undefined) { b_0.storeBit(true).storeRef(src.content); } else { b_0.storeBit(false); }
+        b_0.storeRef(src.walletCode);
     };
 }
 
-export function loadTokenNotification(slice: Slice) {
+export function loadJettonData(slice: Slice) {
     const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 4134986841) { throw Error('Invalid prefix'); }
-    const _queryId = sc_0.loadIntBig(257);
-    const _amount = sc_0.loadIntBig(257);
-    const _from = sc_0.loadAddress();
-    const _forwardPayload = sc_0;
-    return { $$type: 'TokenNotification' as const, queryId: _queryId, amount: _amount, from: _from, forwardPayload: _forwardPayload };
+    const _totalSupply = sc_0.loadIntBig(257);
+    const _mintable = sc_0.loadBit();
+    const _owner = sc_0.loadAddress();
+    const _content = sc_0.loadBit() ? sc_0.loadRef() : null;
+    const _walletCode = sc_0.loadRef();
+    return { $$type: 'JettonData' as const, totalSupply: _totalSupply, mintable: _mintable, owner: _owner, content: _content, walletCode: _walletCode };
 }
 
-export function loadTupleTokenNotification(source: TupleReader) {
-    const _queryId = source.readBigNumber();
-    const _amount = source.readBigNumber();
-    const _from = source.readAddress();
-    const _forwardPayload = source.readCell().asSlice();
-    return { $$type: 'TokenNotification' as const, queryId: _queryId, amount: _amount, from: _from, forwardPayload: _forwardPayload };
+export function loadTupleJettonData(source: TupleReader) {
+    const _totalSupply = source.readBigNumber();
+    const _mintable = source.readBoolean();
+    const _owner = source.readAddress();
+    const _content = source.readCellOpt();
+    const _walletCode = source.readCell();
+    return { $$type: 'JettonData' as const, totalSupply: _totalSupply, mintable: _mintable, owner: _owner, content: _content, walletCode: _walletCode };
 }
 
-export function loadGetterTupleTokenNotification(source: TupleReader) {
-    const _queryId = source.readBigNumber();
-    const _amount = source.readBigNumber();
-    const _from = source.readAddress();
-    const _forwardPayload = source.readCell().asSlice();
-    return { $$type: 'TokenNotification' as const, queryId: _queryId, amount: _amount, from: _from, forwardPayload: _forwardPayload };
+export function loadGetterTupleJettonData(source: TupleReader) {
+    const _totalSupply = source.readBigNumber();
+    const _mintable = source.readBoolean();
+    const _owner = source.readAddress();
+    const _content = source.readCellOpt();
+    const _walletCode = source.readCell();
+    return { $$type: 'JettonData' as const, totalSupply: _totalSupply, mintable: _mintable, owner: _owner, content: _content, walletCode: _walletCode };
 }
 
-export function storeTupleTokenNotification(source: TokenNotification) {
+export function storeTupleJettonData(source: JettonData) {
     const builder = new TupleBuilder();
-    builder.writeNumber(source.queryId);
-    builder.writeNumber(source.amount);
-    builder.writeAddress(source.from);
-    builder.writeSlice(source.forwardPayload.asCell());
+    builder.writeNumber(source.totalSupply);
+    builder.writeBoolean(source.mintable);
+    builder.writeAddress(source.owner);
+    builder.writeCell(source.content);
+    builder.writeCell(source.walletCode);
     return builder.build();
 }
 
-export function dictValueParserTokenNotification(): DictionaryValue<TokenNotification> {
+export function dictValueParserJettonData(): DictionaryValue<JettonData> {
     return {
         serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeTokenNotification(src)).endCell());
+            builder.storeRef(beginCell().store(storeJettonData(src)).endCell());
         },
         parse: (src) => {
-            return loadTokenNotification(src.loadRef().beginParse());
+            return loadJettonData(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type JettonWalletData = {
+    $$type: 'JettonWalletData';
+    balance: bigint;
+    owner: Address;
+    master: Address;
+    walletCode: Cell;
+}
+
+export function storeJettonWalletData(src: JettonWalletData) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeInt(src.balance, 257);
+        b_0.storeAddress(src.owner);
+        b_0.storeAddress(src.master);
+        b_0.storeRef(src.walletCode);
+    };
+}
+
+export function loadJettonWalletData(slice: Slice) {
+    const sc_0 = slice;
+    const _balance = sc_0.loadIntBig(257);
+    const _owner = sc_0.loadAddress();
+    const _master = sc_0.loadAddress();
+    const _walletCode = sc_0.loadRef();
+    return { $$type: 'JettonWalletData' as const, balance: _balance, owner: _owner, master: _master, walletCode: _walletCode };
+}
+
+export function loadTupleJettonWalletData(source: TupleReader) {
+    const _balance = source.readBigNumber();
+    const _owner = source.readAddress();
+    const _master = source.readAddress();
+    const _walletCode = source.readCell();
+    return { $$type: 'JettonWalletData' as const, balance: _balance, owner: _owner, master: _master, walletCode: _walletCode };
+}
+
+export function loadGetterTupleJettonWalletData(source: TupleReader) {
+    const _balance = source.readBigNumber();
+    const _owner = source.readAddress();
+    const _master = source.readAddress();
+    const _walletCode = source.readCell();
+    return { $$type: 'JettonWalletData' as const, balance: _balance, owner: _owner, master: _master, walletCode: _walletCode };
+}
+
+export function storeTupleJettonWalletData(source: JettonWalletData) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.balance);
+    builder.writeAddress(source.owner);
+    builder.writeAddress(source.master);
+    builder.writeCell(source.walletCode);
+    return builder.build();
+}
+
+export function dictValueParserJettonWalletData(): DictionaryValue<JettonWalletData> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeJettonWalletData(src)).endCell());
+        },
+        parse: (src) => {
+            return loadJettonWalletData(src.loadRef().beginParse());
         }
     }
 }
 
 export type VoraToken$Data = {
     $$type: 'VoraToken$Data';
-    owner: Address;
-    treasuryAddress: Address;
     totalSupply: bigint;
-    maxSupply: bigint;
+    owner: Address;
+    content: Cell | null;
+    mintable: boolean;
 }
 
 export function storeVoraToken$Data(src: VoraToken$Data) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeAddress(src.owner);
-        b_0.storeAddress(src.treasuryAddress);
         b_0.storeCoins(src.totalSupply);
-        b_0.storeCoins(src.maxSupply);
+        b_0.storeAddress(src.owner);
+        if (src.content !== null && src.content !== undefined) { b_0.storeBit(true).storeRef(src.content); } else { b_0.storeBit(false); }
+        b_0.storeBit(src.mintable);
     };
 }
 
 export function loadVoraToken$Data(slice: Slice) {
     const sc_0 = slice;
-    const _owner = sc_0.loadAddress();
-    const _treasuryAddress = sc_0.loadAddress();
     const _totalSupply = sc_0.loadCoins();
-    const _maxSupply = sc_0.loadCoins();
-    return { $$type: 'VoraToken$Data' as const, owner: _owner, treasuryAddress: _treasuryAddress, totalSupply: _totalSupply, maxSupply: _maxSupply };
+    const _owner = sc_0.loadAddress();
+    const _content = sc_0.loadBit() ? sc_0.loadRef() : null;
+    const _mintable = sc_0.loadBit();
+    return { $$type: 'VoraToken$Data' as const, totalSupply: _totalSupply, owner: _owner, content: _content, mintable: _mintable };
 }
 
 export function loadTupleVoraToken$Data(source: TupleReader) {
-    const _owner = source.readAddress();
-    const _treasuryAddress = source.readAddress();
     const _totalSupply = source.readBigNumber();
-    const _maxSupply = source.readBigNumber();
-    return { $$type: 'VoraToken$Data' as const, owner: _owner, treasuryAddress: _treasuryAddress, totalSupply: _totalSupply, maxSupply: _maxSupply };
+    const _owner = source.readAddress();
+    const _content = source.readCellOpt();
+    const _mintable = source.readBoolean();
+    return { $$type: 'VoraToken$Data' as const, totalSupply: _totalSupply, owner: _owner, content: _content, mintable: _mintable };
 }
 
 export function loadGetterTupleVoraToken$Data(source: TupleReader) {
-    const _owner = source.readAddress();
-    const _treasuryAddress = source.readAddress();
     const _totalSupply = source.readBigNumber();
-    const _maxSupply = source.readBigNumber();
-    return { $$type: 'VoraToken$Data' as const, owner: _owner, treasuryAddress: _treasuryAddress, totalSupply: _totalSupply, maxSupply: _maxSupply };
+    const _owner = source.readAddress();
+    const _content = source.readCellOpt();
+    const _mintable = source.readBoolean();
+    return { $$type: 'VoraToken$Data' as const, totalSupply: _totalSupply, owner: _owner, content: _content, mintable: _mintable };
 }
 
 export function storeTupleVoraToken$Data(source: VoraToken$Data) {
     const builder = new TupleBuilder();
-    builder.writeAddress(source.owner);
-    builder.writeAddress(source.treasuryAddress);
     builder.writeNumber(source.totalSupply);
-    builder.writeNumber(source.maxSupply);
+    builder.writeAddress(source.owner);
+    builder.writeCell(source.content);
+    builder.writeBoolean(source.mintable);
     return builder.build();
 }
 
@@ -1268,25 +1453,82 @@ export function dictValueParserVoraToken$Data(): DictionaryValue<VoraToken$Data>
     }
 }
 
+export type VoraJettonWallet$Data = {
+    $$type: 'VoraJettonWallet$Data';
+    balance: bigint;
+    owner: Address;
+    master: Address;
+}
+
+export function storeVoraJettonWallet$Data(src: VoraJettonWallet$Data) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeCoins(src.balance);
+        b_0.storeAddress(src.owner);
+        b_0.storeAddress(src.master);
+    };
+}
+
+export function loadVoraJettonWallet$Data(slice: Slice) {
+    const sc_0 = slice;
+    const _balance = sc_0.loadCoins();
+    const _owner = sc_0.loadAddress();
+    const _master = sc_0.loadAddress();
+    return { $$type: 'VoraJettonWallet$Data' as const, balance: _balance, owner: _owner, master: _master };
+}
+
+export function loadTupleVoraJettonWallet$Data(source: TupleReader) {
+    const _balance = source.readBigNumber();
+    const _owner = source.readAddress();
+    const _master = source.readAddress();
+    return { $$type: 'VoraJettonWallet$Data' as const, balance: _balance, owner: _owner, master: _master };
+}
+
+export function loadGetterTupleVoraJettonWallet$Data(source: TupleReader) {
+    const _balance = source.readBigNumber();
+    const _owner = source.readAddress();
+    const _master = source.readAddress();
+    return { $$type: 'VoraJettonWallet$Data' as const, balance: _balance, owner: _owner, master: _master };
+}
+
+export function storeTupleVoraJettonWallet$Data(source: VoraJettonWallet$Data) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.balance);
+    builder.writeAddress(source.owner);
+    builder.writeAddress(source.master);
+    return builder.build();
+}
+
+export function dictValueParserVoraJettonWallet$Data(): DictionaryValue<VoraJettonWallet$Data> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeVoraJettonWallet$Data(src)).endCell());
+        },
+        parse: (src) => {
+            return loadVoraJettonWallet$Data(src.loadRef().beginParse());
+        }
+    }
+}
+
  type VoraToken_init_args = {
     $$type: 'VoraToken_init_args';
     owner: Address;
-    treasuryAddress: Address;
+    content: Cell | null;
 }
 
 function initVoraToken_init_args(src: VoraToken_init_args) {
     return (builder: Builder) => {
         const b_0 = builder;
         b_0.storeAddress(src.owner);
-        b_0.storeAddress(src.treasuryAddress);
+        if (src.content !== null && src.content !== undefined) { b_0.storeBit(true).storeRef(src.content); } else { b_0.storeBit(false); }
     };
 }
 
-async function VoraToken_init(owner: Address, treasuryAddress: Address) {
-    const __code = Cell.fromHex('b5ee9c7241020c0100024f00022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d901060202710204015fbf90a76a268690000ce7d207d207d007d002a98360a4709fd207d202c816880b8411806f05b59d3b20000716d9e3620c03000220015fbeffb76a268690000ce7d207d207d007d002a98360a4709fd207d202c816880b8411806f05b59d3b20000716d9e3620c0500022104e401d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019cfa40fa40fa00fa0055306c148e13fa40fa405902d1017082300de0b6b3a7640000e205925f05e003d70d1ff2e082218210fc708bd2bae302218210894f25e2bae302218210f676e459bae302018210946a98b6ba07090a0b01f831810101d700fa40308200e0ebf84225c705f2f48139cc5352a027bbf2f4820afaf08072704043c855208210433452c95004cb1f12810101cf00810101cf00cec92350335a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004003080028c87f01ca0055305034cece01fa0201fa02c9ed54008e31810101d70031810101d700fa4031d430d0810101d700308200dc3ef84224c705f2f4a70a5341a0815e6a02bbf2f413a05003c87f01ca0055305034cece01fa0201fa02c9ed54002e5b4003c87f01ca0055305034cece01fa0201fa02c9ed5400a68e4bd33f30c8018210aff90f5758cb1fcb3fc9443012f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055305034cece01fa0201fa02c9ed54e05f05f2c0822b66cc77');
+async function VoraToken_init(owner: Address, content: Cell | null) {
+    const __code = Cell.fromHex('b5ee9c7241021f010007d7000228ff008e88f4a413f4bcf2c80bed5320e303ed43d9010602038e6602040151adbcf6a268690000ce7d007d207a0269002a98360a4dfd207a022c816880b82cbff12a81ed9e3620c0030162f828db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d00b014daf16f6a268690000ce7d007d207a0269002a98360a4dfd207a022c816880b82cbff16d9e3622c005011af8285230db3c305464205465500b02ee30eda2edfb01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019cfa00fa40f404d20055306c149bfa40f4045902d10170597fe205925f05e023d749c21f9134e30d02f90182f0fecddb47ca07c20310b95b33924e9a9492497c67c42678fcbf8c464effdc4772bae3025f03f2c082071e04fa03d31f218210fc708bd2ba8f6431810101d700fa4030f8416f245b8138c63224c705f2f4810e6826f2f45131a0f82814db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0707f804053228b082a1034103a544b30c8e0218210af1ca26abae302210b08090a00ee55508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec910364055041036453304c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004003c87f01ca0055305043fa02ce12f400ca00c9ed54db310056313302d430f8416f245b8138c63224c705f2f45003c87f01ca0055305043fa02ce12f400ca00c9ed54db3103fa82107bdd97deba8f7231d33ffa00fa40d72c01916d93fa4001e231f82812db3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0f842c705f2f45044a1236eb3923330e30d4003c87f01ca0055305043fa02ce12f400ca00c9ed54db31e0010b1c1d011688c87001ca005a02cecec90c022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d90d0f0149a65ec0bb513434800066be803e903e9015481b04e6be903e901640b4405c1678b6cf1b0d200e01125cdb3c3054633052301404b401d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019afa00fa40fa4055206c139afa40fa405902d1017059e204e30202d70d1ff2e0822182100f8a7ea5bae302218210178d4519bae302018210595f07bcba1011131800b6028020d7217021d749c21f9430d31f01de208210178d4519ba8e1a30d33ffa00596c21a002c87f01ca0055205afa0212cecec9ed54e082107bdd97deba8e19d33ffa00596c21a002c87f01ca0055205afa0212cecec9ed54e05f0402de31d33ffa00fa40d72c01916d93fa4001e201f40431fa00f8416f245b81114d3229c705f2f48200d5575375bef2f45164a15138db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076707f80402c4813507cc8141200e855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec91056105710344013071036453304c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205afa0212cecec9ed5404f831d33ffa00fa40d72c01916d93fa4001e201fa00f8416f24532cc705b38ebb537cdb3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d024c705f2f4de51a8a054414b4330fa40fa0071d721fa00fa00306c6170f83a23c200e30f216eb3141516170018f82ac87001ca005a02cecec900c25183a15008a172702848135074c8553082107362d09c5005cb1f13cb3f01fa02cecec9284614505510246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb005003000a3010356c4100e29303c200923370e28e53206ef2d0807080427004c8018210d53276db58cb1fcb3fc91034413010246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00915be202c87f01ca0055205afa0212cecec9ed54010ee3025f04f2c0821902fed33ffa00d72c01916d93fa4001e231f8416f245b81114d3226c705f2f48200d5575342bef2f45131a17080405414367f07c8553082107bdd97de5005cb1f13cb3f01fa02ce01206e9430cf84809201cee2c926044313505510246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf818ae2f400c91a1b001a58cf8680cf8480f400f400cf81002801fb0002c87f01ca0055205afa0212cecec9ed5400a803206ef2d0807070804204c8018210d53276db58cb1fcb3fc910344130146d50436d5033c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0000b48210946a98b6ba8e4dd33f30c8018210aff90f5758cb1fcb3fc9443012f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055305043fa02ce12f400ca00c9ed54db31e03410230048f8416f245b8138c63223c705f2f40270c87f01ca0055305043fa02ce12f400ca00c9ed54b32c0f12');
     const builder = beginCell();
     builder.storeUint(0, 1);
-    initVoraToken_init_args({ $$type: 'VoraToken_init_args', owner, treasuryAddress })(builder);
+    initVoraToken_init_args({ $$type: 'VoraToken_init_args', owner, content })(builder);
     const __data = builder.endCell();
     return { code: __code, data: __data };
 }
@@ -1328,17 +1570,10 @@ export const VoraToken_errors = {
     135: { message: "Code of a contract was not found" },
     136: { message: "Invalid standard address" },
     138: { message: "Not a basechain address" },
-    14438: { message: "Unauthorized request for Treasury Balance" },
-    14796: { message: "Exceeds max supply" },
-    22230: { message: "Already set" },
-    24170: { message: "Mint amount exceeds 10x Treasury TON balance limit" },
-    37849: { message: "Bot wallet not set" },
+    3688: { message: "Not mintable" },
+    4429: { message: "Invalid sender" },
+    14534: { message: "Not owner" },
     54615: { message: "Insufficient balance" },
-    55238: { message: "Only bot can withdraw" },
-    56382: { message: "Only Treasury can respond" },
-    57579: { message: "Only owner can mint" },
-    58190: { message: "Only owner can set" },
-    59518: { message: "Only owner can withdraw directly" },
 } as const
 
 export const VoraToken_errors_backward = {
@@ -1378,17 +1613,10 @@ export const VoraToken_errors_backward = {
     "Code of a contract was not found": 135,
     "Invalid standard address": 136,
     "Not a basechain address": 138,
-    "Unauthorized request for Treasury Balance": 14438,
-    "Exceeds max supply": 14796,
-    "Already set": 22230,
-    "Mint amount exceeds 10x Treasury TON balance limit": 24170,
-    "Bot wallet not set": 37849,
+    "Not mintable": 3688,
+    "Invalid sender": 4429,
+    "Not owner": 14534,
     "Insufficient balance": 54615,
-    "Only bot can withdraw": 55238,
-    "Only Treasury can respond": 56382,
-    "Only owner can mint": 57579,
-    "Only owner can set": 58190,
-    "Only owner can withdraw directly": 59518,
 } as const
 
 const VoraToken_types: ABIType[] = [
@@ -1405,44 +1633,49 @@ const VoraToken_types: ABIType[] = [
     {"name":"Deploy","header":2490013878,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"DeployOk","header":2952335191,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"FactoryDeploy","header":1829761339,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"cashback","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"TreasuryBalanceRequest","header":1127502537,"fields":[{"name":"queryId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"mintAmount","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"receiver","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"TreasuryBalanceResponse","header":2303665634,"fields":[{"name":"queryId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"mintAmount","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"receiver","type":{"kind":"simple","type":"address","optional":false}},{"name":"treasuryBalance","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
-    {"name":"SetBotWalletAddress","header":1153750340,"fields":[{"name":"botWalletAddress","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"BotWithdraw","header":4213753329,"fields":[{"name":"amount","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"destination","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"SetVoraTokenAddress","header":4068122196,"fields":[{"name":"voraTokenAddress","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"Treasury$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"voraTokenAddress","type":{"kind":"simple","type":"address","optional":true}},{"name":"botWalletAddress","type":{"kind":"simple","type":"address","optional":true}}]},
+    {"name":"TokenTransfer","header":260734629,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"destination","type":{"kind":"simple","type":"address","optional":false}},{"name":"response_destination","type":{"kind":"simple","type":"address","optional":true}},{"name":"custom_payload","type":{"kind":"simple","type":"cell","optional":true}},{"name":"forward_ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"TokenTransferInternal","header":395134233,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"from","type":{"kind":"simple","type":"address","optional":false}},{"name":"response_destination","type":{"kind":"simple","type":"address","optional":true}},{"name":"forward_ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"TokenNotification","header":1935855772,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"from","type":{"kind":"simple","type":"address","optional":false}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"TokenBurn","header":1499400124,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"response_destination","type":{"kind":"simple","type":"address","optional":true}},{"name":"custom_payload","type":{"kind":"simple","type":"cell","optional":true}}]},
+    {"name":"TokenBurnNotification","header":2078119902,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"sender","type":{"kind":"simple","type":"address","optional":false}},{"name":"response_destination","type":{"kind":"simple","type":"address","optional":true}}]},
+    {"name":"TokenExcesses","header":3576854235,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
+    {"name":"TokenUpdateContent","header":2937889386,"fields":[{"name":"content","type":{"kind":"simple","type":"cell","optional":false}}]},
     {"name":"Mint","header":4235234258,"fields":[{"name":"amount","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"receiver","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"TokenNotification","header":4134986841,"fields":[{"name":"queryId","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"amount","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"from","type":{"kind":"simple","type":"address","optional":false}},{"name":"forwardPayload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
-    {"name":"VoraToken$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"treasuryAddress","type":{"kind":"simple","type":"address","optional":false}},{"name":"totalSupply","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"maxSupply","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}}]},
+    {"name":"JettonData","header":null,"fields":[{"name":"totalSupply","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"mintable","type":{"kind":"simple","type":"bool","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":true}},{"name":"walletCode","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"JettonWalletData","header":null,"fields":[{"name":"balance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"master","type":{"kind":"simple","type":"address","optional":false}},{"name":"walletCode","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"VoraToken$Data","header":null,"fields":[{"name":"totalSupply","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":true}},{"name":"mintable","type":{"kind":"simple","type":"bool","optional":false}}]},
+    {"name":"VoraJettonWallet$Data","header":null,"fields":[{"name":"balance","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"master","type":{"kind":"simple","type":"address","optional":false}}]},
 ]
 
 const VoraToken_opcodes = {
     "Deploy": 2490013878,
     "DeployOk": 2952335191,
     "FactoryDeploy": 1829761339,
-    "TreasuryBalanceRequest": 1127502537,
-    "TreasuryBalanceResponse": 2303665634,
-    "SetBotWalletAddress": 1153750340,
-    "BotWithdraw": 4213753329,
-    "SetVoraTokenAddress": 4068122196,
+    "TokenTransfer": 260734629,
+    "TokenTransferInternal": 395134233,
+    "TokenNotification": 1935855772,
+    "TokenBurn": 1499400124,
+    "TokenBurnNotification": 2078119902,
+    "TokenExcesses": 3576854235,
+    "TokenUpdateContent": 2937889386,
     "Mint": 4235234258,
-    "TokenNotification": 4134986841,
 }
 
 const VoraToken_getters: ABIGetter[] = [
-    {"name":"get_total_supply","methodId":122870,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
-    {"name":"get_max_supply","methodId":94740,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
+    {"name":"get_jetton_data","methodId":106029,"arguments":[],"returnType":{"kind":"simple","type":"JettonData","optional":false}},
+    {"name":"get_wallet_address","methodId":103289,"arguments":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"address","optional":false}},
 ]
 
 export const VoraToken_getterMapping: { [key: string]: string } = {
-    'get_total_supply': 'getGetTotalSupply',
-    'get_max_supply': 'getGetMaxSupply',
+    'get_jetton_data': 'getGetJettonData',
+    'get_wallet_address': 'getGetWalletAddress',
 }
 
 const VoraToken_receivers: ABIReceiver[] = [
     {"receiver":"internal","message":{"kind":"typed","type":"Mint"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"TreasuryBalanceResponse"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"TokenNotification"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"TokenUpdateContent"}},
+    {"receiver":"internal","message":{"kind":"text","text":"Stop Mint"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"TokenBurnNotification"}},
     {"receiver":"internal","message":{"kind":"typed","type":"Deploy"}},
 ]
 
@@ -1453,12 +1686,12 @@ export class VoraToken implements Contract {
     public static readonly errors = VoraToken_errors_backward;
     public static readonly opcodes = VoraToken_opcodes;
     
-    static async init(owner: Address, treasuryAddress: Address) {
-        return await VoraToken_init(owner, treasuryAddress);
+    static async init(owner: Address, content: Cell | null) {
+        return await VoraToken_init(owner, content);
     }
     
-    static async fromInit(owner: Address, treasuryAddress: Address) {
-        const __gen_init = await VoraToken_init(owner, treasuryAddress);
+    static async fromInit(owner: Address, content: Cell | null) {
+        const __gen_init = await VoraToken_init(owner, content);
         const address = contractAddress(0, __gen_init);
         return new VoraToken(address, __gen_init);
     }
@@ -1481,17 +1714,20 @@ export class VoraToken implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: Mint | TreasuryBalanceResponse | TokenNotification | Deploy) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: Mint | TokenUpdateContent | "Stop Mint" | TokenBurnNotification | Deploy) {
         
         let body: Cell | null = null;
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Mint') {
             body = beginCell().store(storeMint(message)).endCell();
         }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'TreasuryBalanceResponse') {
-            body = beginCell().store(storeTreasuryBalanceResponse(message)).endCell();
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'TokenUpdateContent') {
+            body = beginCell().store(storeTokenUpdateContent(message)).endCell();
         }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'TokenNotification') {
-            body = beginCell().store(storeTokenNotification(message)).endCell();
+        if (message === "Stop Mint") {
+            body = beginCell().storeUint(0, 32).storeStringTail(message).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'TokenBurnNotification') {
+            body = beginCell().store(storeTokenBurnNotification(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deploy') {
             body = beginCell().store(storeDeploy(message)).endCell();
@@ -1502,17 +1738,18 @@ export class VoraToken implements Contract {
         
     }
     
-    async getGetTotalSupply(provider: ContractProvider) {
+    async getGetJettonData(provider: ContractProvider) {
         const builder = new TupleBuilder();
-        const source = (await provider.get('get_total_supply', builder.build())).stack;
-        const result = source.readBigNumber();
+        const source = (await provider.get('get_jetton_data', builder.build())).stack;
+        const result = loadGetterTupleJettonData(source);
         return result;
     }
     
-    async getGetMaxSupply(provider: ContractProvider) {
+    async getGetWalletAddress(provider: ContractProvider, owner: Address) {
         const builder = new TupleBuilder();
-        const source = (await provider.get('get_max_supply', builder.build())).stack;
-        const result = source.readBigNumber();
+        builder.writeAddress(owner);
+        const source = (await provider.get('get_wallet_address', builder.build())).stack;
+        const result = source.readAddress();
         return result;
     }
     

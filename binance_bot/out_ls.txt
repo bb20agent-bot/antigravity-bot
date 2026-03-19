@@ -1,0 +1,38 @@
+URL: https://fapi.binance.com/futures/data/takerlongshortRatio?symbol=BTCUSDT&period=5m&limit=2
+[
+  {
+    "buySellRatio": "1.5307",
+    "sellVol": "141.0350",
+    "buyVol": "215.8830",
+    "timestamp": 1772715300000
+  },
+  {
+    "buySellRatio": "1.6035",
+    "sellVol": "292.4080",
+    "buyVol": "468.8800",
+    "timestamp": 1772715600000
+  }
+]
+URL: https://fapi.binance.com/futures/data/topLongShortPositionRatio?symbol=BTCUSDT&period=5m&limit=2
+[
+  {
+    "symbol": "BTCUSDT",
+    "longAccount": "0.5228",
+    "longShortRatio": "1.0957",
+    "shortAccount": "0.4772",
+    "timestamp": 1772715600000
+  },
+  {
+    "symbol": "BTCUSDT",
+    "longAccount": "0.5224",
+    "longShortRatio": "1.0939",
+    "shortAccount": "0.4776",
+    "timestamp": 1772715900000
+  }
+]
+URL: https://fapi.binance.com/fapi/v1/openInterest?symbol=BTCUSDT
+{
+  "symbol": "BTCUSDT",
+  "openInterest": "89859.724",
+  "time": 1772716088169
+}

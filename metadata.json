@@ -1,7 +1,5 @@
 {
-  "name": "VORA TradeFi",
-  "description": "A high-performance TradeFi dashboard for Telegram Mini Apps featuring live trading strategies, leverage controls, and social copy-trading.",
-  "requestFramePermissions": [
-    "camera"
-  ]
+  "name": "VORA Admin Dashboard",
+  "description": "A comprehensive management suite for BORA Platform users to handle subscription settlements, payouts, trade strategies, and NFT P2P brokerage with AI-powered insights.",
+  "requestFramePermissions": []
 }

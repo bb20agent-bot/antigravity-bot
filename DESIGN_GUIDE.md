@@ -84,7 +84,7 @@ The app uses a persistent bottom navigation bar with 4 core tabs:
 ### 5.1 Signal System
 *   **Source:** Python / External Algo (`test_signal.py`).
 *   **Transport:** HTTP POST (Webhook).
-*   **Destination:** n8n Workflow Automation -> Frontend Update.
+*   **Destination:** Webhook Server -> Frontend Update.
 *   **Data Payload Structure:**
     ```json
     {

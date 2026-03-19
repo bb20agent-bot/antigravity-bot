@@ -11,3 +11,8 @@ node_modules/
 dist/
 .DS_Store
 *.logDESIGN_GUIDE.md
+
+server/youtube_token.json
+binance_bot/client_secret.json
+server/client_secret.json
+.env
