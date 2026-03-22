@@ -61,7 +61,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { NavTab, UserAssets, StrategyInfo, DNFTCharacter, DownlineUser, LegalNotice, BoostTier } from '../types';
 import { translations, Language } from '../services/i18nService';
 import { VoraLogo } from '../components/VoraLogo';
-import VoraLivePage from '../pages/VoraLivePage';
+import VoraLivePage from '../src/pages/VoraLivePage';
 
 // --- Fandom Academy Data ---
 const ACADEMY_COURSES = [
@@ -746,11 +746,11 @@ const App: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
 
       {/* Navigation Bar */}
       <nav className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[90%] max-w-[360px] bg-black/40 backdrop-blur-3xl border border-white/10 rounded-full py-4.5 px-8 z-50 flex justify-between items-center shadow-2xl">
-        <NavItem icon={<LayoutDashboard size={22} />} active={activeTab === NavTab.HOME} onClick={() => setActiveTab(NavTab.HOME)} />
-        <NavItem icon={<Video size={22} />} active={activeTab === NavTab.LIVE} onClick={() => setActiveTab(NavTab.LIVE)} />
-        <NavItem icon={<Gamepad2 size={22} />} active={activeTab === NavTab.MY_OFFICE} onClick={() => setActiveTab(NavTab.MY_OFFICE)} />
-        <NavItem icon={<ShoppingBag size={22} />} active={activeTab === NavTab.MARKETPLACE} onClick={() => setActiveTab(NavTab.MARKETPLACE)} />
-        <NavItem icon={<Crown size={22} />} active={activeTab === NavTab.INFO} onClick={() => setActiveTab(NavTab.INFO)} />
+        <NavItem icon={<LayoutDashboard size={22} />} active={activeTab === NavTab.HOME} onClick={() => setActiveTab(NavTab.HOME)} ariaLabel="Home" />
+        <NavItem icon={<Video size={22} />} active={activeTab === NavTab.LIVE} onClick={() => setActiveTab(NavTab.LIVE)} ariaLabel="Live Coaching" />
+        <NavItem icon={<Gamepad2 size={22} />} active={activeTab === NavTab.MY_OFFICE} onClick={() => setActiveTab(NavTab.MY_OFFICE)} ariaLabel="My Office" />
+        <NavItem icon={<ShoppingBag size={22} />} active={activeTab === NavTab.MARKETPLACE} onClick={() => setActiveTab(NavTab.MARKETPLACE)} ariaLabel="Marketplace" />
+        <NavItem icon={<Crown size={22} />} active={activeTab === NavTab.INFO} onClick={() => setActiveTab(NavTab.INFO)} ariaLabel="Fandom Info" />
       </nav>
 
       <style>{`
@@ -762,8 +762,8 @@ const App: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
   );
 };
 
-const NavItem = ({ icon, active, onClick, className }: { icon: React.ReactNode, active: boolean, onClick: () => void, className?: string }) => (
-  <button onClick={onClick} className={`p-2 transition-all relative ${className} ${active ? 'scale-125' : 'text-gray-600'}`}>
+const NavItem = ({ icon, active, onClick, className, ariaLabel }: { icon: React.ReactNode, active: boolean, onClick: () => void, className?: string, ariaLabel?: string }) => (
+  <button onClick={onClick} aria-label={ariaLabel} className={`p-2 transition-all relative outline-none rounded-xl focus-visible:ring-2 focus-visible:ring-[#0088cc]/50 ${className} ${active ? 'scale-125' : 'text-gray-600'}`}>
     <span className={active ? 'text-[#0088cc]' : ''}>{icon}</span>
     {active && <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#0088cc] shadow-[0_0_15px_#0088cc]"></span>}
   </button>
