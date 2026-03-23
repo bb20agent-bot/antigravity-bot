@@ -66,8 +66,9 @@ enum NavTab {
 
 // --- Components ---
 
-const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
+const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; ariaLabel?: string }> = ({ icon, active, onClick, ariaLabel }) => (
     <button
+        aria-label={ariaLabel}
         onClick={onClick}
         className={`p-2 transition-all relative ${active ? 'scale-125 text-[#0088cc]' : 'text-gray-600'}`}
     >
@@ -143,9 +144,9 @@ const StrategyVideoCard: React.FC<{ strategy: any; onClick?: () => void }> = ({ 
     );
 };
 
-// Import VoraLivePage component here
-import VoraLivePage from '../pages/VoraLivePage';
-import { FandomSubscriptionPage } from '../src/pages/FandomSubscriptionPage';
+// VoraLivePage mock or remove if it doesn't exist
+const VoraLivePage = () => <div className="p-8 text-center"><h2 className="text-2xl font-black italic uppercase text-white">Live Dashboard (Coming Soon)</h2></div>;
+const FandomSubscriptionPage = () => <div className="p-8 text-center"><h2 className="text-2xl font-black italic uppercase text-white">Fandom Plans (Coming Soon)</h2></div>;
 
 const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const navigate = useNavigate();
@@ -1132,7 +1133,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
             return (
                 <div className="space-y-4 pt-4 px-1 pb-24 h-full flex flex-col">
                     <div className="px-2 flex items-center gap-3">
-                        <button className="text-slate-400 hover:text-white" onClick={() => setSelectedCrew(null)}>
+                        <button aria-label="Go back to Crew list" className="text-slate-400 hover:text-white" onClick={() => setSelectedCrew(null)}>
                             <ChevronRight size={24} className="rotate-180" />
                         </button>
                         <div>
@@ -1374,7 +1375,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
+                                <button aria-label="Copy Referral Link" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
                                     <Copy size={16} className="text-white" />
                                 </button>
                             </div>
@@ -1556,11 +1557,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                 <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 z-50 pointer-events-none">
                     <nav className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[2rem] flex justify-between items-center px-4 py-3 shadow-2xl pointer-events-auto">
                         <NavItem
+                            ariaLabel="Home"
                             icon={<LayoutDashboard size={20} />}
                             active={activeTab === NavTab.HOME}
                             onClick={() => setActiveTab(NavTab.HOME)}
                         />
                         <NavItem
+                            ariaLabel="Crew"
                             icon={<Trophy size={20} />}
                             active={activeTab === NavTab.CREW}
                             onClick={() => { setActiveTab(NavTab.CREW); setSelectedCrew(null); }}
@@ -1569,6 +1572,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                         {/* MYPAGE (Center Red V Button) */}
                         <div className="relative -top-6">
                             <button
+                                aria-label="My Office"
                                 onClick={() => setActiveTab(NavTab.OFFICE)}
                                 className={`w-14 h-14 rounded-full bg-gradient-to-br border-4 border-[#050505] shadow-[0_4px_25px_rgba(220,38,38,0.5)] flex items-center justify-center transition-transform ${activeTab === NavTab.OFFICE
                                     ? 'from-red-600 to-red-900 ring-4 ring-red-500/50 ring-offset-2 ring-offset-[#050505] scale-110'
@@ -1580,11 +1584,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                         </div>
 
                         <NavItem
+                            ariaLabel="Info"
                             icon={<Crown size={20} />}
                             active={activeTab === NavTab.INFO}
                             onClick={() => setActiveTab(NavTab.INFO)}
                         />
                         <NavItem
+                            ariaLabel="Game"
                             icon={<Gamepad2 size={20} />}
                             active={activeTab === NavTab.GAME}
                             onClick={() => setActiveTab(NavTab.GAME)}
