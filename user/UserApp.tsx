@@ -66,12 +66,13 @@ enum NavTab {
 
 // --- Components ---
 
-const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
+const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; ariaLabel: string }> = ({ icon, active, onClick, ariaLabel }) => (
     <button
         onClick={onClick}
+        aria-label={ariaLabel}
         className={`p-2 transition-all relative ${active ? 'scale-125 text-[#0088cc]' : 'text-gray-600'}`}
     >
-        <span className={active ? 'text-[#0088cc]' : ''}>{icon}</span>
+        <span aria-hidden="true" className={active ? 'text-[#0088cc]' : ''}>{icon}</span>
         {active && (
             <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#0088cc] shadow-[0_0_15px_#0088cc]"></span>
         )}
@@ -1556,11 +1557,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                 <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-[430px] px-4 z-50 pointer-events-none">
                     <nav className="bg-black/60 backdrop-blur-3xl border border-white/10 rounded-[2rem] flex justify-between items-center px-4 py-3 shadow-2xl pointer-events-auto">
                         <NavItem
+                            ariaLabel="Home"
                             icon={<LayoutDashboard size={20} />}
                             active={activeTab === NavTab.HOME}
                             onClick={() => setActiveTab(NavTab.HOME)}
                         />
                         <NavItem
+                            ariaLabel="Crew"
                             icon={<Trophy size={20} />}
                             active={activeTab === NavTab.CREW}
                             onClick={() => { setActiveTab(NavTab.CREW); setSelectedCrew(null); }}
@@ -1569,22 +1572,25 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                         {/* MYPAGE (Center Red V Button) */}
                         <div className="relative -top-6">
                             <button
+                                aria-label="My Office"
                                 onClick={() => setActiveTab(NavTab.OFFICE)}
                                 className={`w-14 h-14 rounded-full bg-gradient-to-br border-4 border-[#050505] shadow-[0_4px_25px_rgba(220,38,38,0.5)] flex items-center justify-center transition-transform ${activeTab === NavTab.OFFICE
                                     ? 'from-red-600 to-red-900 ring-4 ring-red-500/50 ring-offset-2 ring-offset-[#050505] scale-110'
                                     : 'from-slate-800 to-black hover:from-red-800 hover:to-red-900'
                                     }`}
                             >
-                                <span className={`text-2xl font-black italic tracking-tighter ${activeTab === NavTab.OFFICE ? 'text-white drop-shadow-[0_0_10px_white]' : 'text-slate-500'}`}>V</span>
+                                <span aria-hidden="true" className={`text-2xl font-black italic tracking-tighter ${activeTab === NavTab.OFFICE ? 'text-white drop-shadow-[0_0_10px_white]' : 'text-slate-500'}`}>V</span>
                             </button>
                         </div>
 
                         <NavItem
+                            ariaLabel="Info"
                             icon={<Crown size={20} />}
                             active={activeTab === NavTab.INFO}
                             onClick={() => setActiveTab(NavTab.INFO)}
                         />
                         <NavItem
+                            ariaLabel="Game"
                             icon={<Gamepad2 size={20} />}
                             active={activeTab === NavTab.GAME}
                             onClick={() => setActiveTab(NavTab.GAME)}
