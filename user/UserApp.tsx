@@ -66,10 +66,11 @@ enum NavTab {
 
 // --- Components ---
 
-const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
+const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; 'aria-label'?: string }> = ({ icon, active, onClick, 'aria-label': ariaLabel }) => (
     <button
         onClick={onClick}
         className={`p-2 transition-all relative ${active ? 'scale-125 text-[#0088cc]' : 'text-gray-600'}`}
+        aria-label={ariaLabel}
     >
         <span className={active ? 'text-[#0088cc]' : ''}>{icon}</span>
         {active && (
@@ -1559,11 +1560,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<LayoutDashboard size={20} />}
                             active={activeTab === NavTab.HOME}
                             onClick={() => setActiveTab(NavTab.HOME)}
+                            aria-label="Dashboard"
                         />
                         <NavItem
                             icon={<Trophy size={20} />}
                             active={activeTab === NavTab.CREW}
                             onClick={() => { setActiveTab(NavTab.CREW); setSelectedCrew(null); }}
+                            aria-label="Crew"
                         />
 
                         {/* MYPAGE (Center Red V Button) */}
@@ -1574,6 +1577,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     ? 'from-red-600 to-red-900 ring-4 ring-red-500/50 ring-offset-2 ring-offset-[#050505] scale-110'
                                     : 'from-slate-800 to-black hover:from-red-800 hover:to-red-900'
                                     }`}
+                                aria-label="My Page"
                             >
                                 <span className={`text-2xl font-black italic tracking-tighter ${activeTab === NavTab.OFFICE ? 'text-white drop-shadow-[0_0_10px_white]' : 'text-slate-500'}`}>V</span>
                             </button>
@@ -1583,11 +1587,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<Crown size={20} />}
                             active={activeTab === NavTab.INFO}
                             onClick={() => setActiveTab(NavTab.INFO)}
+                            aria-label="Info"
                         />
                         <NavItem
                             icon={<Gamepad2 size={20} />}
                             active={activeTab === NavTab.GAME}
                             onClick={() => setActiveTab(NavTab.GAME)}
+                            aria-label="Game"
                         />
                     </nav>
                 </div>
