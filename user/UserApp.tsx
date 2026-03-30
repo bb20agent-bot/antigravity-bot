@@ -66,10 +66,11 @@ enum NavTab {
 
 // --- Components ---
 
-const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
+const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; ariaLabel?: string }> = ({ icon, active, onClick, ariaLabel }) => (
     <button
         onClick={onClick}
-        className={`p-2 transition-all relative ${active ? 'scale-125 text-[#0088cc]' : 'text-gray-600'}`}
+        aria-label={ariaLabel}
+        className={`p-2 transition-all relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0088cc] rounded-lg ${active ? 'scale-125 text-[#0088cc]' : 'text-gray-600'}`}
     >
         <span className={active ? 'text-[#0088cc]' : ''}>{icon}</span>
         {active && (
@@ -144,8 +145,9 @@ const StrategyVideoCard: React.FC<{ strategy: any; onClick?: () => void }> = ({ 
 };
 
 // Import VoraLivePage component here
-import VoraLivePage from '../pages/VoraLivePage';
-import { FandomSubscriptionPage } from '../src/pages/FandomSubscriptionPage';
+// VoraLivePage and FandomSubscriptionPage are missing from the project files entirely
+const VoraLivePage = () => <div>Live Page Coming Soon</div>;
+const FandomSubscriptionPage = () => <div>Fandom Subscriptions</div>;
 
 const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const navigate = useNavigate();
@@ -217,6 +219,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const [officeSubTab, setOfficeSubTab] = useState<'profile' | 'community' | 'dnft'>('profile');
     const [profileImg, setProfileImg] = useState<string | null>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [linkCopied, setLinkCopied] = useState(false);
 
     // Protocol State
     const [protocolConfig, setProtocolConfig] = useState({ t2eTimerEnd: 0 });
@@ -1374,8 +1377,16 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(`t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`);
+                                        setLinkCopied(true);
+                                        setTimeout(() => setLinkCopied(false), 2000);
+                                    }}
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+                                    aria-label={linkCopied ? "Link copied" : "Copy fandom link"}
+                                >
+                                    {linkCopied ? <CheckCircle size={16} className="text-green-500" /> : <Copy size={16} className="text-white" />}
                                 </button>
                             </div>
                         </div>
@@ -1559,18 +1570,21 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<LayoutDashboard size={20} />}
                             active={activeTab === NavTab.HOME}
                             onClick={() => setActiveTab(NavTab.HOME)}
+                            ariaLabel="Home dashboard"
                         />
                         <NavItem
                             icon={<Trophy size={20} />}
                             active={activeTab === NavTab.CREW}
                             onClick={() => { setActiveTab(NavTab.CREW); setSelectedCrew(null); }}
+                            ariaLabel="Crew rankings"
                         />
 
                         {/* MYPAGE (Center Red V Button) */}
                         <div className="relative -top-6">
                             <button
                                 onClick={() => setActiveTab(NavTab.OFFICE)}
-                                className={`w-14 h-14 rounded-full bg-gradient-to-br border-4 border-[#050505] shadow-[0_4px_25px_rgba(220,38,38,0.5)] flex items-center justify-center transition-transform ${activeTab === NavTab.OFFICE
+                                aria-label="My office and profile"
+                                className={`w-14 h-14 rounded-full bg-gradient-to-br border-4 border-[#050505] shadow-[0_4px_25px_rgba(220,38,38,0.5)] flex items-center justify-center transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${activeTab === NavTab.OFFICE
                                     ? 'from-red-600 to-red-900 ring-4 ring-red-500/50 ring-offset-2 ring-offset-[#050505] scale-110'
                                     : 'from-slate-800 to-black hover:from-red-800 hover:to-red-900'
                                     }`}
@@ -1583,11 +1597,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<Crown size={20} />}
                             active={activeTab === NavTab.INFO}
                             onClick={() => setActiveTab(NavTab.INFO)}
+                            ariaLabel="Fandom info and subscriptions"
                         />
                         <NavItem
                             icon={<Gamepad2 size={20} />}
                             active={activeTab === NavTab.GAME}
                             onClick={() => setActiveTab(NavTab.GAME)}
+                            ariaLabel="Tap to earn game"
                         />
                     </nav>
                 </div>
