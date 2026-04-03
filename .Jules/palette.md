@@ -1,0 +1,3 @@
+## 2024-05-18 - Accessible Icon-Only Navigation
+**Learning:** Found a recurring pattern in the React codebase where icon-only `NavItem` and other UI action buttons lack `aria-label` attributes, rendering them opaque to screen readers.
+**Action:** Implemented an optional `aria-label` prop in shared `NavItem` definitions and updated key icon-only buttons across `App.tsx` and `UserApp.tsx` to include descriptive labels. I will continue checking for missing `aria-label` on buttons.
