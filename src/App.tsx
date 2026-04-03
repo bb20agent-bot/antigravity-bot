@@ -85,7 +85,7 @@ const FandomSubscriptionPage = () => {
     return (
       <div className="px-5 py-4 space-y-6 pb-24 animate-in fade-in duration-500">
         <div className="flex items-center gap-3 mb-4">
-          <button onClick={() => setShowAcademy(false)} className="bg-white/10 p-2 rounded-xl text-white hover:bg-white/20"><AlertTriangle className="rotate-90 hidden" /><ArrowUpRight className="rotate-[225deg]" size={20}/></button>
+          <button aria-label="Close Academy" onClick={() => setShowAcademy(false)} className="bg-white/10 p-2 rounded-xl text-white hover:bg-white/20"><AlertTriangle className="rotate-90 hidden" /><ArrowUpRight className="rotate-[225deg]" size={20}/></button>
           <h2 className="text-xl font-black italic uppercase">VORA Academy</h2>
         </div>
         <div className="bg-gradient-to-br from-indigo-900/40 to-purple-900/20 border border-white/10 rounded-3xl p-6 relative overflow-hidden">
@@ -224,7 +224,7 @@ const OrgNode: React.FC<{ user: DownlineUser; level: number }> = ({ user, level 
           <p className="text-[10px] font-black uppercase tracking-tight">{user.name}</p>
           <p className="text-[8px] font-bold text-gray-500">{user.rank} • {user.volume} TON</p>
         </div>
-        {hasChildren && <button onClick={() => setIsExpanded(!isExpanded)} className="p-1 text-gray-500">{isExpanded ? <ChevronDown size={14} /> : <ArrowRight size={14} />}</button>}
+        {hasChildren && <button aria-label={isExpanded ? "Collapse" : "Expand"} onClick={() => setIsExpanded(!isExpanded)} className="p-1 text-gray-500">{isExpanded ? <ChevronDown size={14} /> : <ArrowRight size={14} />}</button>}
       </div>
       {isExpanded && hasChildren && (
         <div className="ml-4 mt-2 pl-4 border-l border-white/10 space-y-2">
@@ -762,8 +762,8 @@ const App: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
   );
 };
 
-const NavItem = ({ icon, active, onClick, className }: { icon: React.ReactNode, active: boolean, onClick: () => void, className?: string }) => (
-  <button onClick={onClick} className={`p-2 transition-all relative ${className} ${active ? 'scale-125' : 'text-gray-600'}`}>
+const NavItem = ({ icon, active, onClick, className, "aria-label": ariaLabel }: { icon: React.ReactNode, active: boolean, onClick: () => void, className?: string, "aria-label"?: string }) => (
+  <button aria-label={ariaLabel} onClick={onClick} className={`p-2 transition-all relative ${className} ${active ? 'scale-125' : 'text-gray-600'}`}>
     <span className={active ? 'text-[#0088cc]' : ''}>{icon}</span>
     {active && <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[#0088cc] shadow-[0_0_15px_#0088cc]"></span>}
   </button>
