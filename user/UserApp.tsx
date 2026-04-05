@@ -215,6 +215,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     // State
     const [activeTab, setActiveTab] = useState<NavTab>(NavTab.HOME);
     const [officeSubTab, setOfficeSubTab] = useState<'profile' | 'community' | 'dnft'>('profile');
+    const [isLinkCopied, setIsLinkCopied] = useState(false);
     const [profileImg, setProfileImg] = useState<string | null>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -1374,8 +1375,17 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500 outline-none"
+                                    aria-label={isLinkCopied ? "Link copied" : "Copy referral link"}
+                                    onClick={() => {
+                                        const link = `t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
+                                        navigator.clipboard.writeText(link);
+                                        setIsLinkCopied(true);
+                                        setTimeout(() => setIsLinkCopied(false), 2000);
+                                    }}
+                                >
+                                    {isLinkCopied ? <CheckCircle size={16} className="text-green-400" /> : <Copy size={16} className="text-white" />}
                                 </button>
                             </div>
                         </div>

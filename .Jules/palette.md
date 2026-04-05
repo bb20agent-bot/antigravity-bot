@@ -1,0 +1,3 @@
+## 2025-02-23 - Inline Clipboard Feedback in TMAs
+**Learning:** Telegram Mini Apps lack consistent OS-level toasts or haptic feedback for clipboard actions (like `navigator.clipboard.writeText`), resulting in a poor UX for actions like copying referral links.
+**Action:** Always implement explicit, inline visual feedback for copy actions (e.g., swapping a 'Copy' icon with a 'Check' icon for 2 seconds) and dynamically update the `aria-label` to provide accessible confirmation.
