@@ -245,6 +245,18 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const [clicks, setClicks] = useState<{ id: number; x: number; y: number; value: number }[]>([]);
     const [isAttacking, setIsAttacking] = useState(false);
     const [combo, setCombo] = useState(0);
+    const [isLinkCopied, setIsLinkCopied] = useState(false);
+
+    const handleCopyLink = async () => {
+        const link = `t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
+        try {
+            await navigator.clipboard.writeText(link);
+            setIsLinkCopied(true);
+            setTimeout(() => setIsLinkCopied(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
+    };
 
     // Community State
     const [communitySubTab, setCommunitySubTab] = useState<'docs' | 'dao' | 'media'>('docs');
@@ -1374,8 +1386,12 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors"
+                                    onClick={handleCopyLink}
+                                    aria-label={isLinkCopied ? "Copied to clipboard" : "Copy referral link"}
+                                >
+                                    {isLinkCopied ? <CheckCircle size={16} className="text-green-500" /> : <Copy size={16} className="text-white" />}
                                 </button>
                             </div>
                         </div>
