@@ -19,6 +19,34 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ==========================================
+// 🛡️ SECURITY: Admin & Internal Authentication
+// ==========================================
+const ADMIN_TOKEN = process.env.VORA_INTERNAL_API_TOKEN;
+
+// Validation: Ensure the security token is set to prevent insecure operation
+if (!ADMIN_TOKEN) {
+    console.warn("⚠️ WARNING: VORA_INTERNAL_API_TOKEN is not defined in environment variables.");
+}
+
+const adminAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (!ADMIN_TOKEN) {
+        return res.status(500).json({
+            error: "Security configuration error: VORA_INTERNAL_API_TOKEN is missing. Please contact system administrator."
+        });
+    }
+
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader !== `Bearer ${ADMIN_TOKEN}`) {
+        console.warn(`[Security] Unauthorized access attempt to ${req.path} from ${req.ip}`);
+        return res.status(401).json({ error: "Unauthorized: Invalid or missing administrative token." });
+    }
+    next();
+};
+
+// Protect all admin and internal routes
+app.use(['/api/admin/*', '/api/internal/*'], adminAuth);
+
 // Default route for admin/browser access
 app.get('/', (req, res) => {
     res.send(`
