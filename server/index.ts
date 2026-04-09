@@ -9,7 +9,7 @@ import dotenv from 'dotenv';
 import puppeteer from 'puppeteer';
 import { PuppeteerScreenRecorder } from 'puppeteer-screen-recorder';
 import FormData from 'form-data';
-import fetch from 'node-fetch'; // Polyfill if native doesn't support headers well
+// import fetch from 'node-fetch'; // Polyfill if native doesn't support headers well
 import TelegramBot from 'node-telegram-bot-api';
 import nodemailer from 'nodemailer'; // For Email Funnel Automations
 
@@ -91,6 +91,19 @@ async function initializeDB() {
 }
 
 initializeDB().catch(console.error);
+
+// Admin Authentication Middleware
+const adminAuth = (req: any, res: any, next: any) => {
+    const adminToken = process.env.VORA_INTERNAL_API_TOKEN;
+    if (!adminToken) {
+        return res.status(500).json({ status: "error", message: "Internal API configuration missing" });
+    }
+    const authHeader = req.headers.authorization;
+    if (!authHeader || authHeader !== `Bearer ${adminToken}`) {
+        return res.status(401).json({ status: "error", message: "Unauthorized access" });
+    }
+    next();
+};
 
 let globalConfig = {
     t2eTimerEnd: 0,
@@ -207,7 +220,7 @@ app.get('/api/config', (req, res) => {
     res.json(globalConfig);
 });
 
-app.post('/api/admin/t2e_timer', (req, res) => {
+app.post('/api/admin/t2e_timer', adminAuth, (req, res) => {
     const { action } = req.body;
     if (action === 'start_10m') globalConfig.t2eTimerEnd = Date.now() + 10 * 60 * 1000;
     else if (action === 'start_30m') globalConfig.t2eTimerEnd = Date.now() + 30 * 60 * 1000;
@@ -312,7 +325,7 @@ const mockShortsDB: any[] = [
 const mockChatDB: Record<number, any[]> = { 1: [], 2: [] }; // videoId -> [messages]
 
 // Admin: Upload new Strategy Short
-app.post('/api/admin/upload-shorts', async (req, res) => {
+app.post('/api/admin/upload-shorts', adminAuth, async (req, res) => {
     try {
         const { strategy, title, videoUrl } = req.body;
         if (!strategy || !title || !videoUrl) return res.status(400).json({ error: "Missing parameters" });
@@ -917,7 +930,7 @@ app.get('/api/user/:telegramId', async (req, res) => {
     }
 });
 
-app.get('/api/admin/users', async (req, res) => {
+app.get('/api/admin/users', adminAuth, async (req, res) => {
     try {
         const users = await db.all(`SELECT * FROM User ORDER BY id DESC LIMIT 50`);
         res.json({ success: true, users });
@@ -926,7 +939,7 @@ app.get('/api/admin/users', async (req, res) => {
     }
 });
 
-app.get('/api/admin/settlements', async (req, res) => {
+app.get('/api/admin/settlements', adminAuth, async (req, res) => {
     try {
         const users = await db.all(`SELECT telegramId, tonWalletAddress, totalTonStaked, isFandomUser FROM User WHERE totalTonStaked > 0 OR isFandomUser = 1`);
 
@@ -1448,7 +1461,7 @@ if (joyTelegramToken) {
 // ==========================================
 // 🛡️ VORA Admin Control Endpoints
 // ==========================================
-app.get('/api/admin/overview', async (req, res) => {
+app.get('/api/admin/overview', adminAuth, async (req, res) => {
     try {
         const globalState = await db.get(`SELECT * FROM SystemState WHERE id = 'global'`);
         const totalUsers = await db.get(`SELECT COUNT(*) as count FROM User`);
@@ -1469,7 +1482,7 @@ app.get('/api/admin/overview', async (req, res) => {
     }
 });
 
-app.get('/api/admin/users/fandom', async (req, res) => {
+app.get('/api/admin/users/fandom', adminAuth, async (req, res) => {
     try {
         const users = await db.all(`SELECT id, telegramId, nVolume, dnftLevel, isCrew, createdAt FROM User ORDER BY nVolume DESC, createdAt DESC`);
         res.json({ status: "success", data: users });
@@ -1478,7 +1491,7 @@ app.get('/api/admin/users/fandom', async (req, res) => {
     }
 });
 
-app.post('/api/admin/action/upgrade-dnft', async (req, res) => {
+app.post('/api/admin/action/upgrade-dnft', adminAuth, async (req, res) => {
     try {
         const { userId, level } = req.body;
         if (!userId || !level) throw new Error("Missing parameters");
@@ -1489,7 +1502,7 @@ app.post('/api/admin/action/upgrade-dnft', async (req, res) => {
     }
 });
 
-app.post('/api/admin/action/airdrop-crew', async (req, res) => {
+app.post('/api/admin/action/airdrop-crew', adminAuth, async (req, res) => {
     try {
         const { userId, amount } = req.body;
         if (!userId || !amount) throw new Error("Missing parameters");
@@ -1501,7 +1514,7 @@ app.post('/api/admin/action/airdrop-crew', async (req, res) => {
     }
 });
 
-app.post('/api/admin/action/bot-deploy', async (req, res) => {
+app.post('/api/admin/action/bot-deploy', adminAuth, async (req, res) => {
     try {
         const { botType, action } = req.body;
         if (!botType || !action) throw new Error("Missing parameters");
@@ -1516,7 +1529,7 @@ app.post('/api/admin/action/bot-deploy', async (req, res) => {
 // ==========================================
 // 🚀 FANDOM VIP TRADER (API/WEBHOOK) MANAGEMENT
 // ==========================================
-app.get('/api/admin/traders', async (req, res) => {
+app.get('/api/admin/traders', adminAuth, async (req, res) => {
     try {
         // Fetch only VIP Traders (Multiplier >= 2.0 or Crew)
         const traders = await db.all(`
@@ -1531,7 +1544,7 @@ app.get('/api/admin/traders', async (req, res) => {
     }
 });
 
-app.post('/api/admin/traders/update-keys', async (req, res) => {
+app.post('/api/admin/traders/update-keys', adminAuth, async (req, res) => {
     try {
         const { userId, apiKey, secretKey, webhookUrl } = req.body;
         if (!userId) throw new Error("Missing userId parameter");
