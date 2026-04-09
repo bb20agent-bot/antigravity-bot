@@ -11,7 +11,7 @@ dependencies = [
 print("Starting installation...")
 try:
     result = subprocess.run(
-        [r"C:\antigravity-bot\.venv\Scripts\pip.exe", "install"] + dependencies,
+        [sys.executable, "-m", "pip", "install"] + dependencies,
         capture_output=True,
         text=True,
         check=True
