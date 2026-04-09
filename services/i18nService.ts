@@ -343,6 +343,6 @@ export const translations: Record<Language, any> = {
 
 export const detectLanguage = (): Language => {
     const tgLang = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.language_code;
-    if (tgLang && ['ko', 'en', 'zh', 'ja', 'vi'].includes(tgLang)) return tgLang as Language;
+    if (tgLang && ['ko', 'en', 'zh', 'ja', 'vi', 'km'].includes(tgLang)) return tgLang as Language;
     return 'ko';
 };
