@@ -149,6 +149,9 @@ def calculate_position_size(asset_type, symbol, risk_pct, sl_distance, current_p
     seed = app_state["seed_balance"]
     risk_amount = seed * (risk_pct / 100.0)
     
+    if sl_distance <= 0:
+        return 0.001 if asset_type == "BINANCE" else 0.01
+
     if asset_type == "BINANCE":
         size = risk_amount / sl_distance
         return max(round(size, 3), 0.001)
