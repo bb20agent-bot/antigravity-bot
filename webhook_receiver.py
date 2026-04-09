@@ -1,8 +1,10 @@
 import os
 import threading
+import asyncio
 import time
 import requests
 import ccxt
+import ccxt.async_support as ccxt_async
 try:
     import MetaTrader5 as mt5
     MT5_AVAILABLE = True
@@ -17,6 +19,12 @@ from dotenv import load_dotenv
 # 1. 환경 변수 및 설정 로드 (.env 파일에서 API 키 불러오기)
 load_dotenv()
 app = FastAPI(title="Vora Fandom Trading Bridge")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    global binance_async
+    if binance_async:
+        await binance_async.close()
 
 # CORS 설정 (프론트엔드 통신 허용)
 app.add_middleware(
@@ -44,7 +52,15 @@ def get_binance_client():
         'enableRateLimit': True,
     })
 
+def get_binance_async_client():
+    return ccxt_async.binanceusdm({
+        'apiKey': os.getenv('BINANCE_API_KEY'),
+        'secret': os.getenv('BINANCE_SECRET'),
+        'enableRateLimit': True,
+    })
+
 binance = get_binance_client()
+binance_async = get_binance_async_client()
 
 def init_mt5():
     if not MT5_AVAILABLE:
@@ -116,10 +132,17 @@ class ManualTrade(BaseModel):
 @app.post("/api/keys")
 async def save_api_keys(keys: ApiKeys):
     # 실제 구현 시 .env 업데이트 또는 Secure Storage 연동
-    global binance
+    global binance, binance_async
     os.environ['BINANCE_API_KEY'] = keys.binance_api
     os.environ['BINANCE_SECRET'] = keys.binance_secret
+
     binance = get_binance_client()
+
+    # Close old async client and re-initialize
+    if binance_async:
+        await binance_async.close()
+    binance_async = get_binance_async_client()
+
     return {"status": "success", "message": "API 키가 업데이트 되었습니다."}
 
 @app.post("/api/settings/toggle")
@@ -190,10 +213,10 @@ threading.Thread(target=monitor_manual_positions, daemon=True).start()
 async def execute_trade(data: TradingViewWebhook, is_manual=False):
     # 시세 확인 및 수량 계산
     if data.asset_type == "BINANCE":
-        ticker = binance.fetch_ticker(data.symbol)
+        ticker = await binance_async.fetch_ticker(data.symbol)
         current_price = ticker['last']
     else:
-        tick = mt5.symbol_info_tick(data.symbol)
+        tick = await asyncio.to_thread(mt5.symbol_info_tick, data.symbol)
         current_price = tick.ask if data.direction == 'LONG' else tick.bid
 
     order_size = calculate_position_size(data.asset_type, data.symbol, app_state["risk_pct"], data.sl_distance, current_price)
@@ -201,16 +224,16 @@ async def execute_trade(data: TradingViewWebhook, is_manual=False):
     # ─── 모드 A (Safety Belt) ───
     if app_state["mode"] == "Safety Belt" and not is_manual:
         msg = f"🔔 [웹훅 신호 방어] {data.symbol} {data.direction} 신호 수신. Safety Belt 모드 (1Lot = 알림만)"
-        send_telegram_msg(msg)
+        await asyncio.to_thread(send_telegram_msg, msg)
         return {"status": "ignored", "reason": "Safety Belt mode active", "msg": msg}
 
     # ─── 모드 B (Autopilot) 또는 수동 진입 ───
     if data.asset_type == "BINANCE":
-        binance.set_leverage(data.leverage, data.symbol)
+        await binance_async.set_leverage(data.leverage, data.symbol)
         
         side = 'buy' if data.direction == 'LONG' else 'sell'
         # 1) 진입
-        order = binance.create_market_order(data.symbol, side, order_size)
+        order = await binance_async.create_market_order(data.symbol, side, order_size)
         
         # 2) CCXT 자동 손절(SL), 익절(TP) 로직 작성
         sl_side = 'sell' if side == 'buy' else 'buy'
@@ -220,10 +243,10 @@ async def execute_trade(data: TradingViewWebhook, is_manual=False):
         sl_params = {'stopPrice': sl_price, 'reduceOnly': True}
         tp_params = {'stopPrice': tp_price, 'reduceOnly': True}
         
-        sl_order = binance.create_order(data.symbol, 'stopMarket', sl_side, order_size, None, sl_params)
-        tp_order = binance.create_order(data.symbol, 'takeProfitMarket', sl_side, order_size, None, tp_params)
+        sl_order = await binance_async.create_order(data.symbol, 'stopMarket', sl_side, order_size, None, sl_params)
+        tp_order = await binance_async.create_order(data.symbol, 'takeProfitMarket', sl_side, order_size, None, tp_params)
 
-        send_telegram_msg(f"🤖 Autopilot Binance 진입 완료\n코인: {data.symbol}\n방향: {side}\n수량: {order_size}\nSL: {sl_price}\nTP: {tp_price}")
+        await asyncio.to_thread(send_telegram_msg, f"🤖 Autopilot Binance 진입 완료\n코인: {data.symbol}\n방향: {side}\n수량: {order_size}\nSL: {sl_price}\nTP: {tp_price}")
         return {
             "status": "success", 
             "exchange": "BINANCE", 
@@ -252,11 +275,11 @@ async def execute_trade(data: TradingViewWebhook, is_manual=False):
             "type_filling": mt5.ORDER_FILLING_IOC,
         }
         
-        result = mt5.order_send(request)
+        result = await asyncio.to_thread(mt5.order_send, request)
         if result.retcode != mt5.TRADE_RETCODE_DONE:
             raise HTTPException(status_code=500, detail=f"MT5 Order Failed: {result.comment}")
             
-        send_telegram_msg(f"🤖 Autopilot MT5 진입 완료: {data.symbol} {data.direction} {order_size}\nSL: {sl_price}\nTP: {tp_price}")
+        await asyncio.to_thread(send_telegram_msg, f"🤖 Autopilot MT5 진입 완료: {data.symbol} {data.direction} {order_size}\nSL: {sl_price}\nTP: {tp_price}")
         return {"status": "success", "exchange": "MT5", "ticket": result.order}
 
 # 웹훅 수신 라우터
