@@ -1,13 +1,19 @@
+import os
 import asyncio
 import logging
+from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters.command import Command
 from aiogram.enums import ParseMode
 
 from handlers.trading import router as trading_router
 
-# Replace with secure token loading (e.g., dotenv)
-BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
+# Load environment variables
+load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+if not BOT_TOKEN:
+    raise RuntimeError("BOT_TOKEN environment variable is not set")
 
 logging.basicConfig(level=logging.INFO)
 
