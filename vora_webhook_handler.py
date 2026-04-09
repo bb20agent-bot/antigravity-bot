@@ -24,7 +24,14 @@ def get_exchange():
 
 # --- INDICATORS ---
 def calculate_smma(series, period):
+    if period <= 0:
+        return series
     return series.ewm(alpha=1/period, adjust=False).mean()
+
+def calculate_ema(series, period):
+    if period <= 0:
+        return series
+    return series.ewm(span=period, adjust=False).mean()
 
 def calculate_williams_fractal(df, period=2):
     up_fractal = pd.Series(0, index=df.index)
