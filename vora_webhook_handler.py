@@ -26,6 +26,9 @@ def get_exchange():
 def calculate_smma(series, period):
     return series.ewm(alpha=1/period, adjust=False).mean()
 
+def calculate_ema(series, period):
+    return series.ewm(span=period, adjust=False).mean()
+
 def calculate_williams_fractal(df, period=2):
     up_fractal = pd.Series(0, index=df.index)
     down_fractal = pd.Series(0, index=df.index)
@@ -201,7 +204,7 @@ def check_exit_condition(exchange, symbol='BTCUSDT'):
         if trend_broken:
             # Execute Market Close (Vora checks close only on bar close, here we check hourly trigger)
             side = 'sell' if float(pos['contracts']) > 0 else 'buy' 
-            exchange.create_market_order(symbol, side, float(pos['contracts']), params={'reduceOnly': True})
+            exchange.create_market_order(symbol, side, abs(float(pos['contracts'])), params={'reduceOnly': True})
             return {
                 'status': 'success',
                 'signal': 'CLOSE_EXECUTED', 
