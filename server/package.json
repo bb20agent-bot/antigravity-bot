@@ -34,6 +34,7 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@types/node-fetch": "^2.6.13",
     "@types/nodemailer": "^7.0.11"
   }
 }
