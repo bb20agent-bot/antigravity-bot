@@ -1,13 +1,24 @@
 import asyncio
 import logging
+import os
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters.command import Command
 from aiogram.enums import ParseMode
+from dotenv import load_dotenv
 
 from handlers.trading import router as trading_router
 
-# Replace with secure token loading (e.g., dotenv)
-BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
+# Load environment variables
+load_dotenv()
+
+# Securely load bot token
+BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+
+if not BOT_TOKEN or BOT_TOKEN == "YOUR_BOT_TOKEN_HERE":
+    raise RuntimeError(
+        "TELEGRAM_BOT_TOKEN is not set in environment variables or .env file. "
+        "Please check your configuration."
+    )
 
 logging.basicConfig(level=logging.INFO)
 
