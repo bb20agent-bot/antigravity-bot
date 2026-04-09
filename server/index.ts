@@ -661,8 +661,10 @@ app.post('/api/internal/generate-trade-videos', async (req, res) => {
                     await new Promise(resolve => setTimeout(resolve, 3000));
 
                     const mockVideoPath = `./trade_video_${v.type.toLowerCase().replace('-', '_')}.mp4`;
-                    if (!fs.existsSync(mockVideoPath)) {
-                        fs.writeFileSync(mockVideoPath, "MOCK MP4 BINANCE DATA");
+                    try {
+                        await fs.promises.access(mockVideoPath);
+                    } catch {
+                        await fs.promises.writeFile(mockVideoPath, "MOCK MP4 BINANCE DATA");
                     }
 
                     const title = `🔥 Binance Real-time Auto-Trading: ${v.type} Results`;
@@ -753,7 +755,14 @@ app.post('/api/internal/record-trade-video', async (req, res) => {
 
                 const tgToken = process.env.TELEGRAM_TOKEN;
                 const tgChat = process.env.TELEGRAM_CHAT_ID;
-                if (tgToken && tgChat && fs.existsSync(savePath)) {
+
+                let fileExists = false;
+                try {
+                    await fs.promises.access(savePath);
+                    fileExists = true;
+                } catch {}
+
+                if (tgToken && tgChat && fileExists) {
                     const positionIcon = side.toUpperCase() === "LONG" ? "🟢" : "🔴";
                     const tgMsg = `⚡️ <b>BINANCE LIVE EXECUTION</b> ⚡️\n━━━━━━━━━━━━━━━━━━\n${positionIcon} <b>${side.toUpperCase()} 포지션 진입 완료</b>\n▪️ 코인명: #${formattedSymbol}\n▪️ 진입가: ${price}\n▪️ 수  량: ${amount}\n━━━━━━━━━━━━━━━━━━\n<i>(이 영상은 봇 체결 순간의 라이브 차트입니다)</i>`;
 
@@ -769,13 +778,15 @@ app.post('/api/internal/record-trade-video', async (req, res) => {
                         headers: form.getHeaders()
                     });
 
-                    fs.unlinkSync(savePath); // Clean up
+                    await fs.promises.unlink(savePath); // Clean up
                     console.log(`✅ Trade Video sent via Telegram`);
                 }
             } catch (e) {
                 console.error("Screen recording error:", e);
                 if (browser) await browser.close();
-                if (fs.existsSync(savePath)) fs.unlinkSync(savePath);
+                try {
+                    await fs.promises.unlink(savePath);
+                } catch {}
             }
         });
     } catch (error) {
@@ -789,22 +800,26 @@ async function uploadToYouTubeShorts(videoPath: string, title: string, descripti
     try {
         console.log("📤 Uploading to YouTube Shorts...");
         // 1. Load client secrets from a local file.
-        if (!fs.existsSync('./client_secret.json')) {
+        try {
+            await fs.promises.access('./client_secret.json');
+        } catch {
             console.warn("⚠️ client_secret.json not found! Skipping YouTube upload. Please download OAuth credentials from Google Cloud Console.");
             return "https://youtube.com/shorts/MOCK_VIDEO_ID_MISSING_API_KEY";
         }
 
-        const content = fs.readFileSync('./client_secret.json', 'utf8');
+        const content = await fs.promises.readFile('./client_secret.json', 'utf8');
         const credentials = JSON.parse(content);
         const { client_secret, client_id, redirect_uris } = credentials.installed || credentials.web;
         const oauth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
-        if (!fs.existsSync('./youtube_token.json')) {
+        try {
+            await fs.promises.access('./youtube_token.json');
+        } catch {
             console.warn("⚠️ youtube_token.json not found! You must authorize the app locally first to get a token.");
             return "https://youtube.com/shorts/MOCK_VIDEO_ID_NEEDS_AUTH";
         }
 
-        const token = fs.readFileSync('./youtube_token.json', 'utf8');
+        const token = await fs.promises.readFile('./youtube_token.json', 'utf8');
         oauth2Client.setCredentials(JSON.parse(token));
         const youtube = google.youtube({ version: 'v3', auth: oauth2Client });
 
@@ -870,8 +885,10 @@ app.post('/api/webhook/tradingview-video', async (req, res) => {
 
             // Save mock video output physically to upload
             const mockVideoPath = "./demo_short.mp4";
-            if (!fs.existsSync(mockVideoPath)) {
-                fs.writeFileSync(mockVideoPath, "MOCK MP4 DATA FILE");
+            try {
+                await fs.promises.access(mockVideoPath);
+            } catch {
+                await fs.promises.writeFile(mockVideoPath, "MOCK MP4 DATA FILE");
             }
 
             // Step 4.5: YouTube Shorts Upload
