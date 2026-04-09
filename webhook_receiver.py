@@ -19,9 +19,15 @@ load_dotenv()
 app = FastAPI(title="Vora Fandom Trading Bridge")
 
 # CORS 설정 (프론트엔드 통신 허용)
+# 프로덕션 환경에서는 ALLOWED_ORIGINS 환경 변수를 통해 허용할 도메인을 지정해야 합니다.
+allowed_origins = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+    if origin.strip()
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 프로덕션에서는 세부 도메인 지정 권장
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
