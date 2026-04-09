@@ -16,7 +16,16 @@ import nodemailer from 'nodemailer'; // For Email Funnel Automations
 dotenv.config();
 
 const app = express();
-app.use(cors());
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : ['http://localhost:3000'];
+
+app.use(cors({
+    origin: allowedOrigins,
+    credentials: true
+}));
+
 app.use(express.json());
 
 // Default route for admin/browser access
