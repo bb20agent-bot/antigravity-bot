@@ -165,22 +165,31 @@ def monitor_manual_positions():
             if app_state["mode"] == "Safety Belt" and app_state["auto_sl_enabled"]:
                 # 현재 포지션을 감지
                 positions = binance.fetch_positions()
-                for pos in positions:
-                    if float(pos["positionAmt"]) != 0:
-                        symbol = pos["symbol"]
-                        open_orders = binance.fetch_open_orders(symbol)
-                        sl_exists = any(o['type'] == 'stopMarket' for o in open_orders)
+                active_positions = [pos for pos in positions if float(pos["positionAmt"]) != 0]
+
+                if not active_positions:
+                    time.sleep(10)
+                    continue
+
+                # 모든 미체결 주문을 한 번에 가져와 메모리에서 필터링 (N+1 문제 해결)
+                all_open_orders = binance.fetch_open_orders()
+
+                for pos in active_positions:
+                    symbol = pos["symbol"]
+                    # 해당 심볼의 주문만 필터링
+                    open_orders = [o for o in all_open_orders if o['symbol'] == symbol]
+                    sl_exists = any(o['type'] == 'stopMarket' for o in open_orders)
+
+                    if not sl_exists:
+                        amt = float(pos["positionAmt"])
+                        entry_price = float(pos["entryPrice"])
+                        side = 'sell' if amt > 0 else 'buy'
+                        # 안전벨트 모드: 1% 밖 하드 손절 걸기 등 (여기서는 대략 1% 차이)
+                        sl_price = entry_price * 0.99 if amt > 0 else entry_price * 1.01
+                        params = {'stopPrice': sl_price, 'reduceOnly': True}
                         
-                        if not sl_exists:
-                            amt = float(pos["positionAmt"])
-                            entry_price = float(pos["entryPrice"])
-                            side = 'sell' if amt > 0 else 'buy'
-                            # 안전벨트 모드: 1% 밖 하드 손절 걸기 등 (여기서는 대략 1% 차이)
-                            sl_price = entry_price * 0.99 if amt > 0 else entry_price * 1.01
-                            params = {'stopPrice': sl_price, 'reduceOnly': True}
-                            
-                            binance.create_order(symbol, 'stopMarket', side, abs(amt), None, params)
-                            send_telegram_msg(f"🛡️ Safety Belt: {symbol} 수동 진입 감지. 안전 SL 자동설정 완료 ({sl_price})")
+                        binance.create_order(symbol, 'stopMarket', side, abs(amt), None, params)
+                        send_telegram_msg(f"🛡️ Safety Belt: {symbol} 수동 진입 감지. 안전 SL 자동설정 완료 ({sl_price})")
         except Exception as e:
             pass
         time.sleep(10)
