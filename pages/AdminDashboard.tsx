@@ -82,7 +82,7 @@ const AdminDashboard = () => {
                 <Activity size={14} className="text-green-500 animate-pulse" />
                 <span className="text-[10px] font-black text-green-500 uppercase tracking-widest">Backend Connected</span>
               </div>
-              <button className="relative w-10 h-10 flex items-center justify-center bg-white/5 rounded-xl hover:bg-white/10 transition border border-transparent hover:border-white/10">
+              <button aria-label="Notifications" className="relative w-10 h-10 flex items-center justify-center bg-white/5 rounded-xl hover:bg-white/10 transition border border-transparent hover:border-white/10">
                  <Bell size={18} />
                  <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-black animate-ping"></span>
                  <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-black"></span>
