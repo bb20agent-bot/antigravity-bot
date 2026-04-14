@@ -1374,7 +1374,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
+                                <button aria-label="Copy Fandom Link" className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
                                     <Copy size={16} className="text-white" />
                                 </button>
                             </div>
