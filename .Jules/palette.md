@@ -1,0 +1,3 @@
+## 2024-04-19 - Added clear visual feedback and aria-label to copy clipboard interaction
+**Learning:** TMA UX constraint: OS-level toasts/haptic feedback for clipboard writes are inconsistent in Telegram Mini Apps. Users needed inline visual feedback and screen readers needed an aria-label because it was an icon-only button without textual context.
+**Action:** Implemented a pattern using `useState` and `setTimeout` to temporarily swap the 'Copy' icon with a 'Check' icon and added `aria-label="Copy Fandom Link"` to ensure accessibility. Always provide explicit, inline visual feedback for clipboard actions in this app.
