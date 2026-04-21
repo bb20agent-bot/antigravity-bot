@@ -217,6 +217,57 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const [officeSubTab, setOfficeSubTab] = useState<'profile' | 'community' | 'dnft'>('profile');
     const [profileImg, setProfileImg] = useState<string | null>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [isCopied, setIsCopied] = useState(false);
+    const copyTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleCopyLink = () => {
+        let telegramId = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id?.toString() || "TESTUSER";
+        const link = `t.me/Vora_Brown_bot?start=${telegramId}`;
+
+        const triggerSuccess = () => {
+            setIsCopied(true);
+            if (copyTimeoutRef.current) {
+                clearTimeout(copyTimeoutRef.current);
+            }
+            copyTimeoutRef.current = setTimeout(() => setIsCopied(false), 2000);
+        };
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(link).then(() => {
+                triggerSuccess();
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                fallbackCopyTextToClipboard(link, triggerSuccess);
+            });
+        } else {
+            fallbackCopyTextToClipboard(link, triggerSuccess);
+        }
+    };
+
+    const fallbackCopyTextToClipboard = (text: string, onSuccess: () => void) => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+
+        // Avoid scrolling to bottom
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            if(successful) {
+                onSuccess();
+            }
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+        }
+
+        document.body.removeChild(textArea);
+    };
 
     // Protocol State
     const [protocolConfig, setProtocolConfig] = useState({ t2eTimerEnd: 0 });
@@ -1374,8 +1425,12 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    onClick={handleCopyLink}
+                                    aria-label={isCopied ? "Link copied" : "Copy fandom link"}
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors"
+                                >
+                                    {isCopied ? <CheckCircle size={16} className="text-green-500" /> : <Copy size={16} className="text-white" />}
                                 </button>
                             </div>
                         </div>
