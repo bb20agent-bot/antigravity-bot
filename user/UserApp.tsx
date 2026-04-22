@@ -31,7 +31,8 @@ import {
     Users,
     Video,
     Lock,
-    TimerOff
+    TimerOff,
+    Check
 } from 'lucide-react';
 import { translations, Language } from '../services/i18nService';
 import { protocolService } from '../services/protocolService';
@@ -66,9 +67,10 @@ enum NavTab {
 
 // --- Components ---
 
-const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
+const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; ariaLabel?: string }> = ({ icon, active, onClick, ariaLabel }) => (
     <button
         onClick={onClick}
+        aria-label={ariaLabel}
         className={`p-2 transition-all relative ${active ? 'scale-125 text-[#0088cc]' : 'text-gray-600'}`}
     >
         <span className={active ? 'text-[#0088cc]' : ''}>{icon}</span>
@@ -217,6 +219,42 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const [officeSubTab, setOfficeSubTab] = useState<'profile' | 'community' | 'dnft'>('profile');
     const [profileImg, setProfileImg] = useState<string | null>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [isCopied, setIsCopied] = useState(false);
+
+    const handleCopyLink = () => {
+        const link = `t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(link).then(() => {
+                setIsCopied(true);
+                setTimeout(() => setIsCopied(false), 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                fallbackCopyTextToClipboard(link);
+            });
+        } else {
+            fallbackCopyTextToClipboard(link);
+        }
+    };
+
+    const fallbackCopyTextToClipboard = (text: string) => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+        }
+        document.body.removeChild(textArea);
+    };
 
     // Protocol State
     const [protocolConfig, setProtocolConfig] = useState({ t2eTimerEnd: 0 });
@@ -1132,7 +1170,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
             return (
                 <div className="space-y-4 pt-4 px-1 pb-24 h-full flex flex-col">
                     <div className="px-2 flex items-center gap-3">
-                        <button className="text-slate-400 hover:text-white" onClick={() => setSelectedCrew(null)}>
+                        <button className="text-slate-400 hover:text-white" onClick={() => setSelectedCrew(null)} aria-label="Go back to crew ranking">
                             <ChevronRight size={24} className="rotate-180" />
                         </button>
                         <div>
@@ -1374,8 +1412,16 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    onClick={handleCopyLink}
+                                    aria-label={isCopied ? "Copied link" : "Copy referral link"}
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors relative"
+                                >
+                                    {isCopied ? (
+                                        <Check size={16} className="text-green-500" />
+                                    ) : (
+                                        <Copy size={16} className="text-white" />
+                                    )}
                                 </button>
                             </div>
                         </div>
@@ -1559,17 +1605,20 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<LayoutDashboard size={20} />}
                             active={activeTab === NavTab.HOME}
                             onClick={() => setActiveTab(NavTab.HOME)}
+                            ariaLabel="Home Dashboard"
                         />
                         <NavItem
                             icon={<Trophy size={20} />}
                             active={activeTab === NavTab.CREW}
                             onClick={() => { setActiveTab(NavTab.CREW); setSelectedCrew(null); }}
+                            ariaLabel="Crew Ranking"
                         />
 
                         {/* MYPAGE (Center Red V Button) */}
                         <div className="relative -top-6">
                             <button
                                 onClick={() => setActiveTab(NavTab.OFFICE)}
+                                aria-label="My Office / Profile"
                                 className={`w-14 h-14 rounded-full bg-gradient-to-br border-4 border-[#050505] shadow-[0_4px_25px_rgba(220,38,38,0.5)] flex items-center justify-center transition-transform ${activeTab === NavTab.OFFICE
                                     ? 'from-red-600 to-red-900 ring-4 ring-red-500/50 ring-offset-2 ring-offset-[#050505] scale-110'
                                     : 'from-slate-800 to-black hover:from-red-800 hover:to-red-900'
@@ -1583,11 +1632,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<Crown size={20} />}
                             active={activeTab === NavTab.INFO}
                             onClick={() => setActiveTab(NavTab.INFO)}
+                            ariaLabel="Fandom Information"
                         />
                         <NavItem
                             icon={<Gamepad2 size={20} />}
                             active={activeTab === NavTab.GAME}
                             onClick={() => setActiveTab(NavTab.GAME)}
+                            ariaLabel="Tap to Earn Game"
                         />
                     </nav>
                 </div>
