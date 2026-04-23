@@ -66,10 +66,11 @@ enum NavTab {
 
 // --- Components ---
 
-const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
+const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; 'aria-label'?: string }> = ({ icon, active, onClick, 'aria-label': ariaLabel }) => (
     <button
         onClick={onClick}
-        className={`p-2 transition-all relative ${active ? 'scale-125 text-[#0088cc]' : 'text-gray-600'}`}
+        aria-label={ariaLabel}
+        className={`p-2 transition-all relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0088cc] focus-visible:rounded-lg ${active ? 'scale-125 text-[#0088cc]' : 'text-gray-600'}`}
     >
         <span className={active ? 'text-[#0088cc]' : ''}>{icon}</span>
         {active && (
@@ -1479,8 +1480,17 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                 <div className="relative z-10 px-6 pt-8 pb-6 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <div
+                            role="button"
+                            tabIndex={0}
+                            aria-label="Upload Profile Picture"
                             onClick={handleProfileClick}
-                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-900/20 border border-emerald-500/30 flex items-center justify-center cursor-pointer relative overflow-hidden group shadow-lg"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleProfileClick();
+                                }
+                            }}
+                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-900/20 border border-emerald-500/30 flex items-center justify-center cursor-pointer relative overflow-hidden group shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                         >
                             {profileImg ? (
                                 <img src={profileImg} alt="Profile" className="w-full h-full object-cover" />
@@ -1490,7 +1500,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             <div className="absolute inset-0 bg-black/60 items-center justify-center hidden group-hover:flex">
                                 <span className="text-[8px] font-black text-white px-1 text-center leading-tight uppercase">+ IMG</span>
                             </div>
-                            <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
+                            <input type="file" accept="image/*" ref={fileInputRef} className="hidden" onChange={handleFileChange} tabIndex={-1} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
@@ -1559,18 +1569,21 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<LayoutDashboard size={20} />}
                             active={activeTab === NavTab.HOME}
                             onClick={() => setActiveTab(NavTab.HOME)}
+                            aria-label="Home"
                         />
                         <NavItem
                             icon={<Trophy size={20} />}
                             active={activeTab === NavTab.CREW}
                             onClick={() => { setActiveTab(NavTab.CREW); setSelectedCrew(null); }}
+                            aria-label="Crew Ranking"
                         />
 
                         {/* MYPAGE (Center Red V Button) */}
                         <div className="relative -top-6">
                             <button
                                 onClick={() => setActiveTab(NavTab.OFFICE)}
-                                className={`w-14 h-14 rounded-full bg-gradient-to-br border-4 border-[#050505] shadow-[0_4px_25px_rgba(220,38,38,0.5)] flex items-center justify-center transition-transform ${activeTab === NavTab.OFFICE
+                                aria-label="My Office"
+                                className={`w-14 h-14 rounded-full bg-gradient-to-br border-4 border-[#050505] shadow-[0_4px_25px_rgba(220,38,38,0.5)] flex items-center justify-center transition-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${activeTab === NavTab.OFFICE
                                     ? 'from-red-600 to-red-900 ring-4 ring-red-500/50 ring-offset-2 ring-offset-[#050505] scale-110'
                                     : 'from-slate-800 to-black hover:from-red-800 hover:to-red-900'
                                     }`}
@@ -1583,11 +1596,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<Crown size={20} />}
                             active={activeTab === NavTab.INFO}
                             onClick={() => setActiveTab(NavTab.INFO)}
+                            aria-label="Information"
                         />
                         <NavItem
                             icon={<Gamepad2 size={20} />}
                             active={activeTab === NavTab.GAME}
                             onClick={() => setActiveTab(NavTab.GAME)}
+                            aria-label="Game"
                         />
                     </nav>
                 </div>
