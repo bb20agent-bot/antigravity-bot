@@ -31,6 +31,70 @@
             "options": {
                 "debug": true
             }
+        },
+        {
+            "name": "VoraJetton",
+            "path": "./contracts/tact/VoraJetton.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
+        },
+        {
+            "name": "SubscriptionRouter",
+            "path": "./contracts/tact/SubscriptionRouter.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
+        },
+        {
+            "name": "P2PEscrow",
+            "path": "./contracts/tact/P2PEscrow.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
+        },
+        {
+            "name": "VoraTreasury",
+            "path": "./contracts/tact/VoraTreasury_v4.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
+        },
+        {
+            "name": "VoraToken_v2",
+            "path": "./contracts/tact/VoraToken.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
+        },
+        {
+            "name": "VoraTreasury_v2",
+            "path": "./contracts/tact/VoraTreasury_v2.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
+        },
+        {
+            "name": "Escrow_v2",
+            "path": "./contracts/tact/Escrow_v2.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
+        },
+        {
+            "name": "SubscriptionRouter_v2",
+            "path": "./contracts/tact/SubscriptionRouter_v2.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
         }
     ]
 }

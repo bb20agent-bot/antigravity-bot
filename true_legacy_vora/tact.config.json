@@ -1,0 +1,36 @@
+{
+    "projects": [
+        {
+            "name": "VoraToken",
+            "path": "./contracts/tact/VoraToken.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
+        },
+        {
+            "name": "Treasury",
+            "path": "./contracts/tact/Treasury.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
+        },
+        {
+            "name": "Escrow",
+            "path": "./contracts/tact/Escrow.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
+        },
+        {
+            "name": "VestingVault",
+            "path": "./contracts/tact/VestingVault.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
+        }
+    ]
+}

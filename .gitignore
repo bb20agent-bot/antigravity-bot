@@ -9,6 +9,16 @@ metadata.json
 # Build & Dependencies
 node_modules/
 dist/
+# Security: Exclude Admin Logic & Secrets
+pages/
+services/geminiService.ts
+.env
+scripts/deploy-admin
+metadata.json
+
+# Build & Dependencies
+node_modules/
+dist/
 .DS_Store
 *.logDESIGN_GUIDE.md
 
@@ -16,3 +26,6 @@ server/youtube_token.json
 binance_bot/client_secret.json
 server/client_secret.json
 .env
+*.zip
+*.tar.gz
+server/blogger_token.json

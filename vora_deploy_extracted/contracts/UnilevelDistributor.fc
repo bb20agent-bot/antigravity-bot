@@ -1,0 +1,118 @@
+
+;; UnilevelDistributor.fc - 5-Level Reward System
+;; 
+;; Storage:
+;; - owner_address: MsgAddress
+;; - user_uplines: Dict (Key: UserAddressHash(256), Value: UplineAddressSlice)
+
+#pragma version >=0.2.0;
+#include "stdlib.fc";
+
+const int op::register = 0x100;
+const int op::purchase = 0x200;
+
+(slice, cell) load_data() inline {
+    slice ds = get_data().begin_parse();
+    return (
+        ds~load_msg_addr(), ;; owner_address
+        ds~load_dict()      ;; user_uplines
+    );
+}
+
+() save_data(slice owner_address, cell user_uplines) impure inline {
+    set_data(begin_cell()
+        .store_slice(owner_address)
+        .store_dict(user_uplines)
+        .end_cell()
+    );
+}
+
+;; Helper to send TON
+() send_ton(slice to_addr, int amount) impure {
+    var msg = begin_cell()
+        .store_uint(0x10, 6) ;; nobounce
+        .store_slice(to_addr)
+        .store_coins(amount)
+        .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+        .end_cell();
+    send_raw_message(msg, 1); ;; pay transfer fees separately
+}
+
+;; Resolve upline from Dict
+(slice, int) get_upline(cell user_uplines, slice user_addr) {
+    (slice payload, int found) = user_uplines.udict_get?(256, slice_hash(user_addr));
+    if (found) {
+        return (payload, -1);
+    }
+    return (null(), 0);
+}
+
+() recv_internal(int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    if (in_msg_body.slice_empty()) { return (); }
+    
+    slice cs = in_msg_full.begin_parse();
+    int flags = cs~load_uint(4);
+    if (flags & 1) { return (); }
+    
+    slice sender_address = cs~load_msg_addr();
+    int op = in_msg_body~load_uint(32);
+    int query_id = in_msg_body~load_uint(64);
+    
+    (slice owner_address, cell user_uplines) = load_data();
+    
+    ;; 1. Register Upline
+    if (op == op::register) {
+        slice upline_address = in_msg_body~load_msg_addr();
+        
+        ;; Basic check: cannot register self
+        throw_if(101, equal_slices(sender_address, upline_address));
+        
+        ;; Save to dict
+        user_uplines~udict_set(256, slice_hash(sender_address), upline_address);
+        save_data(owner_address, user_uplines);
+        return ();
+    }
+    
+    ;; 2. Purchase (Distribute Rewards)
+    if (op == op::purchase) {
+        int purchase_amount = msg_value;
+        int remaining = purchase_amount;
+        
+        slice current_user = sender_address;
+        
+        ;; Level 1: 10%
+        ;; Level 2: 5%
+        ;; Level 3: 3%
+        ;; Level 4: 2%
+        ;; Level 5: 1%
+        
+        tuple rates = empty_tuple();
+        rates~tpush(10); rates~tpush(5); rates~tpush(3); rates~tpush(2); rates~tpush(1);
+        
+        int i = 0;
+        repeat(5) {
+            (slice upline, int found) = get_upline(user_uplines, current_user);
+            if (found) {
+                int rate = rates.at(i);
+                int reward = (purchase_amount * rate) / 100;
+                
+                if (remaining > reward) {
+                     send_ton(upline, reward);
+                     remaining -= reward;
+                }
+                current_user = upline; ;; Move up
+            } else {
+                ;; Break if no upline found
+                i = 5; 
+            }
+            i += 1;
+        }
+        
+        ;; Send remaining to owner (Treasury)
+        if (remaining > 0) {
+            send_ton(owner_address, remaining);
+        }
+        
+        return ();
+    }
+}

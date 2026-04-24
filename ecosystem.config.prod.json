@@ -1,0 +1,85 @@
+{
+  "apps": [
+    {
+      "name": "vora-frontend",
+      "script": "serve",
+      "env": {
+        "PM2_SERVE_PATH": "./dist",
+        "PM2_SERVE_PORT": 80,
+        "PM2_SERVE_SPA": "true",
+        "PM2_SERVE_HOMEPAGE": "/index.html"
+      }
+    },
+    {
+      "name": "vora-backend",
+      "script": "npm",
+      "args": "run start",
+      "cwd": "c:/antigravity-bot/server",
+      "watch": false
+    },
+    {
+      "name": "daily-routine-bot",
+      "script": "binance_bot/daily_routine_bot.py",
+      "interpreter": "python",
+      "cwd": "c:/antigravity-bot",
+      "watch": false,
+      "restart_delay": 5000
+    },
+    {
+      "name": "joy-funnel-bot",
+      "script": "binance_bot/joy_telegram_funnel_bot.py",
+      "interpreter": "python",
+      "cwd": "c:/antigravity-bot",
+      "watch": false,
+      "restart_delay": 5000
+    },
+    {
+      "name": "binance-trading-bot",
+      "script": "binance_bot/binance_trading_bot.py",
+      "interpreter": "python",
+      "cwd": "c:/antigravity-bot",
+      "watch": false,
+      "restart_delay": 5000
+    },
+    {
+      "name": "webhook-bot",
+      "script": "binance_bot/webhook_bot.py",
+      "interpreter": "python",
+      "cwd": "c:/antigravity-bot",
+      "watch": false,
+      "restart_delay": 5000
+    },
+    {
+      "name": "vora-webhook-handler",
+      "script": "vora_webhook_handler.py",
+      "interpreter": "python",
+      "cwd": "c:/antigravity-bot",
+      "watch": false,
+      "restart_delay": 5000
+    },
+    {
+      "name": "vora-main-bot",
+      "script": "bot/main.py",
+      "interpreter": "python",
+      "cwd": "c:/antigravity-bot",
+      "watch": false,
+      "restart_delay": 5000
+    },
+    {
+      "name": "founder-broadcaster",
+      "script": "bot/founder_broadcaster.py",
+      "interpreter": "python",
+      "cwd": "c:/antigravity-bot",
+      "watch": false,
+      "restart_delay": 5000
+    },
+    {
+      "name": "market-rss-bot",
+      "script": "bot/market_rss_bot.py",
+      "interpreter": "python",
+      "cwd": "c:/antigravity-bot",
+      "watch": false,
+      "restart_delay": 5000
+    }
+  ]
+}

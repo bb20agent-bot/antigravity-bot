@@ -23,7 +23,9 @@
         "./src/*"
       ]
     },
-    "allowImportingTsExtensions": false,
+    "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "include": ["src", "user", "pages", "services", "types.ts", "true_legacy_vora"],
+  "exclude": ["node_modules", "dist", "vora_deploy", "vora_deploy_extracted"]
 }

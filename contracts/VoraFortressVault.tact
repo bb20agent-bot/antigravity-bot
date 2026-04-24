@@ -20,6 +20,11 @@ message ClaimReward {
     query_id: Int as uint64;
 }
 
+message AllocateP2PAirdrop {
+    user: Address;
+    amount: Int as coins;
+}
+
 // =====================================================================
 // 2. VORA Fortress Vault Contract (TON Native)
 // =====================================================================
@@ -76,8 +81,23 @@ contract VoraFortressVault with Deployable, Ownable {
         self.claimable_rewards.set(msg.user, current_reward + msg.amount);
     }
 
+    // P2P 유휴 자금 0.1% 에어드랍 전용 보상 채널
+    receive(msg: AllocateP2PAirdrop) {
+        require(sender() == self.engine_bot || sender() == self.owner, "VORA: Only Bot or Owner can allocate P2P Airdrop");
+        
+        let current_reward: Int = 0;
+        if (self.claimable_rewards.get(msg.user) != null) {
+            current_reward = self.claimable_rewards.get(msg.user)!!;
+        }
+        // 기존 보상 누적금에 P2P 에어드랍 추가
+        self.claimable_rewards.set(msg.user, current_reward + msg.amount);
+    }
+
     // 유저가 직접 수령 (가스비 대납 및 레이스 컨디션 방어)
     receive(msg: ClaimReward) {
+        // [SECURITY] Gas Drain 방어: 유저가 최소한의 트랜잭션 수수료를 지불하도록 강제
+        require(context().value >= ton("0.08"), "VORA: Insufficient TON for gas");
+        
         let user: Address = sender();
         let reward: Int = 0;
         

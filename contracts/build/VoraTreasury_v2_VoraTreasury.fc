@@ -1,0 +1,657 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+;; VoraTreasury_v2_VoraTreasury.headers.fc
+;;
+;; Header files for VoraTreasury
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_store_address_opt
+builder __tact_store_address_opt(builder b, slice address) inline;
+
+;; __tact_not_null
+forall X -> X __tact_not_null(X x) impure inline;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_context_get_sender
+slice __tact_context_get_sender() inline;
+
+;; $DeployOk$_store
+builder $DeployOk$_store(builder build_0, (int) v) inline;
+
+;; $DeployOk$_store_cell
+cell $DeployOk$_store_cell((int) v, builder b) inline;
+
+;; $TokenTransfer$_store
+builder $TokenTransfer$_store(builder build_0, (int, int, slice, slice, cell, int, slice) v) inline;
+
+;; $TokenTransfer$_store_cell
+cell $TokenTransfer$_store_cell((int, int, slice, slice, cell, int, slice) v, builder b) inline;
+
+;; $VoraTreasury$_store
+builder $VoraTreasury$_store(builder build_0, (slice, slice, int, int, slice, slice, slice, slice, slice) v) inline;
+
+;; $VoraTreasury$_load
+(slice, ((slice, slice, int, int, slice, slice, slice, slice, slice))) $VoraTreasury$_load(slice sc_0) inline;
+
+;; $Context$_get_value
+_ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $VoraTreasury$init$_load
+(slice, ((slice, slice, slice, slice, slice, slice))) $VoraTreasury$init$_load(slice sc_0) inline;
+
+;; $VoraTreasury$_contract_init
+(slice, slice, int, int, slice, slice, slice, slice, slice) $VoraTreasury$_contract_init(slice $owner, slice $strategy, slice $dev, slice $dex, slice $tech, slice $p2p) impure inline;
+
+;; $VoraTreasury$_contract_load
+(slice, slice, int, int, slice, slice, slice, slice, slice) $VoraTreasury$_contract_load() impure inline;
+
+;; $VoraTreasury$_contract_store
+() $VoraTreasury$_contract_store((slice, slice, int, int, slice, slice, slice, slice, slice) v) impure inline;
+
+;; $SendParameters$_constructor_to_value_mode_body
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline;
+
+;; $TokenTransfer$_constructor_query_id_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload
+((int, int, slice, slice, cell, int, slice)) $TokenTransfer$_constructor_query_id_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload(int $query_id, int $amount, slice $destination, slice $response_destination, cell $custom_payload, int $forward_ton_amount, slice $forward_payload) inline;
+
+;; $VoraTreasury$_fun_send_jettons
+((slice, slice, int, int, slice, slice, slice, slice, slice), ()) $VoraTreasury$_fun_send_jettons((slice, slice, int, int, slice, slice, slice, slice, slice) $self, slice $to, int $amount, slice $memo) impure inline_ref;
+
+;; $MessageParameters$_constructor_bounce_to_value_mode_body
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
+
+;; $VoraTreasury$_fun_notify
+((slice, slice, int, int, slice, slice, slice, slice, slice), ()) $VoraTreasury$_fun_notify((slice, slice, int, int, slice, slice, slice, slice, slice) $self, cell $body) impure inline;
+
+;; $VoraTreasury$_fun_requireOwner
+((slice, slice, int, int, slice, slice, slice, slice, slice), ()) $VoraTreasury$_fun_requireOwner((slice, slice, int, int, slice, slice, slice, slice, slice) $self) impure inline_ref;
+
+;; $VoraTreasury$_fun_owner
+((slice, slice, int, int, slice, slice, slice, slice, slice), slice) $VoraTreasury$_fun_owner((slice, slice, int, int, slice, slice, slice, slice, slice) $self) impure inline_ref;
+
+;; $DeployOk$_constructor_queryId
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
+
+;; $SendParameters$_constructor_to_value_mode
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline;
+
+
+;; VoraTreasury_v2_VoraTreasury.stdlib.fc
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_child_contract_codes;
+global int __tact_randomized;
+
+(slice, slice) __tact_load_address_opt(slice cs) asm """
+
+            b{00} SDBEGINSQ
+            IF:<{
+              PUSHNULL
+            }>ELSE<{
+              LDMSGADDR
+              SWAP
+            }>
+
+""";
+
+builder __tact_store_addr_none(builder b) asm "b{00} STSLICECONST";
+
+builder __tact_store_address_opt(builder b, slice address) inline {
+    if (null?(address)) {
+        return __tact_store_addr_none(b);
+    } else {
+        return b.store_slice(address);
+    }
+}
+
+forall X -> X __tact_not_null(X x) impure inline {
+    throw_if(128, null?(x)); return x;
+}
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+int $global_myBalance() impure asm """
+    BALANCE FIRST
+""";
+
+() $global_nativeReserve(int $amount, int $mode) impure asm """
+    RAWRESERVE
+""";
+
+() $global_message((int, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+    STZEROES
+    // → Stack state
+    // s0: Builder
+    // s1: `body`
+    // s2: `mode`
+    STDICT
+    ENDC
+    SWAP
+    SENDRAWMSG
+""";
+
+() $global_send((int, cell, cell, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+    STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+    // → Stack state
+    // s0: Builder
+    // s1: `data`
+    // s2: `code`
+    // s3: `body`
+    // s4: `mode`
+
+    // Group 2: Placing the Builder after code and data, then checking those for nullability
+    s2 XCHG0
+    DUP2
+    ISNULL
+    SWAP
+    ISNULL
+    AND
+    // → Stack state
+    // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+    // s1: `code`
+    // s2: `data`
+    // s3: Builder
+    // s4: `body`
+    // s5: `mode`
+
+    // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+    <{
+        DROP2 // drop `data` and `code`, since either of those is null
+        b{0} STSLICECONST
+    }> PUSHCONT
+
+    // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+    <{
+        // _ split_depth:(Maybe (## 5))
+        //   special:(Maybe TickTock)
+        //   code:(Maybe ^Cell)
+        //   data:(Maybe ^Cell)
+        //   library:(Maybe ^Cell)
+        // = StateInit;
+        ROT                // place message Builder on top
+        b{10} STSLICECONST // store Maybe = true, Either = false
+        // Start composing inlined StateInit
+        b{00} STSLICECONST // store split_depth and special first
+        STDICT             // store code
+        STDICT             // store data
+        b{0} STSLICECONST  // store library
+    }> PUSHCONT
+
+    // Group 3: IFELSE that does the branching shown above
+    IFELSE
+    // → Stack state
+    // s0: Builder
+    // s1: null or StateInit
+    // s2: `body`
+    // s3: `mode`
+
+    // Group 4: Finalizing the message
+    STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+    ENDC
+    // → Stack state
+    // s0: Cell
+    // s1: `mode`
+
+    // Group 5: Sending the message, with `mode` on top
+    SWAP
+    SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+""";
+
+slice $String$_fun_asSlice(slice $self) impure asm "NOP";
+
+((slice, slice, int, int, slice, slice, slice, slice, slice), ()) $VoraTreasury$_fun_notify((slice, slice, int, int, slice, slice, slice, slice, slice) $self, cell $body) impure inline {
+    var (($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)) = $self;
+    slice $to = __tact_context_get_sender();
+    int $bounce = false;
+    if (false) {
+        int $balance = $global_myBalance();
+        int $balanceBeforeMessage = ($balance - $Context$_get_value(__tact_context_get()));
+        if (($balanceBeforeMessage < 0)) {
+            $global_nativeReserve(0, 0);
+            $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
+            return (($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address), ());
+        }
+    }
+    $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
+    return (($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address), ());
+}
+
+((slice, slice, int, int, slice, slice, slice, slice, slice), ()) $VoraTreasury$_fun_requireOwner((slice, slice, int, int, slice, slice, slice, slice, slice) $self) impure inline_ref {
+    var (($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)) = $self;
+    throw_unless(132, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
+    return (($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address), ());
+}
+
+((slice, slice, int, int, slice, slice, slice, slice, slice), slice) $VoraTreasury$_fun_owner((slice, slice, int, int, slice, slice, slice, slice, slice) $self) impure inline_ref {
+    var (($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)) = $self;
+    var $fresh$ret_27 = $self'owner;
+    return (($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address), $fresh$ret_27);
+}
+
+;; VoraTreasury_v2_VoraTreasury.constants.fc
+;; String "VORA IDO: Strategy (50%)"
+slice __gen_slice_string_0da95c8bdb4088b274841eb642ea2084da9e28c653cbc8bd50cd8fe03b34e431() asm """
+    B{b5ee9c7241010101001a000030564f52412049444f3a2053747261746567792028353025295faf6a01} B>boc <s PUSHSLICE
+""";
+
+;; String "VORA IDO: Dev (20%)"
+slice __gen_slice_string_1645018f16e52d38dc32d614ec2644d0e93487525b502d146175369898d724c6() asm """
+    B{b5ee9c72410101010015000026564f52412049444f3a2044657620283230252925f42acc} B>boc <s PUSHSLICE
+""";
+
+;; String "VORA IDO: DEX (30%)"
+slice __gen_slice_string_79e0183dee85eccd9621048003bf38e8d5955e31e9e2f39e2c9cedb636383235() asm """
+    B{b5ee9c72410101010015000026564f52412049444f3a20444558202833302529abd9ff1a} B>boc <s PUSHSLICE
+""";
+
+;; String "VORA Sub: Strategy (50%)"
+slice __gen_slice_string_79368612f8a140a6646fa122b2fa3dbaba55dfd26aa56d84b9e6911e88b49c9f() asm """
+    B{b5ee9c7241010101001a000030564f5241205375623a2053747261746567792028353025293f080802} B>boc <s PUSHSLICE
+""";
+
+;; String "VORA Sub: Tech (5%)"
+slice __gen_slice_string_1bb2451b5196a3e49e0faa77bceafc691426edf7d2752b351982cf3d3dd6e120() asm """
+    B{b5ee9c72410101010015000026564f5241205375623a2054656368202835252912138cf4} B>boc <s PUSHSLICE
+""";
+
+;; String "VORA Sub: DEX LP (20%)"
+slice __gen_slice_string_cecd3326153cadb7a4711300a3c422144feb0eb44b47ff51594093081642a63d() asm """
+    B{b5ee9c7241010101001800002c564f5241205375623a20444558204c502028323025298ae2f792} B>boc <s PUSHSLICE
+""";
+
+;; String "VORA Sub: P2P Brokerage (25%)"
+slice __gen_slice_string_c357d91fff279bdb8f9cf203ba06dcb4e23282270b6b8afa7cbd8b5901b802c3() asm """
+    B{b5ee9c7241010101001f00003a564f5241205375623a205032502042726f6b6572616765202832352529b05e445c} B>boc <s PUSHSLICE
+""";
+
+;; VoraTreasury_v2_VoraTreasury.storage.fc
+;;
+;; Type: Context
+;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounceable, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell value:int257 to:address bounce:bool = SendParameters
+;;
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, null(), null(), $value, $to, true);
+}
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode(slice $to, int $value, int $mode) inline {
+    return ($mode, null(), null(), null(), $value, $to, true);
+}
+
+;;
+;; Type: MessageParameters
+;; TLB: _ mode:int257 body:Maybe ^cell value:int257 to:address bounce:bool = MessageParameters
+;;
+
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, $value, $to, $bounce);
+}
+
+;;
+;; Type: DeployOk
+;; Header: 0xaff90f57
+;; TLB: deploy_ok#aff90f57 queryId:uint64 = DeployOk
+;;
+
+builder $DeployOk$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $DeployOk$_store_cell((int) v, builder b) inline {
+    return $DeployOk$_store(b, v).end_cell();
+}
+
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline {
+    return ($queryId);
+}
+
+;;
+;; Type: TokenTransfer
+;; Header: 0x0f8a7ea5
+;; TLB: token_transfer#0f8a7ea5 query_id:uint64 amount:coins destination:address response_destination:address custom_payload:Maybe ^cell forward_ton_amount:coins forward_payload:remainder<slice> = TokenTransfer
+;;
+
+builder $TokenTransfer$_store(builder build_0, (int, int, slice, slice, cell, int, slice) v) inline {
+    var (v'query_id, v'amount, v'destination, v'response_destination, v'custom_payload, v'forward_ton_amount, v'forward_payload) = v;
+    build_0 = store_uint(build_0, 260734629, 32);
+    build_0 = build_0.store_uint(v'query_id, 64);
+    build_0 = build_0.store_varuint16(v'amount);
+    build_0 = build_0.store_slice(v'destination);
+    build_0 = __tact_store_address_opt(build_0, v'response_destination);
+    build_0 = build_0.store_maybe_ref(v'custom_payload);
+    build_0 = build_0.store_varuint16(v'forward_ton_amount);
+    build_0 = build_0.store_slice(v'forward_payload);
+    return build_0;
+}
+
+cell $TokenTransfer$_store_cell((int, int, slice, slice, cell, int, slice) v, builder b) inline {
+    return $TokenTransfer$_store(b, v).end_cell();
+}
+
+((int, int, slice, slice, cell, int, slice)) $TokenTransfer$_constructor_query_id_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload(int $query_id, int $amount, slice $destination, slice $response_destination, cell $custom_payload, int $forward_ton_amount, slice $forward_payload) inline {
+    return ($query_id, $amount, $destination, $response_destination, $custom_payload, $forward_ton_amount, $forward_payload);
+}
+
+;;
+;; Type: VoraTreasury
+;; TLB: _ owner:address vora_jetton_wallet:address total_ido_revenue:coins total_subscription_revenue:coins strategy_address:address dev_address:address dex_address:address tech_incentive_address:address p2p_brokerage_address:address = VoraTreasury
+;;
+
+builder $VoraTreasury$_store(builder build_0, (slice, slice, int, int, slice, slice, slice, slice, slice) v) inline {
+    var (v'owner, v'vora_jetton_wallet, v'total_ido_revenue, v'total_subscription_revenue, v'strategy_address, v'dev_address, v'dex_address, v'tech_incentive_address, v'p2p_brokerage_address) = v;
+    build_0 = build_0.store_slice(v'owner);
+    build_0 = __tact_store_address_opt(build_0, v'vora_jetton_wallet);
+    build_0 = build_0.store_varuint16(v'total_ido_revenue);
+    build_0 = build_0.store_varuint16(v'total_subscription_revenue);
+    var build_1 = begin_cell();
+    build_1 = build_1.store_slice(v'strategy_address);
+    build_1 = build_1.store_slice(v'dev_address);
+    build_1 = build_1.store_slice(v'dex_address);
+    var build_2 = begin_cell();
+    build_2 = build_2.store_slice(v'tech_incentive_address);
+    build_2 = build_2.store_slice(v'p2p_brokerage_address);
+    build_1 = store_builder_ref(build_1, build_2);
+    build_0 = store_builder_ref(build_0, build_1);
+    return build_0;
+}
+
+(slice, ((slice, slice, int, int, slice, slice, slice, slice, slice))) $VoraTreasury$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'vora_jetton_wallet = sc_0~__tact_load_address_opt();
+    var v'total_ido_revenue = sc_0~load_varuint16();
+    var v'total_subscription_revenue = sc_0~load_varuint16();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'strategy_address = sc_1~load_msg_addr();
+    var v'dev_address = sc_1~load_msg_addr();
+    var v'dex_address = sc_1~load_msg_addr();
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'tech_incentive_address = sc_2~load_msg_addr();
+    var v'p2p_brokerage_address = sc_2~load_msg_addr();
+    return (sc_0, (v'owner, v'vora_jetton_wallet, v'total_ido_revenue, v'total_subscription_revenue, v'strategy_address, v'dev_address, v'dex_address, v'tech_incentive_address, v'p2p_brokerage_address));
+}
+
+(slice, ((slice, slice, slice, slice, slice, slice))) $VoraTreasury$init$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'strategy = sc_0~load_msg_addr();
+    var v'dev = sc_0~load_msg_addr();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'dex = sc_1~load_msg_addr();
+    var v'tech = sc_1~load_msg_addr();
+    var v'p2p = sc_1~load_msg_addr();
+    return (sc_0, (v'owner, v'strategy, v'dev, v'dex, v'tech, v'p2p));
+}
+
+(slice, slice, int, int, slice, slice, slice, slice, slice) $VoraTreasury$_contract_load() impure inline {
+    slice $sc = get_data().begin_parse();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$VoraTreasury$_load();
+    }
+    else {
+        (slice $owner, slice $strategy, slice $dev, slice $dex, slice $tech, slice $p2p) = $sc~$VoraTreasury$init$_load();
+        $sc.end_parse();
+        return $VoraTreasury$_contract_init($owner, $strategy, $dev, $dex, $tech, $p2p);
+    }
+}
+
+() $VoraTreasury$_contract_store((slice, slice, int, int, slice, slice, slice, slice, slice) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_int(true, 1);
+    b = $VoraTreasury$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Contract VoraTreasury functions
+;;
+
+(slice, slice, int, int, slice, slice, slice, slice, slice) $VoraTreasury$_contract_init(slice $owner, slice $strategy, slice $dev, slice $dex, slice $tech, slice $p2p) impure inline {
+    var (($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)) = (null(), null(), 0, 0, null(), null(), null(), null(), null());
+    $self'owner = $owner;
+    $self'strategy_address = $strategy;
+    $self'dev_address = $dev;
+    $self'dex_address = $dex;
+    $self'tech_incentive_address = $tech;
+    $self'p2p_brokerage_address = $p2p;
+    return ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address);
+}
+
+((slice, slice, int, int, slice, slice, slice, slice, slice), ()) $VoraTreasury$_fun_send_jettons((slice, slice, int, int, slice, slice, slice, slice, slice) $self, slice $to, int $amount, slice $memo) impure inline_ref {
+    var (($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)) = $self;
+    throw_unless(14079, (~ null?($self'vora_jetton_wallet)));
+    $global_send($SendParameters$_constructor_to_value_mode_body(__tact_not_null($self'vora_jetton_wallet), 50000000, 1, $TokenTransfer$_store_cell($TokenTransfer$_constructor_query_id_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload(0, $amount, $to, $self'owner, null(), 10000000, $String$_fun_asSlice($memo)), begin_cell())));
+    return (($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address), ());
+}
+
+;;
+;; Get methods of a Contract VoraTreasury
+;;
+
+_ %owner() method_id(83229) {
+    var self = $VoraTreasury$_contract_load();
+    var res = self~$VoraTreasury$_fun_owner();
+    return res;
+}
+
+;;
+;; Routing of a Contract VoraTreasury
+;;
+
+;; message opcode reader utility: only binary receivers
+;; Returns 32 bit message opcode, otherwise throws the "Invalid incoming message" exit code
+(slice, int) ~load_opcode_internal(slice s) asm( -> 1 0) "32 LDUQ 130 THROWIFNOT";
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    cs~skip_bits(2);
+    var msg_bounceable = cs~load_int(1);
+    var msg_bounced = cs~load_int(1);
+    slice msg_sender_addr = cs~load_msg_addr();
+    __tact_context = (msg_bounceable, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address) = $VoraTreasury$_contract_load();
+    
+    ;; Handle bounced messages
+    if (msg_bounced) { return (); }
+    int op = 0;
+    int in_msg_length = slice_bits(in_msg);
+    if (in_msg_length >= 32) {
+        op = in_msg~load_uint(32);
+        ;; Receive WithdrawIDO message
+        if (op == 800788723) {
+            var $msg'strategy_amount = in_msg~load_varuint16();
+            var $msg'dev_amount = in_msg~load_varuint16();
+            var $msg'dex_amount = in_msg~load_varuint16();
+            ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)~$VoraTreasury$_fun_requireOwner();
+            int $total = (($msg'strategy_amount + $msg'dev_amount) + $msg'dex_amount);
+            if (($msg'strategy_amount > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)~$VoraTreasury$_fun_send_jettons($self'strategy_address, $msg'strategy_amount, __gen_slice_string_0da95c8bdb4088b274841eb642ea2084da9e28c653cbc8bd50cd8fe03b34e431());
+            }
+            if (($msg'dev_amount > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)~$VoraTreasury$_fun_send_jettons($self'dev_address, $msg'dev_amount, __gen_slice_string_1645018f16e52d38dc32d614ec2644d0e93487525b502d146175369898d724c6());
+            }
+            if (($msg'dex_amount > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)~$VoraTreasury$_fun_send_jettons($self'dex_address, $msg'dex_amount, __gen_slice_string_79e0183dee85eccd9621048003bf38e8d5955e31e9e2f39e2c9cedb636383235());
+            }
+            $VoraTreasury$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address));
+            return ();
+        }
+        
+        ;; Receive WithdrawSubscription message
+        if (op == 833932536) {
+            var $msg'strategy_amount = in_msg~load_varuint16();
+            var $msg'tech_amount = in_msg~load_varuint16();
+            var $msg'dex_lp_amount = in_msg~load_varuint16();
+            var $msg'p2p_brokerage_amount = in_msg~load_varuint16();
+            ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)~$VoraTreasury$_fun_requireOwner();
+            if (($msg'strategy_amount > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)~$VoraTreasury$_fun_send_jettons($self'strategy_address, $msg'strategy_amount, __gen_slice_string_79368612f8a140a6646fa122b2fa3dbaba55dfd26aa56d84b9e6911e88b49c9f());
+            }
+            if (($msg'tech_amount > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)~$VoraTreasury$_fun_send_jettons($self'tech_incentive_address, $msg'tech_amount, __gen_slice_string_1bb2451b5196a3e49e0faa77bceafc691426edf7d2752b351982cf3d3dd6e120());
+            }
+            if (($msg'dex_lp_amount > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)~$VoraTreasury$_fun_send_jettons($self'dex_address, $msg'dex_lp_amount, __gen_slice_string_cecd3326153cadb7a4711300a3c422144feb0eb44b47ff51594093081642a63d());
+            }
+            if (($msg'p2p_brokerage_amount > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)~$VoraTreasury$_fun_send_jettons($self'p2p_brokerage_address, $msg'p2p_brokerage_amount, __gen_slice_string_c357d91fff279bdb8f9cf203ba06dcb4e23282270b6b8afa7cbd8b5901b802c3());
+            }
+            $VoraTreasury$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address));
+            return ();
+        }
+        
+        ;; Receive Deploy message
+        if (op == 0x946a98b6) {
+            var $deploy'queryId = in_msg~load_uint(64);
+            ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)~$VoraTreasury$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+            $VoraTreasury$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address));
+            return ();
+        }
+        
+    }
+    ;; Empty Receiver and Text Receivers
+    var text_op = slice_hash(in_msg);
+    ;; Receive "Set Jetton Wallet" message
+    if (text_op == 0x71a1ec67b1d252cdd4096d9115e629e01397e30cc2422b00d08f3b5aba8eb347) {
+        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        $self'vora_jetton_wallet = __tact_context_get_sender();
+        $VoraTreasury$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address));
+        return ();
+    }
+    ;; Receive "withdraw_ton" message
+    if (text_op == 0x43f2b4a3430a592bb785c71e3e454e8011ac68a50641c9f853dc559f547c9862) {
+        ($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address)~$VoraTreasury$_fun_requireOwner();
+        $global_send($SendParameters$_constructor_to_value_mode($self'owner, 0, 130));
+        $VoraTreasury$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'total_ido_revenue, $self'total_subscription_revenue, $self'strategy_address, $self'dev_address, $self'dex_address, $self'tech_incentive_address, $self'p2p_brokerage_address));
+        return ();
+    }
+    ;; Throw if not handled
+    throw(130);
+}
+
+
+() __tact_selector_hack_asm() impure asm """
+@atend @ 1 {
+        execute current@ context@ current!
+        {
+            // The core idea of this function is to save gas by avoiding unnecessary dict jump, when recv_internal/recv_external is called
+            // We want to extract recv_internal/recv_external from the dict and select needed function
+            // not by jumping to the needed function by it's index, but by using usual IF statements.
+
+            }END> b> // Close previous builder, now we have a cell of previous code on top of the stack
+
+            <{ // Start of the new code builder
+                SETCP0
+                // Swap the new code builder with the previous code, now we have previous code on top of the stack
+                swap
+                // Transform cell to slice and load first ref from the previous code, now we have the dict on top of the stack
+                <s ref@
+
+                // Extract the recv_internal from the dict
+                dup 0 swap @procdictkeylen idict@ { "internal shortcut error" abort } ifnot
+                swap
+
+                // Delete the recv_internal from the dict
+                0 swap @procdictkeylen idict- drop
+                // Delete the recv_external from the dict (it's okay if it's not there)
+                -1 swap @procdictkeylen idict- drop
+                // Delete the __tact_selector_hack from the dict
+                65535 swap @procdictkeylen idict- drop
+
+                // Bring the code builder from the bottom of the stack
+                // because if recv_external extraction is optional, and the number of elements on the stack is not fixed
+                depth 1- roll
+                // Swap with the dict from which we extracted recv_internal and (maybe) recv_external
+                swap
+
+                // Check if the dict is empty
+                dup null?
+                // Store a copy of this flag in the bottom of the stack
+                dup depth 1- -roll
+                {
+                    // If the dict is empty, just drop it (it will be null if it's empty)
+                    drop
+                }
+                {
+                    // If the dict is not empty, prepare continuation to be stored in c3
+                    <{
+                        // Save this dict as first ref in this continuation, it will be pushed in runtime by DICTPUSHCONST
+                        swap @procdictkeylen DICTPUSHCONST
+                        // Jump to the needed function by it's index
+                        DICTIGETJMPZ
+                        // If such key is not found, throw 11 along with the key as an argument
+                        11 THROWARG
+                    }> PUSHCONT
+                    // Store the continuation in c3
+                    c3 POP
+                } cond
+
+                // Function id is on top of the (runtime) stack
+                DUP IFNOTJMP:<{
+                    // place recv_internal here
+                    DROP swap @addop
+                }>
+
+                // Bring back the flag, indicating if the dict is empty or not from the bottom of the stack
+                depth 1- roll
+                {
+                    // If the dict is empty, throw 11
+                    11 THROWARG
+                }
+                {
+                    // If the dict is not empty, jump to continuation from c3
+                    c3 PUSH JMPX
+                } cond
+            }> b>
+        } : }END>c
+        current@ context! current!
+    } does @atend !
+""";
+
+() __tact_selector_hack() method_id(65535) {
+    return __tact_selector_hack_asm();
+}

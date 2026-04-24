@@ -1,0 +1,13 @@
+@import "tailwindcss";
+/* Tailwind v4 기준 */
+
+:root {
+    background-color: #050505;
+    color: white;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}

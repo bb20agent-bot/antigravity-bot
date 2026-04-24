@@ -1,0 +1,70 @@
+
+;; IljimaeNFT.fc - Dynamic Persona NFT
+;; Based on standard NFT Item
+;; Features: Metadata update by Collection (Admin)
+
+#pragma version >=0.2.0;
+#include "stdlib.fc";
+
+;; Storage
+;; index: uint64
+;; collection_address: MsgAddress
+;; owner_address: MsgAddress
+;; content: Cell (Dynamic)
+
+(int, int, slice, slice, cell) load_data() inline {
+    slice ds = get_data().begin_parse();
+    var (index, collection_address, owner_address, content) = (
+        ds~load_uint(64),
+        ds~load_msg_addr(),
+        ds~load_msg_addr(),
+        ds~load_ref()
+    );
+    return (index, 0, collection_address, owner_address, content); ;; 0 is inited constant
+}
+
+() save_data(int index, slice collection_address, slice owner_address, cell content) impure inline {
+    set_data(begin_cell()
+        .store_uint(index, 64)
+        .store_slice(collection_address)
+        .store_slice(owner_address)
+        .store_ref(content)
+        .end_cell());
+}
+
+() recv_internal(int msg_value, cell in_msg_full, slice in_msg_body) impure {
+    if (in_msg_body.slice_empty()) { return (); }
+    
+    slice cs = in_msg_full.begin_parse();
+    int flags = cs~load_uint(4);
+    if (flags & 1) { return (); }
+    
+    slice sender_address = cs~load_msg_addr();
+    int op = in_msg_body~load_uint(32);
+    int query_id = in_msg_body~load_uint(64);
+    
+    (int index, int inited, slice collection_address, slice owner_address, cell content) = load_data();
+    
+    ;; 1. Transfer (Standard)
+    if (op == 0x5fcc3d14) { 
+        throw_unless(401, equal_slices(sender_address, owner_address));
+        slice new_owner = in_msg_body~load_msg_addr();
+        save_data(index, collection_address, new_owner, content);
+        return ();
+    }
+    
+    ;; 2. Update Dynamic Metadata (Only Collection/Admin)
+    if (op == 0x1a2b3c4d) { 
+        throw_unless(401, equal_slices(sender_address, collection_address)); 
+        cell new_content = in_msg_body~load_ref();
+        save_data(index, collection_address, owner_address, new_content);
+        return ();
+    }
+    
+    throw(0xffff);
+}
+
+;; Get methods
+(int, int, slice, slice, cell) get_nft_data() method_id {
+    return load_data();
+}

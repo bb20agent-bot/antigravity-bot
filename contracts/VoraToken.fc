@@ -88,6 +88,30 @@
         save_data(total_supply, admin_address, in_msg_body~load_ref(), jetton_wallet_code);
         return ();
     }
+
+    if (op == 0x7bdd97de) { ;; burn notification
+        int amount = in_msg_body~load_coins();
+        slice sender_owner = in_msg_body~load_msg_addr();
+        
+        cell state_init = calculate_jetton_wallet_state_init(sender_owner, my_address(), jetton_wallet_code);
+        slice valid_wallet_address = calculate_jetton_wallet_address(state_init);
+        throw_unless(74, equal_slices(valid_wallet_address, sender_address));
+        
+        save_data(total_supply - amount, admin_address, content, jetton_wallet_code);
+        
+        slice response_address = in_msg_body~load_msg_addr();
+        if (response_address.preload_uint(2) != 0) {
+            var msg = begin_cell()
+                .store_uint(0x10, 6)
+                .store_slice(response_address)
+                .store_coins(0)
+                .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1)
+                .store_uint(0xd53276db, 32)
+                .store_uint(query_id, 64);
+            send_raw_message(msg.end_cell(), 64); ;; return remaining gas
+        }
+        return ();
+    }
     
     throw(0xffff);
 }

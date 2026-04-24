@@ -1,0 +1,380 @@
+//@version=5
+strategy("Vora_BJ_Master_strategy", "Vora_BJ_Master", overlay=true, pyramiding=1, initial_capital=1000, default_qty_type=strategy.cash, commission_type=strategy.commission.percent, commission_value=0.04, slippage=2)
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 1. INPUT SETTINGS (3대 전략 완벽 통합)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+grpJoy = "1. Joy_full (추세선) 설정"
+pLen = input.int(5, "피봇 길이 (기본 5)", group=grpJoy)
+showTL = input.bool(true, "추세선 표시", group=grpJoy)
+minStars = input.int(2, "최소 겹침 조건 (기본 2)", group=grpJoy, tooltip="2 = 2개 타임프레임 추세선 겹침 돌파시 진입")
+
+grpBrn = "2. Brown_skill (지지/저항) 설정"
+zoneThick = input.float(0.3, "존 두께 (ATR 배수)", step=0.1, group=grpBrn)
+minZoneTouch = input.int(2, "S/R 존 최소 터치", group=grpBrn)
+maxZones = input.int(4, "표시 구역 개수", group=grpBrn)
+
+grpVora = "3. VORA (필터 & 리스크 관리) 설정"
+leverage = input.int(10, "레버리지 (Leverage)", group=grpVora)
+marginPct = input.float(15.0, "1회 진입 시드 비율(%)", step=5.0, group=grpVora)
+emaLen = input.int(50, "EMA 트렌드 필터", group=grpVora)
+adxLen = input.int(14, "ADX 변동성 필터", group=grpVora)
+adxThresh = input.float(18.0, "ADX 최소 기준", group=grpVora)
+volMult = input.float(1.5, "거래량 폭발 필터 (SMA 배수)", group=grpVora)
+
+grpExit = "4. 통합 익절/손절 (Exit) 설정"
+rrRatio = input.float(2.0, "기본 목표가 손익비 (RR)", step=0.5, group=grpExit)
+useMicroHedge = input.bool(true, "마이크로 반익절 (uTP) 사용", group=grpExit)
+hedgeRmult = input.float(0.15, "uTP 도달 지점 (RR)", step=0.05, group=grpExit)
+useBE = input.bool(true, "본절 이동 (Break Even) 사용", group=grpExit)
+useTS = input.bool(true, "트레일링 스탑 (Trailing Stop) 사용", group=grpExit)
+
+grpMTF = "5. 타임프레임 설정"
+midTF = input.timeframe("60", "Mid TF (예: 1시간)", group=grpMTF)
+highTF = input.timeframe("240", "High TF (예: 4시간)", group=grpMTF)
+
+// 기본 지표 계산
+atrVal = ta.atr(14)
+volMA = ta.sma(volume, 20)
+highVol = volume > volMA * volMult
+emaVal = ta.ema(close, emaLen)
+[dip, dim, adxVal] = ta.dmi(adxLen, adxLen)
+
+// 차트에 EMA 표시 (에러 방지용 겸 시각적 지표)
+plot(emaVal, "EMA 50", color=color.new(color.orange, 50), linewidth=2)
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 2. VORA Pro v6 - 상태 머신 (충격 및 눌림목 파악 - 삼각수렴 포착 핵심)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+var int longState = 0
+var float longImpHigh = na
+var float longPbLow = na
+var int longWaitBars = 0
+
+bool isBullCandle = close > open and (close - open) >= atrVal * 0.25
+bool isBearCandle = close < open
+
+if isBullCandle
+    if longState == 0
+        longState := 1
+        longImpHigh := high
+        longWaitBars := 0
+else if longState == 1
+    longImpHigh := math.max(longImpHigh, high)
+    longWaitBars += 1
+    if isBearCandle
+        longState := 2
+        longPbLow := low
+        longWaitBars := 0
+    else if longWaitBars > 20
+        longState := 0
+else if longState == 2
+    longPbLow := math.min(longPbLow, low)
+    longWaitBars += 1
+    float pbSize = longImpHigh - longPbLow
+    if pbSize > atrVal * 3.0
+        longState := 0
+    else if pbSize >= atrVal * 0.2
+        longState := 3 // 응축 완료 (삼각수렴 끝자락 등)
+        longWaitBars := 0
+else if longState == 3
+    longWaitBars += 1
+    if longWaitBars > 20
+        longState := 0
+
+var int shortState = 0
+var float shortImpLow = na
+var float shortPbHigh = na
+var int shortWaitBars = 0
+
+bool isBearCandleSM = close < open and (open - close) >= atrVal * 0.25
+bool isBullCandleSM = close > open
+
+if isBearCandleSM
+    if shortState == 0
+        shortState := 1
+        shortImpLow := low
+        shortWaitBars := 0
+else if shortState == 1
+    shortImpLow := math.min(shortImpLow, low)
+    shortWaitBars += 1
+    if isBullCandleSM
+        shortState := 2
+        shortPbHigh := high
+        shortWaitBars := 0
+    else if shortWaitBars > 20
+        shortState := 0
+else if shortState == 2
+    shortPbHigh := math.max(shortPbHigh, high)
+    shortWaitBars += 1
+    float pbSize = shortPbHigh - shortImpLow
+    if pbSize > atrVal * 3.0
+        shortState := 0
+    else if pbSize >= atrVal * 0.2
+        shortState := 3 // 응축 완료
+        shortWaitBars := 0
+else if shortState == 3
+    shortWaitBars += 1
+    if shortWaitBars > 20
+        shortState := 0
+
+// 필터
+bool emaLongOk = close > emaVal and emaVal > emaVal[1]
+bool emaShortOk = close < emaVal and emaVal < emaVal[1]
+bool adxOk = adxVal > adxThresh
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 3. JOY_FULL (스마트 추세선 로직)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+c_res = color.new(#ff00ff, 0)
+c_sup = color.new(#00ff00, 0)
+tf_sec_cur = timeframe.in_seconds(timeframe.period)
+len_cur = pLen
+len_mid = pLen * int(math.max(1, math.round(timeframe.in_seconds(midTF) / tf_sec_cur)))
+len_hi  = pLen * int(math.max(1, math.round(timeframe.in_seconds(highTF) / tf_sec_cur)))
+
+type TL
+    float x1
+    float y1
+    float x2
+    float y2
+    float slope
+    bool broken
+    line obj
+    float val
+    color col
+    string st
+    int wid
+    bool isHigh
+    int len
+
+method update(TL this, float pivot, float c_price) =>
+    bool is_breakout = false
+    
+    if not na(this.x1) and not na(this.x2) and this.x1 != this.x2 and not this.broken
+        this.val := this.y1 + this.slope * (bar_index - this.x1)
+    else
+        this.val := na
+
+    if not na(this.obj) and not this.broken and not na(this.val)
+        bool broken_now = this.isHigh ? (c_price > this.val) : (c_price < this.val)
+        if broken_now
+            this.broken := true
+            is_breakout := true
+            line.set_xy2(this.obj, bar_index, this.val)
+
+    if not na(pivot)
+        if not na(this.obj) and not this.broken
+            int retro_x = bar_index - this.len
+            if retro_x > this.x1
+                line.set_xy2(this.obj, retro_x, this.y1 + this.slope * (retro_x - this.x1))
+                
+        this.x2 := this.x1
+        this.y2 := this.y1
+        this.x1 := bar_index[this.len]
+        this.y1 := pivot
+        
+        if not na(this.x1) and not na(this.x2) and this.x1 != this.x2
+            this.slope := (this.y1 - this.y2) / (this.x1 - this.x2)
+            if (this.isHigh ? (this.slope < 0) : (this.slope > 0))
+                this.broken := false
+                if showTL
+                    this.obj := line.new(math.round(this.x2), this.y2, math.round(this.x1), this.y1, color=this.col, style=this.st, width=this.wid)
+                    this.val := this.y1 + this.slope * (bar_index - this.x1)
+            else
+                this.broken := true
+                this.val := na
+
+    if not na(this.obj) and not this.broken and not na(this.val)
+        line.set_xy2(this.obj, bar_index, this.val)
+        
+    is_breakout
+
+var res_cur = TL.new(na,na,na,na,na,true,na,na, c_res, line.style_solid, 2, true, len_cur)
+var res_mid = TL.new(na,na,na,na,na,true,na,na, color.new(c_res, 30), line.style_dashed, 1, true, len_mid)
+var res_hi  = TL.new(na,na,na,na,na,true,na,na, color.new(c_res, 30), line.style_dotted, 1, true, len_hi)
+
+var sup_cur = TL.new(na,na,na,na,na,true,na,na, c_sup, line.style_solid, 2, false, len_cur)
+var sup_mid = TL.new(na,na,na,na,na,true,na,na, color.new(c_sup, 30), line.style_dashed, 1, false, len_mid)
+var sup_hi  = TL.new(na,na,na,na,na,true,na,na, color.new(c_sup, 30), line.style_dotted, 1, false, len_hi)
+
+bool brk_up_cur = res_cur.update(ta.pivothigh(high, len_cur, len_cur), close)
+bool brk_up_mid = res_mid.update(ta.pivothigh(high, len_mid, len_mid), close)
+bool brk_up_hi  = res_hi.update(ta.pivothigh(high, len_hi,  len_hi),  close)
+
+bool brk_dn_cur = sup_cur.update(ta.pivotlow(low, len_cur, len_cur), close)
+bool brk_dn_mid = sup_mid.update(ta.pivotlow(low, len_mid, len_mid), close)
+bool brk_dn_hi  = sup_hi.update(ta.pivotlow(low, len_hi,  len_hi),  close)
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 4. BROWN_SKILL (지지/저항 박스 로직)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+var float[] sup_lvls = array.new_float()
+var int[] sup_tchs = array.new_int()
+var box[] sup_bx = array.new_box()
+
+var float[] res_lvls = array.new_float()
+var int[] res_tchs = array.new_int()
+var box[] res_bx = array.new_box()
+
+float ph = ta.pivothigh(high, pLen, pLen)
+float pl = ta.pivotlow(low, pLen, pLen)
+float zoneH = atrVal * zoneThick
+
+if not na(ph)
+    array.push(res_lvls, ph)
+    array.push(res_tchs, 1)
+    array.push(res_bx, box.new(bar_index[pLen], ph + zoneH/2, bar_index, ph - zoneH/2, border_color=color.new(color.red, 40), bgcolor=color.new(color.red, 85), extend=extend.right))
+    if array.size(res_lvls) > maxZones
+        array.shift(res_lvls)
+        array.shift(res_tchs)
+        box.delete(array.shift(res_bx))
+
+if not na(pl)
+    array.push(sup_lvls, pl)
+    array.push(sup_tchs, 1)
+    array.push(sup_bx, box.new(bar_index[pLen], pl + zoneH/2, bar_index, pl - zoneH/2, border_color=color.new(color.green, 40), bgcolor=color.new(color.green, 85), extend=extend.right))
+    if array.size(sup_lvls) > maxZones
+        array.shift(sup_lvls)
+        array.shift(sup_tchs)
+        box.delete(array.shift(sup_bx))
+
+bool brown_sup_bounce = false
+if array.size(sup_lvls) > 0
+    for i = 0 to array.size(sup_lvls) - 1
+        float top = array.get(sup_lvls, i) + zoneH/2
+        float bot = array.get(sup_lvls, i) - zoneH/2
+        if low <= top and close >= bot
+            array.set(sup_tchs, i, array.get(sup_tchs, i) + 1)
+            if array.get(sup_tchs, i) >= minZoneTouch and close > open
+                brown_sup_bounce := true
+        if close < bot and close[1] >= bot
+            box.set_extend(array.get(sup_bx, i), extend.none)
+            box.set_right(array.get(sup_bx, i), bar_index)
+
+bool brown_res_bounce = false
+if array.size(res_lvls) > 0
+    for i = 0 to array.size(res_lvls) - 1
+        float top = array.get(res_lvls, i) + zoneH/2
+        float bot = array.get(res_lvls, i) - zoneH/2
+        if high >= bot and close <= top
+            array.set(res_tchs, i, array.get(res_tchs, i) + 1)
+            if array.get(res_tchs, i) >= minZoneTouch and close < open
+                brown_res_bounce := true
+        if close > top and close[1] <= top
+            box.set_extend(array.get(res_bx, i), extend.none)
+            box.set_right(array.get(res_bx, i), bar_index)
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 5. MASTER CONFLUENCE (얼티밋 융합 진입 타점)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+bool joy_long_brk = brk_up_cur or brk_up_mid or brk_up_hi
+bool joy_short_brk = brk_dn_cur or brk_dn_mid or brk_dn_hi
+
+float ref_val_up = brk_up_cur ? res_cur.val : brk_up_mid ? res_mid.val : res_hi.val
+int stars_up = 0
+stars_up += (not na(res_cur.val) and math.abs(res_cur.val - ref_val_up) <= atrVal*0.4 ? 1 : 0)
+stars_up += (not na(res_mid.val) and math.abs(res_mid.val - ref_val_up) <= atrVal*0.4 ? 1 : 0)
+stars_up += (not na(res_hi.val) and math.abs(res_hi.val - ref_val_up) <= atrVal*0.4 ? 1 : 0)
+
+float ref_val_dn = brk_dn_cur ? sup_cur.val : brk_dn_mid ? sup_mid.val : sup_hi.val
+int stars_dn = 0
+stars_dn += (not na(sup_cur.val) and math.abs(sup_cur.val - ref_val_dn) <= atrVal*0.4 ? 1 : 0)
+stars_dn += (not na(sup_mid.val) and math.abs(sup_mid.val - ref_val_dn) <= atrVal*0.4 ? 1 : 0)
+stars_dn += (not na(sup_hi.val) and math.abs(sup_hi.val - ref_val_dn) <= atrVal*0.4 ? 1 : 0)
+
+// ★★★ 얼티밋 발사 조건 ★★★
+bool triggerLong = (joy_long_brk and stars_up >= minStars) or (brown_sup_bounce and highVol)
+bool master_long = triggerLong and longState == 3 and emaLongOk and adxOk
+
+bool triggerShort = (joy_short_brk and stars_dn >= minStars) or (brown_res_bounce and highVol)
+bool master_short = triggerShort and shortState == 3 and emaShortOk and adxOk
+
+// 상태 초기화
+if master_long
+    longState := 0
+if master_short
+    shortState := 0
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 6. VORA PRO STRATEGY EXECUTION (자동매매 & 리스크 관리)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+float currentEquity = strategy.equity
+float marginAmount = currentEquity * (marginPct / 100)
+float positionValue = marginAmount * leverage
+float posQty = positionValue / close
+
+var float trade_sl = na
+var float entry_risk = na
+var bool be_triggered = false
+var bool ts_triggered = false
+
+float avgPrice = strategy.position_avg_price
+
+if master_long
+    color heart_col = stars_up >= 3 ? color.new(color.lime, 0) : color.new(color.lime, 50)
+    label.new(bar_index, low - atrVal, "L\n♥", style=label.style_none, textcolor=heart_col, size=size.normal)
+    
+    float sl = longPbLow - atrVal * 0.5 
+    float risk = close - sl
+    if risk > 0
+        strategy.entry("Long", strategy.long, qty=posQty)
+        trade_sl := sl
+        entry_risk := risk
+        be_triggered := false
+        ts_triggered := false
+        
+        line.new(bar_index, sl, bar_index+4, sl, color=color.red, width=2)
+        line.new(bar_index, close + risk * rrRatio, bar_index+4, close + risk * rrRatio, color=color.lime, width=2)
+        
+        if useMicroHedge
+            strategy.exit("uTP", "Long", limit=close + risk * hedgeRmult, qty=posQty * 0.03)
+
+if master_short
+    color heart_col = stars_dn >= 3 ? color.new(color.red, 0) : color.new(color.red, 50)
+    label.new(bar_index, high + atrVal, "♥\nS", style=label.style_none, textcolor=heart_col, size=size.normal)
+    
+    float sl = shortPbHigh + atrVal * 0.5 
+    float risk = sl - close
+    if risk > 0
+        strategy.entry("Short", strategy.short, qty=posQty)
+        trade_sl := sl
+        entry_risk := risk
+        be_triggered := false
+        ts_triggered := false
+        
+        line.new(bar_index, sl, bar_index+4, sl, color=color.red, width=2)
+        line.new(bar_index, close - risk * rrRatio, bar_index+4, close - risk * rrRatio, color=color.lime, width=2)
+        
+        if useMicroHedge
+            strategy.exit("uTP", "Short", limit=close - risk * hedgeRmult, qty=posQty * 0.03)
+
+// VORA 본절 & 트레일링 스탑 안전 추적 로직 (에러 방지 강화)
+if strategy.position_size > 0
+    if useBE and not be_triggered and high >= avgPrice + (entry_risk * 0.8)
+        trade_sl := na(trade_sl) ? avgPrice : math.max(trade_sl, avgPrice)
+        be_triggered := true
+    if useTS and high >= avgPrice + (entry_risk * 1.2)
+        ts_triggered := true
+    if ts_triggered
+        trade_sl := na(trade_sl) ? high - atrVal * 1.0 : math.max(trade_sl, high - atrVal * 1.0)
+    strategy.exit("Exit L", "Long", stop=trade_sl, limit=avgPrice + entry_risk * rrRatio)
+
+else if strategy.position_size < 0
+    if useBE and not be_triggered and low <= avgPrice - (entry_risk * 0.8)
+        trade_sl := na(trade_sl) ? avgPrice : math.min(trade_sl, avgPrice)
+        be_triggered := true
+    if useTS and low <= avgPrice - (entry_risk * 1.2)
+        ts_triggered := true
+    if ts_triggered
+        trade_sl := na(trade_sl) ? low + atrVal * 1.0 : math.min(trade_sl, low + atrVal * 1.0)
+    strategy.exit("Exit S", "Short", stop=trade_sl, limit=avgPrice - entry_risk * rrRatio)
+
+if strategy.position_size == 0
+    trade_sl := na
+
+// VORA 대시보드
+var table dash = table.new(position.top_right, 1, 1, bgcolor=color.new(color.black, 80), border_width=1)
+if barstate.islast
+    string stateStr = "L_State: " + str.tostring(longState) + " | S_State: " + str.tostring(shortState)
+    table.cell(dash, 0, 0, "Vora_BJ_Master_strategy\n" + stateStr, text_color=color.white, text_size=size.small)

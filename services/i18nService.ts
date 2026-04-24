@@ -34,13 +34,13 @@ export const translations: Record<Language, any> = {
         unilevelTree: "유니레벨 트리",
         settlements: "정산 관리",
         operations: "운영 관리",
-        voraScan: "Vora 스캔",
+        voraScan: "Bromotion 스캔",
         communityHub: "커뮤니티 허브",
         userRankings: "유저 랭킹",
         growth: "성장 관리",
         strategyCenter: "전략 센터",
         nftMarket: "NFT 마켓",
-        voraAdmin: "VORA 관리자",
+        voraAdmin: "BROMOTION 관리자",
         // User App Specific
         strategicAI: "전략적 AI",
         brown: "브라운",
@@ -74,7 +74,7 @@ export const translations: Record<Language, any> = {
         platformDataBridge: "플랫폼 데이터 브리지 로그",
         realTimeLinkActive: "실시간 링크 활성",
         omniChannelSync: "옴니채널 동기화",
-        policyUpdatesInfo: "여기서 실행된 정책 업데이트는 BORA 생태계 전반에 즉시 전파됩니다. 비공개 관리자 로직이 공개 유저 인터페이스를 원활하게 업데이트합니다.",
+        policyUpdatesInfo: "여기서 실행된 정책 업데이트는 BROMOTION 생태계 전반에 즉시 전파됩니다. 비공개 관리자 로직이 공개 유저 인터페이스를 원활하게 업데이트합니다.",
         pushToMainnet: "메인넷 배포",
         auditUserUI: "유저 UI 감사",
         // Settlement
@@ -96,7 +96,7 @@ export const translations: Record<Language, any> = {
         action: "작업",
         forceBatch: "강제 배치",
         protocolSettlementProtection: "프로토콜 정산 보호",
-        secondaryVerification: "2차 온체인 검증으로 30% 에코시스템 지분이 VORA 스테이킹 리저브로 자동 라우팅됩니다.",
+        secondaryVerification: "2차 온체인 검증으로 30% 에코시스템 지분이 BROMOTION 스테이킹 리저브로 자동 라우팅됩니다.",
         verifyOnChain: "온체인 검증"
     },
     en: {
@@ -122,13 +122,13 @@ export const translations: Record<Language, any> = {
         unilevelTree: "Unilevel Tree",
         settlements: "Settlements",
         operations: "Operations",
-        voraScan: "VoraScan",
+        voraScan: "BromotionScan",
         communityHub: "Community Hub",
         userRankings: "User Rankings",
         growth: "Growth",
         strategyCenter: "Strategy Center",
         nftMarket: "NFT Market",
-        voraAdmin: "VORA ADMIN",
+        voraAdmin: "BROMOTION ADMIN",
         // User App Specific
         strategicAI: "STRATEGIC AI",
         brown: "BROWN",
@@ -162,7 +162,7 @@ export const translations: Record<Language, any> = {
         platformDataBridge: "Platform Data Bridge Logs",
         realTimeLinkActive: "Real-time Link Active",
         omniChannelSync: "Omni-Channel Synchronization",
-        policyUpdatesInfo: "Policy updates executed here are immediately propagated across the BORA ecosystem. The private Admin logic seamlessly updates the public User application interfaces.",
+        policyUpdatesInfo: "Policy updates executed here are immediately propagated across the BROMOTION ecosystem. The private Admin logic seamlessly updates the public User application interfaces.",
         pushToMainnet: "Push To Mainnet",
         auditUserUI: "Audit User UI",
         // Settlement
@@ -184,7 +184,7 @@ export const translations: Record<Language, any> = {
         action: "Action",
         forceBatch: "Force Batch",
         protocolSettlementProtection: "Protocol Settlement Protection",
-        secondaryVerification: "Secondary on-chain verification ensures 30% ecosystem share is automatically routed to the VORA Staking Reserve.",
+        secondaryVerification: "Secondary on-chain verification ensures 30% ecosystem share is automatically routed to the BROMOTION Staking Reserve.",
         verifyOnChain: "Verify On-Chain"
     },
     zh: {

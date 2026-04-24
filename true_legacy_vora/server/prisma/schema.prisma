@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    Int      @id @default(autoincrement())
+  telegramId            String   @unique
+  tonWalletAddress      String?  @unique
+  totalTonStaked        Float    @default(0)
+  isFandomUser          Boolean  @default(false)
+  t2eBonusMultiplier    Float    @default(1.0)
+  
+  // -- Fandom 8 Core Mechanics (Admin Control) --
+  dnftLevel             Int      @default(1)    // 1: 스타트업 ~ 5: 로키의 지팡이
+  nVolume               Float    @default(0)    // 1, 2레벨 직/간접 N추천 볼륨 추적
+  isCrew                Boolean  @default(false)// 브라운 AI 우수자 / 크루 발탁 여부
+  accumulatedVora       Float    @default(0)    // T2E 에어드랍 누적 획득량 VORA
+  
+  // -- Fandom Trader (VIP) Security Keys --
+  binanceApiKey         String?
+  binanceSecretKey      String?
+  tvWebhookUrl          String?
+  // ---------------------------------------------
+
+  referrerId            Int?
+  referrer              User?    @relation("UserToReferrer", fields: [referrerId], references: [id])
+  referrals             User[]   @relation("UserToReferrer")
+
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+// Global System Configuration (Admin Control Variables)
+model SystemState {
+  id                    String   @id @default("global") // One global config row
+  stakingPoolTotal      Float    @default(0)   // 3M 스테이킹 풀 예치금 (CEX 봇 가동 조건)
+  joyCmoLiquidityTon    Float    @default(0)   // 조이 CMO 기반 구독 출금 풀 (TON)
+  joyCmoLiquidityUsdc   Float    @default(0)   // 조이 CMO 기반 구독 출금 풀 (USDC)
+  p2pTaxAccumulated     Float    @default(0)   // 텔레그램 P2P 에스크로 운영 텍스 누적 (10%)
+  p2pBurnAccumulated    Float    @default(0)   // 텔레그램 P2P 텍스 중 바이백 소각 누적 (15%)
+
+  updatedAt             DateTime @updatedAt
+}
+
+// DAO Governance Voting
+model DaoProposal {
+  id                    Int      @id @default(autoincrement())
+  title                 String
+  status                String   @default("Active") // Active | Passed | Rejected
+  votesFor              Int      @default(0)
+  votesAgainst          Int      @default(0)
+  
+  createdAt             DateTime @default(now())
+}

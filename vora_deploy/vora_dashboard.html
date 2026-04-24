@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VORA 팬덤 대시보드</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vora: #7C3AED;
+    --vora-light: #A78BFA;
+    --vora-dark: #4C1D95;
+    --vora-glow: rgba(124,58,237,0.25);
+    --gold: #F59E0B;
+    --gold-light: #FCD34D;
+    --emerald: #10B981;
+    --emerald-light: #6EE7B7;
+    --rose: #F43F5E;
+    --sky: #0EA5E9;
+    --bg: #0A0A14;
+    --bg2: #0F0F1E;
+    --bg3: #161628;
+    --surface: #1A1A2E;
+    --surface2: #1F1F3A;
+    --border: rgba(124,58,237,0.2);
+    --border2: rgba(124,58,237,0.4);
+    --text: #E2E8F0;
+    --text-muted: #94A3B8;
+    --text-dim: #475569;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  /* STARFIELD */
+  .stars {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background: 
+      radial-gradient(1px 1px at 20% 15%, rgba(255,255,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 30%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 35% 60%, rgba(255,255,255,0.25) 0%, transparent 100%),
+      radial-gradient(1px 1px at 65% 80%, rgba(255,255,255,0.35) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 50%, rgba(255,255,255,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 85%, rgba(255,255,255,0.3) 0%, transparent 100%),
+      radial-gradient(2px 2px at 45% 45%, rgba(167,139,250,0.2) 0%, transparent 100%);
+  }
+  .page { position: relative; z-index: 1; }
+
+  /* ─── WELCOME SCREEN ─── */
+  #welcomeScreen {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 2rem; text-align: center;
+  }
+  .vora-logo {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(3rem, 10vw, 6rem);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    background: linear-gradient(135deg, var(--vora-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+    text-shadow: none;
+  }
+  .vora-sub { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 3rem; letter-spacing: 0.2em; text-transform: uppercase; }
+  .fandom-choice { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; margin-top: 1rem; }
+  .choice-card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 2rem 2.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    width: 260px;
+    position: relative;
+    overflow: hidden;
+  }
+  .choice-card::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, var(--vora-glow), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .choice-card:hover { transform: translateY(-4px); border-color: var(--vora-light); }
+  .choice-card:hover::before { opacity: 1; }
+  .choice-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+  .choice-title { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: var(--vora-light); margin-bottom: 0.5rem; }
+  .choice-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+  .choice-badge { display: inline-block; background: var(--vora-dark); color: var(--vora-light); font-size: 0.7rem; padding: 2px 8px; border-radius: 999px; margin-top: 0.75rem; }
+
+  /* ─── ONBOARDING CHAT ─── */
+  #onboardingScreen {
+    min-height: 100vh; display: none; flex-direction: column;
+    max-width: 700px; margin: 0 auto; padding: 2rem 1rem;
+  }
+  .chat-header {
+    display: flex; align-items: center; gap: 1rem;
+    padding: 1rem 1.5rem; background: var(--surface); border-radius: 16px;
+    border: 1px solid var(--border); margin-bottom: 1.5rem;
+  }
+  .brown-avatar {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--vora), var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 700;
+    color: white; flex-shrink: 0;
+  }
+  .chat-title { font-weight: 700; color: var(--vora-light); font-size: 1rem; }
+  .chat-subtitle { font-size: 0.8rem; color: var(--emerald); margin-top: 2px; }
+  .chat-messages { flex: 1; display: flex; flex-direction: column; gap: 1rem; }
+  .msg {
+    display: flex; gap: 0.75rem; align-items: flex-end;
+    animation: slideIn 0.4s ease;
+  }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    background: var(--surface2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; color: var(--text-muted);
+  }
+  .msg-bubble {
+    max-width: 80%; padding: 0.75rem 1rem; border-radius: 16px;
+    font-size: 0.9rem; line-height: 1.6;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .msg.user .msg-bubble {
+    background: var(--vora-dark); border-color: var(--vora);
+    color: var(--vora-light);
+  }
+  .msg.brown .msg-bubble { border-left: 3px solid var(--vora-light); }
+  .msg-bubble .highlight { color: var(--gold); font-weight: 600; }
+  .msg-bubble .em { color: var(--vora-light); }
+  .input-section { margin-top: 1.5rem; }
+  .options-grid { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 1rem; }
+  .opt-btn {
+    background: var(--surface); border: 1px solid var(--border2);
+    color: var(--vora-light); padding: 0.5rem 1rem;
+    border-radius: 999px; cursor: pointer; font-size: 0.85rem;
+    font-family: 'Noto Sans KR', sans-serif; transition: all 0.2s;
+  }
+  .opt-btn:hover { background: var(--vora-dark); border-color: var(--vora-light); }
+  .text-input-row { display: flex; gap: 0.75rem; }
+  .chat-input {
+    flex: 1; background: var(--surface); border: 1px solid var(--border2);
+    color: var(--text); padding: 0.75rem 1rem; border-radius: 12px;
+    font-size: 0.9rem; font-family: 'Noto Sans KR', sans-serif; outline: none;
+  }
+  .chat-input:focus { border-color: var(--vora-light); }
+  .send-btn {
+    background: var(--vora); color: white; border: none;
+    padding: 0.75rem 1.25rem; border-radius: 12px; cursor: pointer;
+    font-size: 0.9rem; transition: background 0.2s;
+  }
+  .send-btn:hover { background: var(--vora-dark); }
+
+  /* ─── DASHBOARD ─── */
+  #dashboardScreen {
+    display: none; min-height: 100vh;
+    padding: 1.5rem; max-width: 1400px; margin: 0 auto;
+  }
+  .dash-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;
+  }
+  .dash-logo { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 900; color: var(--vora-light); }
+  .dash-logo span { color: var(--gold); }
+  .user-badge {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+    padding: 0.4rem 1rem 0.4rem 0.4rem;
+  }
+  .user-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--emerald); }
+
+  /* DREAMS BANNER */
+  .dreams-banner {
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: 16px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+    border-left: 4px solid var(--vora);
+  }
+  .dreams-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+  .dreams-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .dream-item { display: flex; flex-direction: column; gap: 0.25rem; }
+  .dream-rank { font-size: 0.7rem; color: var(--vora-light); font-family: 'Orbitron', sans-serif; }
+  .dream-text { font-size: 0.9rem; font-weight: 500; color: var(--text); }
+  .dream-target { font-size: 0.85rem; color: var(--gold); font-family: 'Orbitron', sans-serif; }
+  .dream-progress { height: 4px; background: var(--bg3); border-radius: 2px; margin-top: 4px; overflow: hidden; }
+  .dream-progress-fill { height: 100%; background: linear-gradient(90deg, var(--vora), var(--gold)); border-radius: 2px; transition: width 1s ease; }
+
+  /* KEY METRICS */
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+  .metric-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1rem 1.25rem;
+  }
+  .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .metric-value { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; }
+  .metric-value.seed { color: var(--sky); }
+  .metric-value.stoploss { color: var(--rose); }
+  .metric-value.daily { color: var(--emerald); }
+  .metric-value.weekly { color: var(--gold); }
+  .metric-value.monthly { color: var(--vora-light); }
+  .metric-value.winrate { color: var(--gold-light); }
+  .metric-delta { font-size: 0.75rem; margin-top: 4px; }
+  .metric-delta.pos { color: var(--emerald); }
+  .metric-delta.neg { color: var(--rose); }
+
+  /* MAIN GRID */
+  .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } .dreams-grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.25rem;
+  }
+  .panel-title {
+    font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-muted); margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .panel-title::before { content: ''; width: 3px; height: 14px; background: var(--vora); border-radius: 2px; flex-shrink: 0; }
+
+  /* TRADING SETUP */
+  .trading-row { display: flex; flex-direction: column; gap: 0.75rem; }
+  .trade-field { display: flex; flex-direction: column; gap: 0.3rem; }
+  .trade-label { font-size: 0.75rem; color: var(--text-muted); }
+  .trade-value { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: var(--vora-light); background: var(--bg3); padding: 0.5rem 0.75rem; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .trade-badge { font-size: 0.7rem; background: var(--vora-dark); color: var(--vora-light); padding: 2px 8px; border-radius: 999px; font-family: 'Noto Sans KR', sans-serif; }
+  .mode-row { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
+  .mode-btn { flex: 1; padding: 0.4rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--text-muted); font-size: 0.8rem; cursor: pointer; text-align: center; transition: all 0.2s; font-family: 'Noto Sans KR', sans-serif; }
+  .mode-btn.active { background: var(--vora-dark); border-color: var(--vora); color: var(--vora-light); }
+  .asset-tab { background: var(--bg3); border: 1px solid var(--border); color: var(--text-muted); padding: 0.35rem 0.75rem; border-radius: 999px; cursor: pointer; font-size: 0.78rem; font-family: 'Noto Sans KR', sans-serif; transition: all 0.2s; white-space: nowrap; }
+  .asset-tab:hover { border-color: var(--vora-light); color: var(--text); }
+  .asset-tab.active { background: var(--vora-dark); border-color: var(--vora); color: var(--vora-light); font-weight: 500; }
+  .input-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .num-input { width: 100%; background: var(--bg3); border: 1px solid var(--border2); color: var(--text); padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.9rem; font-family: 'Orbitron', sans-serif; outline: none; }
+  .num-input:focus { border-color: var(--vora-light); }
+
+  /* PnL CHART */
+  .chart-area { height: 200px; position: relative; overflow: hidden; }
+  canvas { width: 100% !important; height: 100% !important; }
+
+  /* HISTORY TABLE */
+  .history-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .history-table th { color: var(--text-muted); font-weight: 400; text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .history-table td { padding: 0.5rem 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .history-table .long { color: var(--emerald); }
+  .history-table .short { color: var(--rose); }
+  .history-table .profit { color: var(--emerald); font-family: 'Orbitron', sans-serif; font-size: 0.8rem; }
+  .history-table .loss { color: var(--rose); font-family: 'Orbitron', sans-serif; font-size: 0.8rem; }
+
+  /* BOTTOM STATS */
+  .bottom-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .stat-box { background: var(--bg3); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; text-align: center; }
+  .stat-box-label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+  .stat-box-value { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; font-weight: 700; }
+  .stat-box-value.cum-loss { color: var(--rose); }
+  .stat-box-value.cum-profit { color: var(--emerald); }
+  .stat-box-value.winrate { color: var(--gold); }
+
+  /* WEBHOOK SECTION */
+  .webhook-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.25rem; margin-bottom: 1.5rem; }
+  .webhook-url-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 8px; padding: 0.75rem 1rem; font-family: 'Orbitron', sans-serif; font-size: 0.75rem; color: var(--vora-light); word-break: break-all; cursor: pointer; margin-top: 0.75rem; position: relative; }
+  .copy-tag { position: absolute; top: 50%; right: 0.75rem; transform: translateY(-50%); font-size: 0.7rem; color: var(--gold); }
+  .api-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
+  .api-input { background: var(--bg3); border: 1px solid var(--border); color: var(--text-muted); padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 0.8rem; font-family: 'Noto Sans KR', sans-serif; outline: none; width: 100%; }
+  .connect-btn { background: var(--vora); color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 8px; cursor: pointer; font-size: 0.85rem; font-family: 'Noto Sans KR', sans-serif; margin-top: 0.75rem; transition: background 0.2s; }
+  .connect-btn:hover { background: var(--vora-dark); }
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
+  .status-dot.on { background: var(--emerald); box-shadow: 0 0 6px var(--emerald); }
+  .status-dot.off { background: var(--rose); }
+
+  /* TOGGLE */
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+  .toggle-label { font-size: 0.85rem; color: var(--text); }
+  .toggle { width: 40px; height: 22px; background: var(--bg3); border-radius: 999px; border: 1px solid var(--border2); cursor: pointer; position: relative; transition: background 0.2s; }
+  .toggle.on { background: var(--vora); }
+  .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: white; transition: transform 0.2s; }
+  .toggle.on::after { transform: translateX(18px); }
+
+  /* TICKER */
+  .live-ticker {
+    display: flex; align-items: center; gap: 1rem;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.6rem 1rem; font-family: 'Orbitron', sans-serif; font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+  .ticker-pair { color: var(--text-muted); font-size: 0.75rem; }
+  .ticker-price { color: var(--text); font-size: 1.1rem; font-weight: 700; }
+  .ticker-change { font-size: 0.85rem; }
+  .ticker-change.up { color: var(--emerald); }
+  .ticker-change.down { color: var(--rose); }
+  .ticker-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--emerald); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* UTILITY */
+  .section-gap { margin-bottom: 1.5rem; }
+  .hidden { display: none !important; }
+  .typing { display: flex; gap: 4px; align-items: center; padding: 0.75rem 1rem; }
+  .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--vora-light); animation: bounce 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+  /* ACADEMY */
+  .nav-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 0.5rem 1rem; border-radius: 8px;
+    font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+  }
+  .nav-btn:hover { background: var(--vora-dark); border-color: var(--vora); color: white; }
+  .course-card:hover { transform: translateY(-4px); border-color: var(--vora-light); box-shadow: 0 4px 20px rgba(124,58,237,0.15); }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+
+<!-- ═══ WELCOME ═══ -->
+<div id="welcomeScreen" class="page">
+  <div class="vora-logo">VORA</div>
+  <div class="vora-sub">Fandom Trading Platform</div>
+
+  <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem; max-width: 480px; line-height: 1.7;">
+    보라 팬덤 멤버십에 오신 것을 환영합니다.<br>
+    아래에서 원하시는 멤버십 유형을 선택해 주세요.
+  </p>
+
+  <div class="fandom-choice">
+    <div class="choice-card" onclick="startUserFlow()">
+      <span class="choice-icon">⭐</span>
+      <div class="choice-title">팬덤 유저</div>
+      <div class="choice-desc">dNFT 자동 생성 · VORA 토큰 에어드랍 · 온라인 강좌 무료 시청 · 브라운 MM봇 스테이킹 30% 할인 사전 예약</div>
+      <span class="choice-badge">FANDOM USER</span>
+    </div>
+    <div class="choice-card" onclick="startTraderFlow()">
+      <span class="choice-icon">📈</span>
+      <div class="choice-title">팬덤 트레이더</div>
+      <div class="choice-desc">트레이딩뷰 웹훅 연동 · 거래소 자동화 · 브라운 AI 목표 설정 · 개인 대시보드 · 손절/익절 자동화</div>
+      <span class="choice-badge">FANDOM TRADER</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ ONBOARDING CHAT ═══ -->
+<div id="onboardingScreen" class="page" style="display: none; flex-direction: column;">
+  <div class="chat-header">
+    <div class="brown-avatar">BR</div>
+    <div>
+      <div class="chat-title">브라운 AI</div>
+      <div class="chat-subtitle">● 온라인 · 목표 설정 도우미</div>
+    </div>
+  </div>
+  <div class="chat-messages" id="chatMessages"></div>
+  <div class="input-section" id="inputSection">
+    <div class="options-grid" id="optionsBtns"></div>
+    <div class="text-input-row">
+      <input type="text" class="chat-input" id="chatInput" placeholder="답변을 입력하세요..." onkeydown="if(event.key==='Enter') sendUserMsg()">
+      <button class="send-btn" onclick="sendUserMsg()">전송 ▶</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DASHBOARD ═══ -->
+<div id="dashboardScreen" class="page" style="display: none;">
+  <div class="dash-header">
+    <div>
+      <div class="dash-logo">VO<span>RA</span></div>
+      <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">팬덤 트레이더 대시보드</div>
+    </div>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <button class="nav-btn" onclick="document.getElementById('dashboardScreen').style.display='none'; document.getElementById('academyScreen').style.display='block'; document.getElementById('academyNavToTrading').style.display='block'; renderAcademy();">📚 VORA 아카데미 (10강)</button>
+      <div class="user-badge">
+        <div class="user-dot"></div>
+        <span id="dashUserName" style="font-size: 0.9rem;"></span>
+        <span style="font-size: 0.75rem; color: var(--text-muted);">트레이더</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIVE TICKER -->
+  <div class="live-ticker">
+    <div class="ticker-pulse"></div>
+    <div>
+      <div class="ticker-pair">BINANCE PERP.</div>
+      <div style="font-size: 0.7rem; color: var(--text-muted);">ETHUSDT</div>
+    </div>
+    <div class="ticker-price" id="livePrice">$3,412.50</div>
+    <div class="ticker-change up" id="livePriceChange">+1.82%</div>
+    <div style="margin-left: auto; font-size: 0.75rem; color: var(--text-muted);" id="liveTime"></div>
+  </div>
+
+  <!-- 3 DREAMS BANNER -->
+  <div class="dreams-banner">
+    <div class="dreams-label">🌟 나의 3가지 꿈 — 매일 이 꿈을 보며 트레이딩하세요</div>
+    <div class="dreams-grid">
+      <div class="dream-item">
+        <div class="dream-rank">DREAM 1 · 최우선</div>
+        <div class="dream-text" id="dream1text">-</div>
+        <div class="dream-target" id="dream1target">$30,000</div>
+        <div class="dream-progress"><div class="dream-progress-fill" id="dp1" style="width:12%"></div></div>
+      </div>
+      <div class="dream-item">
+        <div class="dream-rank">DREAM 2</div>
+        <div class="dream-text" id="dream2text">-</div>
+        <div class="dream-target" id="dream2target">$50,000</div>
+        <div class="dream-progress"><div class="dream-progress-fill" id="dp2" style="width:5%"></div></div>
+      </div>
+      <div class="dream-item">
+        <div class="dream-rank">DREAM 3 · 최종 목표</div>
+        <div class="dream-text" id="dream3text">-</div>
+        <div class="dream-target" id="dream3target">$100,000</div>
+        <div class="dream-progress"><div class="dream-progress-fill" id="dp3" style="width:2%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KEY METRICS -->
+  <div class="metrics-grid section-gap">
+    <div class="metric-card">
+      <div class="metric-label">총 시드</div>
+      <div class="metric-value seed" id="mSeed">$0</div>
+      <div class="metric-delta" style="color: var(--text-muted);">거래 원금</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">절대원칙 손절가</div>
+      <div class="metric-value stoploss" id="mStop">-$0</div>
+      <div class="metric-delta neg">이 이상 손실 → 즉시 중단</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">당일 수익</div>
+      <div class="metric-value daily" id="mDaily">+$284</div>
+      <div class="metric-delta pos">▲ 오늘</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">주간 수익</div>
+      <div class="metric-value weekly" id="mWeekly">+$1,042</div>
+      <div class="metric-delta pos">▲ 이번 주</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">월간 수익</div>
+      <div class="metric-value monthly" id="mMonthly">+$3,781</div>
+      <div class="metric-delta pos">▲ 이번 달</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">총 승률</div>
+      <div class="metric-value winrate" id="mWinrate">64.2%</div>
+      <div class="metric-delta pos">87승 / 48패</div>
+    </div>
+  </div>
+
+  <!-- ─── RISK WARNING OVERLAY ─── -->
+  <div id="riskWarning" style="display:none; background: rgba(244,63,94,0.12); border: 1px solid rgba(244,63,94,0.5); border-radius: 12px; padding: 0.85rem 1rem; margin-bottom: 1rem; animation: slideIn 0.3s ease;">
+    <div style="display: flex; align-items: center; gap: 0.6rem;">
+      <span style="font-size: 1.1rem;">⚠️</span>
+      <div>
+        <div style="font-size: 0.82rem; color: var(--rose); font-weight: 600;" id="warningTitle">시드 1% 초과 경고!</div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;" id="warningBody">손절 거리를 줄이거나 Lot Size를 낮추는 것을 강력 권장합니다.</div>
+      </div>
+    </div>
+    <div style="font-size: 0.75rem; color: var(--vora-light); margin-top: 0.5rem; border-top: 1px solid rgba(244,63,94,0.2); padding-top: 0.5rem;">💜 브라운 AI: 진입 전 반드시 손절 금액을 확인하세요. 리스크 관리가 생존의 핵심입니다.</div>
+  </div>
+
+  <div class="main-grid">
+    <!-- TRADING SETUP PANEL v2 -->
+    <div class="panel" style="display: flex; flex-direction: column; gap: 0;">
+      <div class="panel-title">리스크 계산기 v2 · 멀티 자산</div>
+
+      <!-- ① 자산 선택 탭 -->
+      <div style="margin-bottom: 1rem;">
+        <div style="font-size: 0.68rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.08em;">거래 플랫폼 & 자산</div>
+        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;" id="assetTabs">
+          <button class="asset-tab active" data-asset="BINANCE_ETH" onclick="selectAsset(this)">🟡 ETH/USDT</button>
+          <button class="asset-tab" data-asset="MT5_FOREX" onclick="selectAsset(this)">💱 Forex</button>
+          <button class="asset-tab" data-asset="MT5_GOLD" onclick="selectAsset(this)">🥇 XAUUSD</button>
+          <button class="asset-tab" data-asset="MT5_OIL" onclick="selectAsset(this)">🛢 Oil</button>
+          <button class="asset-tab" data-asset="MT5_NAS" onclick="selectAsset(this)">📊 NAS100</button>
+        </div>
+        <!-- 선택된 자산 뱃지 -->
+        <div id="assetBadge" style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--text-muted);">
+          <span style="background: rgba(14,165,233,0.12); color: var(--sky); padding: 2px 8px; border-radius: 4px; font-family: 'Orbitron', sans-serif; font-size: 0.7rem;">BINANCE PERP</span>
+          <span id="unitLabel">1포인트 = $1 / 계약</span>
+          <span id="mt5Badge" style="display:none; background: rgba(245,158,11,0.12); color: var(--gold); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem;">MT5</span>
+        </div>
+      </div>
+
+      <!-- ② 레버리지 + Risk% -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px;">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">레버리지</span>
+            <span id="leverageVal" style="font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--gold);">5x</span>
+          </div>
+          <input type="range" min="1" max="500" value="5" step="1" id="leverageRange" oninput="updateLeverage(this.value)" style="width: 100%;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--text-dim); margin-top: 2px;"><span>1x</span><span>100x</span><span>200x</span><span>500x</span></div>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px;">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">1회 위험률 (Risk%)</span>
+            <span id="riskPctVal" style="font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--vora-light);">1%</span>
+          </div>
+          <input type="range" min="0.5" max="5" value="1" step="0.5" id="riskPctRange" oninput="updateRiskPct(this.value)" style="width: 100%; accent-color: var(--vora-light);">
+          <div style="display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--text-dim); margin-top: 2px;"><span>0.5%</span><span>1% 권장</span><span>3%</span><span>5%</span></div>
+        </div>
+      </div>
+
+      <!-- ③ 마진 모드 (Binance만) -->
+      <div id="marginModeRow" style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+        <div class="mode-btn active" id="modeCross" onclick="setMode('cross'); calcRisk()">교차 (Cross)</div>
+        <div class="mode-btn" id="modeIsolated" onclick="setMode('isolated'); calcRisk()">격리 (Isolated)</div>
+        <div id="mt5LotRow" style="display:none; flex: 1; align-items: center; gap: 0.5rem;">
+          <span style="font-size: 0.72rem; color: var(--text-muted);">Lot Size</span>
+          <input type="number" id="lotInput" value="0.1" step="0.01" min="0.01" oninput="calcRisk()" style="width: 80px; background: var(--bg3); border: 1px solid var(--border2); color: var(--text); padding: 4px 8px; border-radius: 6px; font-size: 0.85rem; font-family: 'Orbitron', sans-serif; outline: none;">
+          <span style="font-size: 0.7rem; color: var(--text-dim);">lot</span>
+        </div>
+      </div>
+
+      <!-- ④ 최소 진입 금액 계산 카드 -->
+      <div style="background: rgba(124,58,237,0.1); border: 1px solid var(--border2); border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 1rem;">
+        <div style="font-size: 0.68rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.06em;">레버리지 대비 최소 진입 금액</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <div style="font-size: 0.7rem; color: var(--text-muted);">추천 포지션 규모</div>
+            <div id="posVal" style="font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: var(--vora-light);">$500</div>
+          </div>
+          <div style="text-align: center;">
+            <div style="font-size: 0.7rem; color: var(--text-muted);">레버리지 사용률</div>
+            <div id="levUsage" style="font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: var(--gold);">50%</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.7rem; color: var(--text-muted);">실효 노출</div>
+            <div id="effectiveExp" style="font-family: 'Orbitron', sans-serif; font-size: 1.3rem; color: var(--sky);">$2,500</div>
+          </div>
+        </div>
+        <div id="posSizeFormula" style="font-size: 0.7rem; color: var(--text-dim); margin-top: 6px; border-top: 1px solid var(--border); padding-top: 6px;"></div>
+      </div>
+
+      <!-- ⑤ 진입가 입력 -->
+      <div style="margin-bottom: 0.75rem;">
+        <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">진입가 (Entry Price) <span id="entryUnit" style="color: var(--text-dim);">USD</span></div>
+        <input type="number" id="entryPrice" value="3412" step="1" oninput="calcRisk()" style="width: 100%; background: var(--bg3); border: 1px solid var(--border2); color: var(--text); padding: 0.5rem 0.75rem; border-radius: 8px; font-size: 1rem; font-family: 'Orbitron', sans-serif; outline: none;">
+      </div>
+
+      <!-- ⑥ 손절 설정 -->
+      <div style="background: rgba(244,63,94,0.06); border: 1px solid rgba(244,63,94,0.25); border-radius: 10px; padding: 0.85rem; margin-bottom: 0.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 0.75rem; color: var(--rose); font-weight: 600;">▼ 손절 (Stop-Loss)</span>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <input type="number" id="slInput" value="50" step="1" min="1" oninput="calcRisk()" style="width: 80px; background: var(--bg3); border: 1px solid rgba(244,63,94,0.4); color: var(--rose); padding: 3px 7px; border-radius: 6px; font-size: 0.9rem; font-family: 'Orbitron', sans-serif; outline: none; text-align: right;">
+            <span id="slUnitLabel" style="font-size: 0.72rem; color: var(--text-muted);">포인트</span>
+          </div>
+        </div>
+        <!-- 실질 손실 금액 대형 표시 -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px;">
+          <div>
+            <div style="font-size: 0.68rem; color: var(--text-muted);">실질 손실 금액</div>
+            <div id="slAmt" style="font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--rose); line-height: 1.1;">-$50</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.68rem; color: var(--text-muted);">시드 대비</div>
+            <div id="slSeedPct" style="font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: var(--rose);">-5.0%</div>
+            <div id="slFormula" style="font-size: 0.65rem; color: var(--text-dim); margin-top: 2px;"></div>
+          </div>
+        </div>
+        <div style="height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden;">
+          <div id="slBar" style="height: 100%; background: var(--rose); border-radius: 3px; transition: width 0.35s; width: 25%;"></div>
+        </div>
+        <div id="slPriceLevel" style="font-size: 0.68rem; color: var(--text-dim); margin-top: 4px;"></div>
+      </div>
+
+      <!-- ⑦ 익절 설정 -->
+      <div style="background: rgba(16,185,129,0.06); border: 1px solid rgba(16,185,129,0.25); border-radius: 10px; padding: 0.85rem; margin-bottom: 0.85rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 0.75rem; color: var(--emerald); font-weight: 600;">▲ 익절 (Take-Profit)</span>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <input type="number" id="tpInput" value="150" step="1" min="1" oninput="calcRisk()" style="width: 80px; background: var(--bg3); border: 1px solid rgba(16,185,129,0.4); color: var(--emerald); padding: 3px 7px; border-radius: 6px; font-size: 0.9rem; font-family: 'Orbitron', sans-serif; outline: none; text-align: right;">
+            <span id="tpUnitLabel" style="font-size: 0.72rem; color: var(--text-muted);">포인트</span>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px;">
+          <div>
+            <div style="font-size: 0.68rem; color: var(--text-muted);">실질 수익 금액</div>
+            <div id="tpAmt" style="font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--emerald); line-height: 1.1;">+$150</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 0.68rem; color: var(--text-muted);">시드 대비</div>
+            <div id="tpSeedPct" style="font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: var(--emerald);">+15.0%</div>
+            <div id="tpFormula" style="font-size: 0.65rem; color: var(--text-dim); margin-top: 2px;"></div>
+          </div>
+        </div>
+        <div style="height: 5px; background: var(--bg3); border-radius: 3px; overflow: hidden;">
+          <div id="tpBar" style="height: 100%; background: var(--emerald); border-radius: 3px; transition: width 0.35s; width: 15%;"></div>
+        </div>
+        <div id="tpPriceLevel" style="font-size: 0.68rem; color: var(--text-dim); margin-top: 4px;"></div>
+      </div>
+
+      <!-- ⑧ RRR + 위험등급 요약 -->
+      <div style="background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; display: grid; grid-template-columns: 1fr 1px 1fr 1px 1fr; gap: 0; align-items: center;">
+        <div style="text-align: center; padding: 0 0.5rem;">
+          <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 3px;">손익비 RRR</div>
+          <div id="rrrVal" style="font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: var(--gold);">1 : 3.0</div>
+        </div>
+        <div style="background: var(--border); height: 32px;"></div>
+        <div style="text-align: center; padding: 0 0.5rem;">
+          <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 3px;">청산 위험도</div>
+          <div id="liqRisk" style="font-family: 'Orbitron', sans-serif; font-size: 1.1rem; color: var(--gold);">10%</div>
+        </div>
+        <div style="background: var(--border); height: 32px;"></div>
+        <div style="text-align: center; padding: 0 0.5rem;">
+          <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 3px;">위험등급</div>
+          <div id="riskGrade" style="font-size: 1rem;">🟢 안전</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PnL CHART PANEL -->
+    <div class="panel">
+      <div class="panel-title">월간 누적 수익 그래프</div>
+      <div class="chart-area">
+        <canvas id="pnlChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEBHOOK & API PANEL -->
+  <div class="webhook-panel section-gap">
+    <div class="panel-title" style="margin-bottom: 0.5rem;">트레이딩뷰 웹훅 & API 연동</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; flex-wrap: wrap;">
+      <div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">웹훅 URL <span style="color: var(--vora-light);">(TradingView Alert에 붙여넣기)</span></div>
+        <div class="webhook-url-box" onclick="copyWebhook()" title="클릭하여 복사">
+          https://vora.io/webhook/user/a7f3k2x9
+          <span class="copy-tag">복사</span>
+        </div>
+        <div style="margin-top: 0.75rem;">
+          <div class="toggle-row">
+            <span class="toggle-label"><span class="status-dot on"></span>자동 손절 강제 설정</span>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <span class="toggle-label"><span class="status-dot on"></span>텔레그램 알림</span>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <span class="toggle-label"><span class="status-dot off"></span>구글 앱시트 연동</span>
+            <div class="toggle" onclick="this.classList.toggle('on'); this.previousElementSibling.querySelector('.status-dot').classList.toggle('on'); this.previousElementSibling.querySelector('.status-dot').classList.toggle('off')"></div>
+          </div>
+          <div class="toggle-row" style="border: none;">
+            <span class="toggle-label"><span class="status-dot off"></span>구글 드라이브 백업</span>
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row" style="border-top: 1px solid var(--border); margin-top: 4px; padding-top: 8px;">
+            <span class="toggle-label"><span class="status-dot off"></span>MT5 연결 (Phase 2)</span>
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">API 키 설정 (.env)</div>
+        <div style="font-size: 0.7rem; color: var(--vora-light); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Binance</div>
+        <div class="api-grid">
+          <input class="api-input" placeholder="Binance API Key" type="password">
+          <input class="api-input" placeholder="Binance Secret Key" type="password">
+        </div>
+        <div style="font-size: 0.7rem; color: var(--gold); margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 0.05em;">MT5 계정 (Phase 2)</div>
+        <div class="api-grid">
+          <input class="api-input" placeholder="MT5 서버 주소">
+          <input class="api-input" placeholder="MT5 로그인 ID">
+          <input class="api-input" placeholder="MT5 비밀번호" type="password">
+          <input class="api-input" placeholder="브로커명 (예: ICMarkets)">
+        </div>
+        <div style="font-size: 0.7rem; color: var(--vora-light); margin: 8px 0 4px; text-transform: uppercase; letter-spacing: 0.05em;">알림</div>
+        <div class="api-grid">
+          <input class="api-input" placeholder="Telegram Bot Token" type="password">
+          <input class="api-input" placeholder="Telegram Chat ID">
+        </div>
+        <button class="connect-btn">연결 저장하기 🔒</button>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">모든 키는 AES-256 암호화 저장됩니다. 서버로 전송되지 않습니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRADE HISTORY + BOTTOM STATS -->
+  <div class="main-grid">
+    <div class="panel">
+      <div class="panel-title">최근 거래 내역</div>
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>날짜</th><th>자산</th><th>방향</th><th>진입가</th><th>실질 손실(USD)</th><th>실질 이익(USD)</th>
+          </tr>
+        </thead>
+        <tbody id="tradeHistory"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-title">누적 손익 통계</div>
+      <div class="bottom-stats">
+        <div class="stat-box">
+          <div class="stat-box-label">총 누적 손실</div>
+          <div class="stat-box-value cum-loss" id="cumLoss">-$2,140</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">총 누적 이익</div>
+          <div class="stat-box-value cum-profit" id="cumProfit">+$8,320</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-label">총 승률</div>
+          <div class="stat-box-value winrate">64.2%</div>
+        </div>
+      </div>
+      <div style="margin-top: 1.5rem;">
+        <div style="display:flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.4rem;">
+          <span style="color: var(--emerald);">이익 $8,320</span>
+          <span style="color: var(--rose);">손실 $2,140</span>
+        </div>
+        <div style="height: 8px; background: var(--rose); border-radius: 4px; overflow: hidden;">
+          <div style="height: 100%; width: 79.5%; background: var(--emerald); border-radius: 4px;"></div>
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">순이익: <span style="color: var(--emerald); font-family: 'Orbitron', sans-serif;">+$6,180</span></div>
+      </div>
+
+      <div style="margin-top: 1.5rem; padding: 1rem; background: var(--bg3); border-radius: 10px; border-left: 3px solid var(--vora);">
+        <div style="font-size: 0.75rem; color: var(--vora-light); margin-bottom: 0.4rem;">브라운 AI 일일 메세지</div>
+        <div id="brownMsg" style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+// ─── ASSET CONFIG TABLE ───
+const ASSETS = {
+  BINANCE_ETH: {
+    label: 'ETH/USDT PERP', platform: 'BINANCE', unit: '포인트', unitEn: 'Points',
+    pipValue: (lot) => 1,           // 1 point = $1 per contract (qty-based, simplified)
+    defaultEntry: 3412, defaultSL: 50, defaultTP: 150,
+    leverMax: 20, leverDefault: 5,
+    badge: 'BINANCE PERP', badgeColor: 'var(--sky)',
+    formula: (sl, lot, pv) => `${sl}pt × $1/pt × ${lot} contracts`,
+    unitDesc: '1포인트 = $1 / 계약',
+    isMT5: false,
+  },
+  MT5_FOREX: {
+    label: 'Forex (EURUSD)', platform: 'MT5', unit: '핍', unitEn: 'Pips',
+    pipValue: (lot) => lot * 10,    // 0.0001 × lot × 100,000 = lot × 10
+    defaultEntry: 1.0850, defaultSL: 50, defaultTP: 150,
+    leverMax: 500, leverDefault: 100,
+    badge: 'MT5 FOREX', badgeColor: 'var(--gold)',
+    formula: (sl, lot, pv) => `${sl}pip × $${(lot*10).toFixed(1)}/pip (${lot} lot)`,
+    unitDesc: '1핍 = $10 × Lot (XXXUSD 기준)',
+    isMT5: true,
+  },
+  MT5_GOLD: {
+    label: 'XAUUSD (금)', platform: 'MT5', unit: '핍', unitEn: 'Pips',
+    pipValue: (lot) => lot * 1,     // 0.01 × lot × 100 = lot × 1
+    defaultEntry: 2340, defaultSL: 100, defaultTP: 300,
+    leverMax: 500, leverDefault: 100,
+    badge: 'MT5 GOLD', badgeColor: '#F59E0B',
+    formula: (sl, lot, pv) => `${sl}pip × $${(lot*1).toFixed(2)}/pip (${lot} lot)`,
+    unitDesc: '1핍 = $1 × Lot (XAUUSD)',
+    isMT5: true,
+  },
+  MT5_OIL: {
+    label: 'USOIL (원유)', platform: 'MT5', unit: '핍', unitEn: 'Pips',
+    pipValue: (lot) => lot * 1,     // 0.01 × lot × 100 = lot × 1
+    defaultEntry: 82.50, defaultSL: 50, defaultTP: 150,
+    leverMax: 500, leverDefault: 100,
+    badge: 'MT5 OIL', badgeColor: '#D97706',
+    formula: (sl, lot, pv) => `${sl}pip × $${(lot*1).toFixed(2)}/pip (${lot} lot)`,
+    unitDesc: '1핍 = $1 × Lot (USOIL)',
+    isMT5: true,
+  },
+  MT5_NAS: {
+    label: 'NAS100 (나스닥)', platform: 'MT5', unit: '포인트', unitEn: 'Points',
+    pipValue: (lot) => lot * 0.1,   // 0.1 × lot × 1 = lot × 0.1
+    defaultEntry: 17800, defaultSL: 50, defaultTP: 150,
+    leverMax: 500, leverDefault: 100,
+    badge: 'MT5 NAS100', badgeColor: '#A78BFA',
+    formula: (sl, lot, pv) => `${sl}pt × $${(lot*0.1).toFixed(2)}/pt (${lot} lot)`,
+    unitDesc: '1포인트 = $0.1 × Lot (NAS100)',
+    isMT5: true,
+  },
+};
+
+let currentAsset = 'BINANCE_ETH';
+
+// ─── STATE ───
+const state = {
+  step: 0, name: '', seed: 0, stoploss: 0,
+  dreams: ['', '', ''], dreamTargets: [30000, 50000, 100000]
+};
+
+// ─── ASSET SELECTION ───
+function selectAsset(btn) {
+  document.querySelectorAll('.asset-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentAsset = btn.dataset.asset;
+  const cfg = ASSETS[currentAsset];
+
+  // Update labels
+  document.getElementById('unitLabel').textContent = cfg.unitDesc;
+  document.getElementById('slUnitLabel').textContent = cfg.unit;
+  document.getElementById('tpUnitLabel').textContent = cfg.unit;
+  document.getElementById('entryUnit').textContent = 'USD';
+  document.getElementById('mt5Badge').style.display = cfg.isMT5 ? 'inline' : 'none';
+  document.getElementById('assetBadge').querySelector('span').textContent = cfg.badge;
+  document.getElementById('assetBadge').querySelector('span').style.color = cfg.badgeColor;
+
+  // MT5 vs Binance UI
+  document.getElementById('marginModeRow').style.display = cfg.isMT5 ? 'none' : 'flex';
+  document.getElementById('mt5LotRow').style.display = cfg.isMT5 ? 'flex' : 'none';
+
+  // Set lever range
+  const levRange = document.getElementById('leverageRange');
+  levRange.max = cfg.leverMax;
+  levRange.value = cfg.leverDefault;
+  document.getElementById('leverageVal').textContent = cfg.leverDefault + 'x';
+
+  // Set entry/sl/tp defaults
+  document.getElementById('entryPrice').value = cfg.defaultEntry;
+  document.getElementById('slInput').value = cfg.defaultSL;
+  document.getElementById('tpInput').value = cfg.defaultTP;
+
+  calcRisk();
+}
+
+// ─── WELCOME FLOWS ───
+function startUserFlow() {
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('academyScreen').style.display = 'block';
+  document.getElementById('academyNavToTrading').style.display = 'none'; // 일반 팬덤 유저는 트레이딩 보드 숨김
+  renderAcademy();
+  alert('보라 팬덤 유저 멤버십에 입장하셨습니다! 하단의 VORA 10강 마스터 클래스를 바로 수강하실 수 있습니다.');
+}
+function startTraderFlow() {
+  document.getElementById('welcomeScreen').style.display = 'none';
+  const os = document.getElementById('onboardingScreen');
+  os.style.display = 'flex';
+  setTimeout(() => startOnboarding(), 300);
+}
+
+// ─── ONBOARDING ───
+const steps = [
+  { type: 'brown', msg: '트레이더님 환영합니다! 🌟 저는 브라운 AI입니다. 거래 시작 전 <span class="highlight">명확한 목표 설정은 트레이더님의 미래를 좌우합니다.</span><br><br>먼저, 트레이더님의 이름을 알려주세요.' },
+  { type: 'name_input' },
+  { type: 'brown', key: 'welcome_name', msg: '' },
+  { type: 'brown', msg: '이제 <span class="em">거래 시드</span>를 설정할게요. 투자해도 일상 생활과 가족들에게 전혀 지장을 주지 않는 금액으로 시작하세요.<br><br><span class="highlight">거래 시작 시드는 얼마인가요? (USD 기준)</span>' },
+  { type: 'seed_input' },
+  { type: 'brown', key: 'seed_confirm', msg: '' },
+  { type: 'brown', msg: '이제 트레이딩으로 이루고 싶은 <span class="highlight">3가지 꿈</span>을 알려주세요. 이 꿈들은 대시보드 상단에 매일 표시됩니다. 💫<br><br>첫 번째 꿈은 무엇인가요?' },
+  { type: 'dream_input', dreamIdx: 0 },
+  { type: 'brown', msg: '멋진 꿈이에요! 두 번째 꿈은요?' },
+  { type: 'dream_input', dreamIdx: 1 },
+  { type: 'brown', msg: '이제 마지막! 세 번째 꿈을 알려주세요.' },
+  { type: 'dream_input', dreamIdx: 2 },
+  { type: 'brown', msg: '트레이딩에서 무조건 지켜야 하는 <span class="highlight">절대 원칙 1</span>: <span class="em">손절가 원칙</span>입니다.<br><br>시드 기준으로 얼마의 손실이 발생하면 심리에 영향을 주지 않고 거래를 중단할 수 있으신가요? (USD 금액 입력)' },
+  { type: 'stop_input' },
+  { type: 'brown', key: 'sl_preview', msg: '' },
+  { type: 'brown', key: 'final', msg: '' },
+];
+let stepIdx = 0;
+
+function startOnboarding() {
+  addBrownMsg(steps[0].msg);
+  stepIdx = 1;
+  setTimeout(() => processStep(), 600);
+}
+function processStep() {
+  if (stepIdx >= steps.length) return launchDashboard();
+  const s = steps[stepIdx];
+  if (s.type === 'name_input') { setOptions([], true, '이름을 입력하세요'); stepIdx++; }
+  else if (s.type === 'seed_input') { setOptions(['$500','$1,000','$2,000','$5,000','$10,000'], true, '또는 직접 입력 (USD)'); stepIdx++; }
+  else if (s.type === 'dream_input') { setOptions([], true, `꿈 ${s.dreamIdx + 1} 을 입력하세요`); stepIdx++; }
+  else if (s.type === 'stop_input') { setOptions(['$100','$200','$500','$1,000'], true, '또는 직접 입력 (USD)'); stepIdx++; }
+  else if (s.type === 'brown') {
+    if (s.key === 'welcome_name') addBrownMsg(`<span class="highlight">${state.name} 트레이더님</span>, 환영합니다! 🎉<br>이제 미래를 위한 목표 설정을 도와드리겠습니다.`);
+    else if (s.key === 'seed_confirm') addBrownMsg(`${state.name} 트레이더님의 거래 시드 <span class="highlight">$${state.seed.toLocaleString()}</span>는 잃어도 전혀 상관없는 금액이 맞으신거죠? 이것으로 첫 미래를 설계해 보겠습니다. 💪`);
+    else if (s.key === 'sl_preview') {
+      const recommended1pct = (state.seed * 0.01).toFixed(0);
+      addBrownMsg(`${state.name} 트레이더님, 중요한 정보를 드릴게요! 🔍<br><br>시드 <span class="highlight">$${state.seed.toLocaleString()}</span> 기준으로, 손절 시 잃어도 심리적으로 괜찮은 금액인지 반드시 확인하세요.<br><br>일반적으로 <span class="em">1회 거래 위험률 1%</span>를 권장합니다. 이 경우 최대 손실은 <span class="highlight">$${recommended1pct}</span>입니다. 대시보드에서 실시간으로 확인하실 수 있습니다. 📊`);
+    }
+    else if (s.key === 'final') {
+      addBrownMsg(`완벽합니다! 절대 원칙 1: 손절 <span class="highlight">-$${state.stoploss.toLocaleString()}</span> 이 완성되었습니다.<br><br>이것을 기준으로 <span class="em">표준 대시보드</span>를 설정해드리겠습니다. 지금부터 트레이딩 여정을 시작하세요! 🚀`);
+      setTimeout(() => launchDashboard(), 2000);
+      return;
+    } else addBrownMsg(s.msg);
+    stepIdx++;
+    setTimeout(() => processStep(), 800);
+  }
+}
+function addBrownMsg(html) {
+  const msgs = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  d.className = 'msg brown';
+  d.innerHTML = `<div class="msg-avatar" style="background: linear-gradient(135deg, var(--vora-dark), var(--vora)); color: white; font-size: 0.65rem; font-family: 'Orbitron', sans-serif;">BR</div><div class="msg-bubble">${html}</div>`;
+  msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
+}
+function addUserMsg(text) {
+  const msgs = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  d.className = 'msg user';
+  d.innerHTML = `<div class="msg-avatar" style="background: var(--vora-dark); color: var(--vora-light);">나</div><div class="msg-bubble">${text}</div>`;
+  msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
+}
+function setOptions(opts, showText, placeholder) {
+  const ob = document.getElementById('optionsBtns');
+  const ci = document.getElementById('chatInput');
+  ob.innerHTML = '';
+  opts.forEach(o => { const b = document.createElement('button'); b.className = 'opt-btn'; b.textContent = o; b.onclick = () => handleOption(o); ob.appendChild(b); });
+  ci.placeholder = placeholder || '답변 입력...';
+}
+function sendUserMsg() {
+  const ci = document.getElementById('chatInput');
+  const v = ci.value.trim();
+  if (!v) return;
+  handleOption(v); ci.value = '';
+}
+let dreamFillIdx = 0;
+function handleOption(val) {
+  addUserMsg(val);
+  document.getElementById('optionsBtns').innerHTML = '';
+  const currentStep = steps[stepIdx - 1];
+  if (currentStep && currentStep.type === 'name_input') { state.name = val; document.getElementById('dashUserName').textContent = val; }
+  else if (currentStep && currentStep.type === 'seed_input') { const n = parseFloat(val.replace(/[$,]/g,'')); state.seed = isNaN(n) ? 1000 : n; }
+  else if (currentStep && currentStep.type === 'dream_input') { state.dreams[currentStep.dreamIdx] = val; dreamFillIdx = currentStep.dreamIdx; }
+  else if (currentStep && currentStep.type === 'stop_input') { const n = parseFloat(val.replace(/[$,]/g,'')); state.stoploss = isNaN(n) ? 200 : n; }
+  setTimeout(() => {
+    addBrownMsg('<div class="typing"><span></span><span></span><span></span></div>');
+    const msgs = document.getElementById('chatMessages');
+    const last = msgs.lastElementChild;
+    setTimeout(() => { msgs.removeChild(last); processStep(); }, 500);
+  }, 300);
+}
+
+// ─── LAUNCH DASHBOARD ───
+function launchDashboard() {
+  document.getElementById('onboardingScreen').style.display = 'none';
+  document.getElementById('dashboardScreen').style.display = 'block';
+  document.getElementById('mSeed').textContent = '$' + state.seed.toLocaleString();
+  document.getElementById('mStop').textContent = '-$' + state.stoploss.toLocaleString();
+  document.getElementById('dashUserName').textContent = state.name;
+  document.getElementById('dream1text').textContent = state.dreams[0] || '부동산 구입';
+  document.getElementById('dream2text').textContent = state.dreams[1] || '세계 여행';
+  document.getElementById('dream3text').textContent = state.dreams[2] || '경제적 자유';
+  buildChart(); buildHistory(); updateTicker();
+  setInterval(updateTicker, 3000);
+  showBrownMsg(); calcRisk();
+}
+
+// ─── LEVERAGE / RISK% UPDATE ───
+function updateLeverage(v) { document.getElementById('leverageVal').textContent = v + 'x'; calcRisk(); }
+function updateRiskPct(v) { document.getElementById('riskPctVal').textContent = v + '%'; calcRisk(); }
+
+// ─── CORE RISK CALCULATOR (v2) ───
+function calcRisk() {
+  const seed = state.seed || 1000;
+  const cfg = ASSETS[currentAsset];
+  const lev = parseFloat(document.getElementById('leverageRange').value) || cfg.leverDefault;
+  const riskPct = parseFloat(document.getElementById('riskPctRange').value) || 1;
+  const entry = parseFloat(document.getElementById('entryPrice').value) || cfg.defaultEntry;
+  const slDist = parseFloat(document.getElementById('slInput').value) || cfg.defaultSL;
+  const tpDist = parseFloat(document.getElementById('tpInput').value) || cfg.defaultTP;
+  const lot = cfg.isMT5 ? (parseFloat(document.getElementById('lotInput').value) || 0.1) : 1;
+
+  // ── Pip / Point Value per unit
+  const pipVal = cfg.pipValue(lot);  // $ per pip/point
+
+  // ── Actual monetary P&L
+  let slAmt, tpAmt;
+  if (cfg.isMT5) {
+    // MT5: loss = pip_distance × pip_value
+    slAmt = slDist * pipVal;
+    tpAmt = tpDist * pipVal;
+  } else {
+    // Binance Perp: points × $1 × contracts (simplified: use seed×lev to derive qty)
+    // qty = (seed × riskPct/100) / slDist — contract quantity approach
+    const qty = Math.max((seed * riskPct / 100) / Math.max(slDist, 0.01), 0.01);
+    slAmt = slDist * qty;
+    tpAmt = tpDist * qty;
+  }
+
+  // ── Position size recommendation (risk-based formula from spec)
+  // Position Value = Seed × Risk% / (SL_distance × contract_multiplier)
+  const contractMult = cfg.isMT5 ? pipVal : 1;
+  const recommendedPos = Math.max((seed * riskPct / 100) / Math.max(slDist * contractMult / (cfg.isMT5 ? 1 : seed * lev / seed), 0.0001), 0);
+  const actualPos = cfg.isMT5 ? (lot * entry) : (seed * lev);
+  const levUsagePct = Math.min((actualPos / (seed * (cfg.leverMax || lev))) * 100, 100);
+  const effectiveExp = cfg.isMT5 ? (lot * entry * lev) : (seed * lev);
+
+  // ── Price levels
+  const slPrice = entry - slDist * (cfg.isMT5 ? (cfg === ASSETS.MT5_FOREX ? 0.0001 : 0.01) : 1);
+  const tpPrice = entry + tpDist * (cfg.isMT5 ? (cfg === ASSETS.MT5_FOREX ? 0.0001 : 0.01) : 1);
+
+  // ── Seed % impact
+  const slSeedPct = (slAmt / seed) * 100;
+  const tpSeedPct = (tpAmt / seed) * 100;
+
+  // ── RRR
+  const rrr = (tpDist / Math.max(slDist, 0.01)).toFixed(1);
+
+  // ── Liquidation risk (simplified: how close SL is to forced liquidation %)
+  const liqThreshold = 100 / lev;  // % price move to liquidation (isolated)
+  const slMoveNeeded = cfg.isMT5 ? ((slDist * (cfg === ASSETS.MT5_FOREX ? 0.0001 : 0.01)) / entry * 100) : (slDist / entry * 100);
+  const liqRiskPct = Math.min(Math.round((slMoveNeeded / liqThreshold) * 100), 100);
+
+  // ── Risk grade
+  let grade = '🟢 안전';
+  if (slSeedPct > riskPct * 3 || lev >= (cfg.isMT5 ? 300 : 15)) grade = '🔴 고위험';
+  else if (slSeedPct > riskPct * 2 || lev >= (cfg.isMT5 ? 200 : 10)) grade = '🟡 주의';
+  else if (slSeedPct > riskPct * 1.5 || lev >= (cfg.isMT5 ? 100 : 7)) grade = '🟠 경계';
+
+  // ── Risk Warning
+  const warn = document.getElementById('riskWarning');
+  if (slSeedPct > riskPct) {
+    document.getElementById('warningTitle').textContent = `시드 ${riskPct}% 초과 경고! 현재 손실 위험: ${slSeedPct.toFixed(1)}%`;
+    document.getElementById('warningBody').textContent = `손절 거리를 줄이거나 ${cfg.isMT5 ? 'Lot Size' : '계약 수량'}을 낮추는 것을 강력 권장합니다. (현재 손절 시 -$${slAmt.toFixed(0)} 손실)`;
+    warn.style.display = 'block';
+  } else { warn.style.display = 'none'; }
+
+  // ── DOM Updates
+  document.getElementById('posVal').textContent = '$' + Math.round(cfg.isMT5 ? lot * entry : seed * (riskPct/100) / Math.max(slMoveNeeded/100, 0.001)).toLocaleString();
+  document.getElementById('levUsage').textContent = Math.round(lev / (cfg.leverMax || lev) * 100) + '%';
+  document.getElementById('effectiveExp').textContent = '$' + Math.round(effectiveExp).toLocaleString();
+  document.getElementById('posSizeFormula').textContent =
+    `공식: 시드 $${seed.toLocaleString()} × ${riskPct}% ÷ (${slDist}${cfg.unit} × 승수) | ${cfg.isMT5 ? 'Lot: ' + lot : '레버리지: ' + lev + 'x'}`;
+
+  document.getElementById('slAmt').textContent = `-$${slAmt.toFixed(2)}`;
+  document.getElementById('slSeedPct').textContent = `-${slSeedPct.toFixed(2)}%`;
+  document.getElementById('slFormula').textContent = cfg.formula(slDist, lot, pipVal);
+  document.getElementById('slBar').style.width = Math.min(slSeedPct * (100 / Math.max(riskPct * 3, 1)), 100) + '%';
+  document.getElementById('slPriceLevel').textContent = `손절 발동가: ${slPrice.toFixed(cfg === ASSETS.MT5_FOREX ? 5 : 2)}  ← 진입가 ${entry} 기준`;
+
+  document.getElementById('tpAmt').textContent = `+$${tpAmt.toFixed(2)}`;
+  document.getElementById('tpSeedPct').textContent = `+${tpSeedPct.toFixed(2)}%`;
+  document.getElementById('tpFormula').textContent = cfg.formula(tpDist, lot, pipVal);
+  document.getElementById('tpBar').style.width = Math.min(tpSeedPct * (100 / Math.max(riskPct * 10, 1)), 100) + '%';
+  document.getElementById('tpPriceLevel').textContent = `익절 목표가: ${tpPrice.toFixed(cfg === ASSETS.MT5_FOREX ? 5 : 2)}  ← 진입가 ${entry} 기준`;
+
+  document.getElementById('rrrVal').textContent = '1 : ' + rrr;
+  document.getElementById('liqRisk').textContent = liqRiskPct + '%';
+  document.getElementById('riskGrade').textContent = grade;
+}
+
+// ─── CHART ───
+function buildChart() {
+  const ctx = document.getElementById('pnlChart').getContext('2d');
+  const labels = Array.from({length: 18}, (_, i) => `3/${i + 1}`);
+  const data = [0, 120, 80, 210, 340, 295, 480, 620, 580, 750, 900, 840, 1020, 1280, 1180, 1400, 1620, 1800];
+  new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ data, borderColor: '#7C3AED', backgroundColor: 'rgba(124,58,237,0.1)', fill: true, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#A78BFA', borderWidth: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(124,58,237,0.1)' }, ticks: { color: '#475569', font: { size: 10 } } },
+        y: { grid: { color: 'rgba(124,58,237,0.08)' }, ticks: { color: '#475569', font: { size: 10 }, callback: v => '$' + v } }
+      }
+    }
+  });
+}
+
+// ─── TRADE HISTORY (v2 with real monetary columns) ───
+function buildHistory() {
+  const trades = [
+    { date: '03/18', asset: 'ETH', dir: 'LONG', entry: 3380, slAmt: -47, tpAmt: null, result: 284 },
+    { date: '03/17', asset: 'XAUUSD', dir: 'SHORT', entry: 2335, slAmt: -55, tpAmt: 312, result: 312 },
+    { date: '03/16', asset: 'ETH', dir: 'LONG', entry: 3360, slAmt: -180, tpAmt: null, result: -180 },
+    { date: '03/15', asset: 'NAS100', dir: 'LONG', entry: 17650, slAmt: -60, tpAmt: 420, result: 420 },
+    { date: '03/14', asset: 'EURUSD', dir: 'SHORT', entry: 1.0920, slAmt: -380, tpAmt: null, result: -380 },
+    { date: '03/13', asset: 'ETH', dir: 'LONG', entry: 3250, slAmt: -40, tpAmt: 206, result: 206 },
+  ];
+  const tbody = document.getElementById('tradeHistory');
+  trades.forEach(t => {
+    const tr = document.createElement('tr');
+    const isP = t.result > 0;
+    const realSL = t.slAmt ? `<span style="color: var(--rose); font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">$${Math.abs(t.slAmt)}</span>` : '<span style="color: var(--text-dim);">-</span>';
+    const realTP = t.tpAmt ? `<span style="color: var(--emerald); font-family: 'Orbitron', sans-serif; font-size: 0.75rem;">+$${t.tpAmt}</span>` : '<span style="color: var(--text-dim);">-</span>';
+    tr.innerHTML = `<td style="color: var(--text-muted); font-size: 0.75rem;">${t.date}</td>
+      <td style="font-size: 0.72rem; color: var(--vora-light);">${t.asset}</td>
+      <td class="${t.dir==='LONG'?'long':'short'}" style="font-family:'Orbitron',sans-serif;font-size:0.72rem;">${t.dir}</td>
+      <td style="font-size:0.75rem;">${t.entry}</td>
+      <td>${realSL}</td>
+      <td>${realTP}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── LIVE TICKER ───
+let basePrice = 3412.50;
+function updateTicker() {
+  const change = (Math.random() - 0.48) * 8;
+  basePrice += change;
+  const pct = ((basePrice - 3350) / 3350 * 100);
+  document.getElementById('livePrice').textContent = '$' + basePrice.toFixed(2);
+  const el = document.getElementById('livePriceChange');
+  el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+  el.className = 'ticker-change ' + (pct >= 0 ? 'up' : 'down');
+  document.getElementById('liveTime').textContent = new Date().toLocaleTimeString('ko-KR');
+}
+
+// ─── MODE TOGGLE ───
+function setMode(m) {
+  document.getElementById('modeCross').className = 'mode-btn' + (m==='cross' ? ' active' : '');
+  document.getElementById('modeIsolated').className = 'mode-btn' + (m==='isolated' ? ' active' : '');
+}
+
+// ─── BROWN DAILY MSG ───
+const msgs = [
+  '오늘도 절대 원칙을 지키며 시스템적으로 트레이딩하세요. 감정이 아닌 전략으로 움직이는 것이 진정한 트레이더입니다. 💜',
+  '손절은 실패가 아닙니다. 자본을 보호하는 가장 용감한 결정입니다. 오늘도 규칙을 지켜주세요. 🛡️',
+  '진입 전 반드시 손절 금액을 먼저 확인하세요. 내가 감수하는 리스크를 명확히 아는 것이 프로 트레이더의 시작입니다. 📊',
+  '시장은 항상 기회를 줍니다. 서두르지 말고 기다리세요. 인내심이 최고의 전략입니다. 🌟',
+  'RRR 1:2 이상을 유지하세요. 손익비가 승률보다 중요합니다. 오늘 하루도 화이팅! 🔥',
+];
+function showBrownMsg() { document.getElementById('brownMsg').textContent = msgs[Math.floor(Math.random() * msgs.length)]; }
+
+// ─── COPY WEBHOOK ───
+function copyWebhook() {
+  navigator.clipboard.writeText('https://vora.io/webhook/user/a7f3k2x9').then(() => alert('웹훅 URL이 복사되었습니다!'));
+}
+
+// ─── ACADEMY RENDERING ───
+const COURSES = [
+  { ep: 1, title: '블로그 수익화 자동화 파이프라인', desc: '시나리오 작성, 컨셉 이미지 확보, 블로그 자동 업로드 봇 구축 기초 다지기', thumb: '🤖', time: '45 MIN' },
+  { ep: 2, title: '차트 레시피 기초', desc: '온라인 강좌. 캔들의 이해부터 지지/저항선 긋기 실전 연습', thumb: '📊', time: '38 MIN' },
+  { ep: 3, title: '추세와 역추세 매매기법', desc: '강력한 추세 돌파 셋업 및 리스크 관리형 역추세 매매 룰 익히기', thumb: '📈', time: '52 MIN' },
+  { ep: 4, title: '타점 잡기 심화 가이드', desc: '눌림목/되돌림 (Pullback) 공략법 및 실전 적용 포인트', thumb: '🎯', time: '41 MIN' },
+  { ep: 5, title: '전략 셋팅 5종 마스터', desc: '시장 상황에 맞춘 5가지 입증된 트레이딩 셋업 완벽 분석', thumb: '⚔️', time: '60 MIN' },
+  { ep: 6, title: '글로벌 선물 거래소 완벽 가이드', desc: '바이낸스, 바이비트, OKX 특장점 및 선물 거래 기본 셋팅법', thumb: '🌍', time: '35 MIN' },
+  { ep: 7, title: '트레이딩 뷰 200% 활용법', desc: '보라 전략 셋팅, 브라운 텔레그램 웹훅 자동매매 연결 및 얼러트 최적화', thumb: '🖥️', time: '55 MIN' },
+  { ep: 8, title: 'MT5 실전 매매 로직', desc: '종목별 기능 이해, 핍 계산, 손익비 및 스톱/트레일링 셋팅 전략', thumb: '📉', time: '48 MIN' },
+  { ep: 9, title: '추천 브로커사 강점 비교', desc: '레버리지, 수수료, 슬리피지, 이벤트 혜택 비교를 통한 최적 브로커 선정', thumb: '⚖️', time: '30 MIN'},
+  { ep: 10, title: 'VORA 봇 + 브라운 백테스팅', desc: 'VORA 봇(GitHub 등)과 연계, 자동화 모니터링, 나만의 시스템 룰 만들기', thumb: '🧠', time: '40 MIN' }
+];
+
+function renderAcademy() {
+  const container = document.getElementById('courseList');
+  container.innerHTML = COURSES.map(c => `
+    <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: transform 0.2s, border-color 0.2s; cursor: pointer; display: flex; flex-direction: column;" class="course-card" onclick="alert('[VORA 10강]\\n\\n${c.title}\\n\\n재생을 준비 중입니다. 팬덤 서비스 한정 혜택으로 제공됩니다!')">
+      <div style="height: 140px; background: linear-gradient(135deg, var(--bg2), var(--bg3)); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; position: relative; border-bottom: 1px solid var(--border2);">
+        ${c.thumb}
+        <div style="position: absolute; bottom: 0.5rem; right: 0.5rem; background: rgba(0,0,0,0.8); color: white; font-size: 0.7rem; padding: 0.2rem 0.5rem; border-radius: 4px; font-family: 'Orbitron', sans-serif;">${c.time}</div>
+      </div>
+      <div style="padding: 1.25rem; flex: 1; display: flex; flex-direction: column;">
+        <span style="color: var(--vora-light); font-size: 0.7rem; font-family: 'Orbitron', sans-serif; font-weight: bold; margin-bottom: 0.4rem; letter-spacing: 0.05em;">EPISODE ${c.ep}</span>
+        <h3 style="color: white; font-size: 1.05rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.4;">${c.title}</h3>
+        <p style="color: var(--text-muted); font-size: 0.8rem; line-height: 1.5; margin-bottom: 1rem; flex: 1;">${c.desc}</p>
+        <div style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border2); padding-top: 0.75rem;">
+          <span style="font-size: 0.82rem; color: var(--emerald); font-weight: 500;">▶️ 지금 시청하기</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+// ─── INIT QUERY PARAM CHECK ───
+window.addEventListener('DOMContentLoaded', () => {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('skipSelection') === 'true') {
+     startTraderFlow();
+  }
+});
+</script>
+</body>
+</html>

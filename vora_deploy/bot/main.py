@@ -1,0 +1,42 @@
+import asyncio
+import logging
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters.command import Command
+from aiogram.enums import ParseMode
+
+from handlers.trading import router as trading_router
+
+# Replace with secure token loading (e.g., dotenv)
+BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"
+
+logging.basicConfig(level=logging.INFO)
+
+async def main():
+    bot = Bot(token=BOT_TOKEN, parse_mode=ParseMode.HTML)
+    dp = Dispatcher()
+
+    # Register routers
+    dp.include_router(trading_router)
+
+    # Simple start command defined here for brevity
+    @dp.message(Command("start"))
+    async def cmd_start(message: types.Message):
+        welcome_text = (
+            "🚀 Welcome to the **VORA P2P OTC Bot**! 🚀\n\n"
+            "This bot allows you to securely trade VORA tokens via non-custodial Escrow smart contracts.\n\n"
+            "Commands:\n"
+            "/buy - Buy VORA tokens\n"
+            "/sell - Sell VORA tokens\n"
+            "/orders - View open orders\n"
+            "/mywallet - Manage your TON Wallet connection"
+        )
+        await message.answer(welcome_text)
+
+    # Start polling
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except (KeyboardInterrupt, SystemExit):
+        logging.info("Bot stopped!")

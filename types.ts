@@ -135,6 +135,24 @@ export interface Settlement {
   txHash?: string;
 }
 
+export interface GlobalState {
+  totalUsers: number;
+  totalVoraMined: number;
+  p2pTaxAccumulated: number;
+  dnftSales: number;
+  t2eTimerEnd?: number; // Added for T2E Timer
+  t2eAutoScheduleActive?: boolean; // Automated 7-times daily schedule
+}
+
+export const initialGlobalState: GlobalState = {
+  totalUsers: 1420,
+  totalVoraMined: 45000000,
+  p2pTaxAccumulated: 852.5,
+  dnftSales: 12500,
+  t2eTimerEnd: 0,
+  t2eAutoScheduleActive: false
+};
+
 export interface UserSettlementSummary {
   userId: string;
   username: string;

@@ -53,6 +53,14 @@ module.exports = {
       cwd: "c:/antigravity-bot",
       watch: false,
       restart_delay: 5000
+    },
+    {
+      name: "vora-copy-broadcaster",
+      script: "python",
+      args: "vora_copy_broadcaster.py --master_sync",
+      cwd: "c:/antigravity-bot",
+      watch: false,
+      restart_delay: 10000
     }
   ]
 };

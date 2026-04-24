@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>VORA — Logo Design</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #050508;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ── Subtle grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* ── Main logo container */
+  .logo-wrap {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Ambient glow behind logo */
+  .glow-ring {
+    position: absolute;
+    inset: -40px;
+    border-radius: 50%;
+    background: radial-gradient(circle at center,
+      rgba(0, 201, 167, 0.12) 0%,
+      rgba(0, 201, 167, 0.04) 45%,
+      transparent 70%);
+    animation: pulse-glow 4s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.06); }
+  }
+
+  /* ── The SVG icon */
+  .logo-svg {
+    width: 260px;
+    height: 260px;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Orbit ring animation */
+  .orbit-outer {
+    animation: spin-slow 18s linear infinite;
+    transform-origin: 130px 130px;
+  }
+  .orbit-mid {
+    animation: spin-slow 11s linear infinite reverse;
+    transform-origin: 130px 130px;
+  }
+
+  @keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  /* Flywheel arc dash animation */
+  .arc-dash {
+    stroke-dasharray: 60 400;
+    animation: arc-flow 3s ease-in-out infinite;
+  }
+  @keyframes arc-flow {
+    0%   { stroke-dashoffset: 0; opacity: 0.4; }
+    50%  { opacity: 1; }
+    100% { stroke-dashoffset: -460; opacity: 0.4; }
+  }
+
+  .arc-dash-2 {
+    stroke-dasharray: 40 400;
+    animation: arc-flow 3s ease-in-out infinite 1s;
+  }
+  .arc-dash-3 {
+    stroke-dasharray: 50 400;
+    animation: arc-flow 3s ease-in-out infinite 2s;
+  }
+
+  /* Core pulse */
+  .core-pulse {
+    animation: core-breathe 2.5s ease-in-out infinite;
+    transform-origin: 130px 130px;
+  }
+  @keyframes core-breathe {
+    0%, 100% { opacity: 0.85; transform: scale(1); }
+    50%       { opacity: 1;    transform: scale(1.05); }
+  }
+
+  /* Node dots sparkle */
+  .node-dot {
+    animation: sparkle 2s ease-in-out infinite;
+  }
+  .node-dot:nth-child(1) { animation-delay: 0s; }
+  .node-dot:nth-child(2) { animation-delay: 0.4s; }
+  .node-dot:nth-child(3) { animation-delay: 0.8s; }
+  .node-dot:nth-child(4) { animation-delay: 1.2s; }
+  .node-dot:nth-child(5) { animation-delay: 1.6s; }
+  .node-dot:nth-child(6) { animation-delay: 2.0s; }
+
+  @keyframes sparkle {
+    0%, 100% { opacity: 0.5; r: 4; }
+    50%       { opacity: 1;   r: 6; }
+  }
+
+  /* ── Wordmark */
+  .wordmark {
+    margin-top: -12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .wordmark-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 72px;
+    letter-spacing: 0.22em;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    line-height: 1;
+    position: relative;
+  }
+
+  /* V letter teal accent */
+  .wordmark-text .v-letter {
+    color: #00C9A7;
+    position: relative;
+  }
+
+  .wordmark-sub {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 300;
+    font-size: 11px;
+    letter-spacing: 0.35em;
+    color: #4a5568;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── Tagline */
+  .tagline {
+    margin-top: 36px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 400;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    color: #2d3748;
+    text-align: center;
+  }
+
+  .tagline span {
+    color: #00C9A7;
+    font-weight: 500;
+  }
+
+  /* ── Divider */
+  .divider {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(to bottom, transparent, #00C9A7, transparent);
+    margin: 28px 0;
+    opacity: 0.4;
+  }
+
+  /* ── Variant display row */
+  .variants {
+    display: flex;
+    gap: 48px;
+    align-items: center;
+    margin-top: 16px;
+  }
+
+  .variant {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .variant-label {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.3em;
+    color: #2d3748;
+    text-transform: uppercase;
+  }
+
+  /* Dark variant */
+  .v-dark {
+    background: #050508;
+    padding: 20px 24px;
+    border-radius: 12px;
+    border: 1px solid #0d0d12;
+  }
+
+  /* Light variant */
+  .v-light {
+    background: #FFFFFF;
+    padding: 20px 24px;
+    border-radius: 12px;
+  }
+
+  /* Teal variant */
+  .v-teal {
+    background: #00C9A7;
+    padding: 20px 24px;
+    border-radius: 12px;
+  }
+
+  /* Small icon-only mark */
+  .mark-sm {
+    width: 48px;
+    height: 48px;
+  }
+  .mark-md {
+    width: 72px;
+    height: 72px;
+  }
+
+  /* Light version text */
+  .wm-light {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: 0.2em;
+    color: #0a0a0a;
+  }
+  .wm-light .v-letter { color: #00A896; }
+
+  .wm-teal {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: 0.2em;
+    color: #050508;
+  }
+
+  /* Usage note */
+  .usage-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+    width: 480px;
+  }
+  .usage-item {
+    background: #0a0a0f;
+    border: 1px solid #111118;
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .usage-key {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    color: #00C9A7;
+    text-transform: uppercase;
+  }
+  .usage-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 10px;
+    color: #4a5568;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="stage">
+
+  <!-- ═══ PRIMARY LOGO MARK ═══ -->
+  <div class="logo-wrap">
+    <div class="glow-ring"></div>
+
+    <svg class="logo-svg" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Main teal gradient -->
+        <linearGradient id="tealGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#00C9A7;stop-opacity:1"/>
+          <stop offset="100%" style="stop-color:#00897B;stop-opacity:1"/>
+        </linearGradient>
+
+        <!-- Glow filter -->
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="3.5" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+
+        <!-- Strong glow for core -->
+        <filter id="core-glow" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="8" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+
+        <!-- Soft glow for orbit dots -->
+        <filter id="dot-glow" x="-200%" y="-200%" width="500%" height="500%">
+          <feGaussianBlur stdDeviation="2.5" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+
+        <!-- Clip for outer ring arc -->
+        <clipPath id="clip-ring">
+          <circle cx="130" cy="130" r="115"/>
+        </clipPath>
+      </defs>
+
+      <!-- ── LAYER 0: Background circle (subtle) -->
+      <circle cx="130" cy="130" r="120"
+        fill="none" stroke="#00C9A7" stroke-width="0.4" opacity="0.08"/>
+
+      <!-- ── LAYER 1: Outer orbit ring — dashed rotating -->
+      <g class="orbit-outer">
+        <circle cx="130" cy="130" r="108"
+          fill="none"
+          stroke="#00C9A7"
+          stroke-width="0.8"
+          stroke-dasharray="6 14"
+          opacity="0.2"/>
+        <!-- 6 node dots on orbit ring — representing 6 flywheel steps -->
+        <g class="node-dot">
+          <circle cx="130" cy="22"  r="4.5" fill="#00C9A7" filter="url(#dot-glow)" opacity="0.9"/>
+        </g>
+        <g class="node-dot">
+          <circle cx="223.5" cy="76" r="4.5" fill="#00C9A7" filter="url(#dot-glow)" opacity="0.9"/>
+        </g>
+        <g class="node-dot">
+          <circle cx="223.5" cy="184" r="4.5" fill="#00C9A7" filter="url(#dot-glow)" opacity="0.9"/>
+        </g>
+        <g class="node-dot">
+          <circle cx="130" cy="238" r="4.5" fill="#00C9A7" filter="url(#dot-glow)" opacity="0.9"/>
+        </g>
+        <g class="node-dot">
+          <circle cx="36.5" cy="184" r="4.5" fill="#00C9A7" filter="url(#dot-glow)" opacity="0.9"/>
+        </g>
+        <g class="node-dot">
+          <circle cx="36.5" cy="76" r="4.5" fill="#00C9A7" filter="url(#dot-glow)" opacity="0.9"/>
+        </g>
+      </g>
+
+      <!-- ── LAYER 2: Middle orbit ring — flowing arcs -->
+      <g class="orbit-mid">
+        <!-- Arc segments — 3 glowing arcs, gaps between -->
+        <path d="M 130 50 A 80 80 0 0 1 199.3 210" 
+          fill="none" stroke="url(#tealGrad)" stroke-width="1.5"
+          stroke-linecap="round" opacity="0.5"
+          class="arc-dash"/>
+        <path d="M 199.3 210 A 80 80 0 0 1 60.7 210"
+          fill="none" stroke="url(#tealGrad)" stroke-width="1.5"
+          stroke-linecap="round" opacity="0.5"
+          class="arc-dash-2"/>
+        <path d="M 60.7 210 A 80 80 0 0 1 130 50"
+          fill="none" stroke="url(#tealGrad)" stroke-width="1.5"
+          stroke-linecap="round" opacity="0.5"
+          class="arc-dash-3"/>
+      </g>
+
+      <!-- ── LAYER 3: Inner structure ring -->
+      <circle cx="130" cy="130" r="62"
+        fill="none" stroke="#00C9A7" stroke-width="0.6" opacity="0.15"/>
+
+      <!-- ── LAYER 4: The 6 spokes — connecting center to orbit nodes -->
+      <!-- These represent the 6 flywheel connections -->
+      <line x1="130" y1="130" x2="130" y2="42"
+        stroke="#00C9A7" stroke-width="0.7" opacity="0.18"/>
+      <line x1="130" y1="130" x2="215.6" y2="80"
+        stroke="#00C9A7" stroke-width="0.7" opacity="0.18"/>
+      <line x1="130" y1="130" x2="215.6" y2="180"
+        stroke="#00C9A7" stroke-width="0.7" opacity="0.18"/>
+      <line x1="130" y1="130" x2="130" y2="218"
+        stroke="#00C9A7" stroke-width="0.7" opacity="0.18"/>
+      <line x1="130" y1="130" x2="44.4" y2="180"
+        stroke="#00C9A7" stroke-width="0.7" opacity="0.18"/>
+      <line x1="130" y1="130" x2="44.4" y2="80"
+        stroke="#00C9A7" stroke-width="0.7" opacity="0.18"/>
+
+      <!-- ── LAYER 5: Core mark — the V abstracted as upward momentum arrow -->
+      <!-- Outer hexagon (subtle) -->
+      <polygon
+        points="130,82 169.4,105 169.4,151 130,174 90.6,151 90.6,105"
+        fill="none" stroke="#00C9A7" stroke-width="1.2" opacity="0.25"/>
+
+      <!-- Core fill -->
+      <polygon
+        points="130,82 169.4,105 169.4,151 130,174 90.6,151 90.6,105"
+        fill="#00C9A7" opacity="0.04"/>
+
+      <!-- ── THE CORE SYMBOL: V-shaped momentum bolt -->
+      <!-- Left arm of V going down-right -->
+      <g class="core-pulse" filter="url(#core-glow)">
+        <!-- V shape — bold, geometric, upward -->
+        <polyline
+          points="102,97 130,156 158,97"
+          fill="none"
+          stroke="url(#tealGrad)"
+          stroke-width="9"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.95"/>
+
+        <!-- Inner V — thinner, lighter, offset slightly up — creates depth / "spark" effect -->
+        <polyline
+          points="108,97 130,147 152,97"
+          fill="none"
+          stroke="#FFFFFF"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.22"/>
+
+        <!-- Small upward arrow at V apex — symbolizes growth direction -->
+        <polyline
+          points="122,156 130,168 138,156"
+          fill="none"
+          stroke="#00C9A7"
+          stroke-width="4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          opacity="0.6"/>
+      </g>
+
+      <!-- ── LAYER 6: Center dot — the origin point -->
+      <circle cx="130" cy="130" r="3.5"
+        fill="#FFFFFF" opacity="0.7" filter="url(#dot-glow)"/>
+      <circle cx="130" cy="130" r="1.5"
+        fill="#00C9A7" opacity="1"/>
+
+    </svg>
+  </div>
+
+  <!-- ═══ WORDMARK ═══ -->
+  <div class="wordmark">
+    <div class="wordmark-text">
+      <span class="v-letter">V</span>ORA
+    </div>
+    <div class="wordmark-sub">Fandom Boost · Web3 · T2E</div>
+  </div>
+
+  <!-- Tagline -->
+  <div class="tagline" style="margin-top: 20px;">
+    AI가 <span>돈을 버는 방식</span>을 바꾼다
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ═══ LOGO VARIANTS ═══ -->
+  <div class="variants">
+
+    <!-- Dark BG small -->
+    <div class="variant">
+      <div class="v-dark">
+        <svg class="mark-md" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="tg2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#00C9A7"/>
+              <stop offset="100%" style="stop-color:#00897B"/>
+            </linearGradient>
+            <filter id="glow2"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          </defs>
+          <circle cx="130" cy="130" r="108" fill="none" stroke="#00C9A7" stroke-width="0.8" stroke-dasharray="6 14" opacity="0.2"/>
+          <circle cx="130" cy="22"  r="4" fill="#00C9A7" opacity="0.8"/>
+          <circle cx="223.5" cy="76" r="4" fill="#00C9A7" opacity="0.8"/>
+          <circle cx="223.5" cy="184" r="4" fill="#00C9A7" opacity="0.8"/>
+          <circle cx="130" cy="238" r="4" fill="#00C9A7" opacity="0.8"/>
+          <circle cx="36.5" cy="184" r="4" fill="#00C9A7" opacity="0.8"/>
+          <circle cx="36.5" cy="76" r="4" fill="#00C9A7" opacity="0.8"/>
+          <circle cx="130" cy="130" r="62" fill="none" stroke="#00C9A7" stroke-width="0.6" opacity="0.15"/>
+          <polygon points="130,82 169.4,105 169.4,151 130,174 90.6,151 90.6,105" fill="none" stroke="#00C9A7" stroke-width="1.2" opacity="0.25"/>
+          <g filter="url(#glow2)">
+            <polyline points="102,97 130,156 158,97" fill="none" stroke="url(#tg2)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="122,156 130,168 138,156" fill="none" stroke="#00C9A7" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+          </g>
+        </svg>
+      </div>
+      <div class="variant-label">Dark</div>
+    </div>
+
+    <!-- Light BG -->
+    <div class="variant">
+      <div class="v-light">
+        <svg class="mark-md" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="tg3" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#00A896"/>
+              <stop offset="100%" style="stop-color:#007A6E"/>
+            </linearGradient>
+          </defs>
+          <circle cx="130" cy="130" r="108" fill="none" stroke="#00A896" stroke-width="0.8" stroke-dasharray="6 14" opacity="0.25"/>
+          <circle cx="130" cy="22"  r="4" fill="#00A896" opacity="0.7"/>
+          <circle cx="223.5" cy="76" r="4" fill="#00A896" opacity="0.7"/>
+          <circle cx="223.5" cy="184" r="4" fill="#00A896" opacity="0.7"/>
+          <circle cx="130" cy="238" r="4" fill="#00A896" opacity="0.7"/>
+          <circle cx="36.5" cy="184" r="4" fill="#00A896" opacity="0.7"/>
+          <circle cx="36.5" cy="76" r="4" fill="#00A896" opacity="0.7"/>
+          <circle cx="130" cy="130" r="62" fill="none" stroke="#00A896" stroke-width="0.6" opacity="0.2"/>
+          <polygon points="130,82 169.4,105 169.4,151 130,174 90.6,151 90.6,105" fill="none" stroke="#00A896" stroke-width="1.2" opacity="0.3"/>
+          <polyline points="102,97 130,156 158,97" fill="none" stroke="url(#tg3)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="122,156 130,168 138,156" fill="none" stroke="#00A896" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+        </svg>
+        <div class="wm-light" style="margin-top:8px; font-size:20px; letter-spacing:0.2em;"><span class="v-letter">V</span>ORA</div>
+      </div>
+      <div class="variant-label">Light</div>
+    </div>
+
+    <!-- Teal BG -->
+    <div class="variant">
+      <div class="v-teal">
+        <svg class="mark-md" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="130" cy="130" r="108" fill="none" stroke="#050508" stroke-width="0.8" stroke-dasharray="6 14" opacity="0.2"/>
+          <circle cx="130" cy="22"  r="4" fill="#050508" opacity="0.5"/>
+          <circle cx="223.5" cy="76" r="4" fill="#050508" opacity="0.5"/>
+          <circle cx="223.5" cy="184" r="4" fill="#050508" opacity="0.5"/>
+          <circle cx="130" cy="238" r="4" fill="#050508" opacity="0.5"/>
+          <circle cx="36.5" cy="184" r="4" fill="#050508" opacity="0.5"/>
+          <circle cx="36.5" cy="76" r="4" fill="#050508" opacity="0.5"/>
+          <polygon points="130,82 169.4,105 169.4,151 130,174 90.6,151 90.6,105" fill="none" stroke="#050508" stroke-width="1.2" opacity="0.2"/>
+          <polyline points="102,97 130,156 158,97" fill="none" stroke="#050508" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+          <polyline points="122,156 130,168 138,156" fill="none" stroke="#050508" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+        </svg>
+        <div class="wm-teal" style="margin-top:8px; font-size:20px; letter-spacing:0.2em;">VORA</div>
+      </div>
+      <div class="variant-label">Teal</div>
+    </div>
+
+  </div><!-- /variants -->
+
+  <!-- ═══ DESIGN SYSTEM NOTES ═══ -->
+  <div class="usage-grid" style="margin-top: 48px;">
+    <div class="usage-item">
+      <div class="usage-key">Primary Color</div>
+      <div class="usage-val">#00C9A7 — Teal</div>
+    </div>
+    <div class="usage-item">
+      <div class="usage-key">Background</div>
+      <div class="usage-val">#050508 — Deep Black</div>
+    </div>
+    <div class="usage-item">
+      <div class="usage-key">Wordmark Font</div>
+      <div class="usage-val">Syne 800</div>
+    </div>
+    <div class="usage-item">
+      <div class="usage-key">Symbol</div>
+      <div class="usage-val">6-node Flywheel Ring + V-mark</div>
+    </div>
+    <div class="usage-item">
+      <div class="usage-key">Icon Meaning</div>
+      <div class="usage-val">V = Vora · Victory · Velocity</div>
+    </div>
+    <div class="usage-item">
+      <div class="usage-key">6 Orbit Nodes</div>
+      <div class="usage-val">Sus-Training 6 Flywheel Steps</div>
+    </div>
+  </div>
+
+  <div style="height: 64px;"></div>
+
+</div><!-- /stage -->
+
+</body>
+</html>

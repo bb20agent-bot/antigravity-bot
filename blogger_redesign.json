@@ -1,0 +1,12 @@
+{
+  "theme_name": "VORA Grid Theme (musicaesom Benchmark)",
+  "target_platform": "Google Blogger",
+  "instructions": "Blogger 관리자 화면 접속 -> 테마(Theme) -> 맞춤설정(Customize) 버튼 클릭 -> 고급(Advanced) 옵션 클릭 -> CSS 추가(Add CSS) 항목에 아래의 CustomCSS 코드를 전체 복사하여 붙여넣고 저장하세요.",
+  "CustomCSS": "/* VORA Google Blogger Grid Redesign */\n\n/* 1. 기본 배경 및 폰트 세팅 */\nbody {\n  background-color: #0f1115;\n  color: #e2e8f0;\n  font-family: 'Inter', -apple-system, sans-serif;\n}\n\n/* 2. 블로그 포스트 컨테이너 그리드화 */\n.blog-posts {\n  display: flex !important;\n  flex-wrap: wrap !important;\n  justify-content: space-between !important;\n  width: 100%;\n  padding: 20px 0;\n}\n\n/* 3. 개별 포스트 카드 디자인 (3열 배치) */\n.date-outer, .post-outer {\n  width: 31%; /* 3열을 위한 너비 할당 */\n  margin-bottom: 30px;\n  background: #1a1d24;\n  border-radius: 12px;\n  overflow: hidden;\n  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);\n  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n  display: flex;\n  flex-direction: column;\n}\n\n/* 4. 마우스 호버(Hover) 시 다이나믹 애니메이션 */\n.post-outer:hover {\n  transform: translateY(-8px);\n  box-shadow: 0 12px 28px rgba(0, 200, 255, 0.15);\n  border-color: rgba(255, 255, 255, 0.1);\n}\n\n/* 5. 텍스트 요소 패딩 및 간격 조정 */\n.post-title {\n  font-size: 1.3rem;\n  font-weight: 700;\n  margin: 20px;\n  color: #ffffff;\n  line-height: 1.4;\n}\n.post-body {\n  padding: 0 20px 20px 20px;\n  color: #94a3b8;\n  font-size: 0.95rem;\n  line-height: 1.6;\n}\n\n/* 공간을 차지하는 불필요한 메타데이터 숨김 (옵션) */\n.post-footer {\n  padding: 15px 20px;\n  background: #14161a;\n  border-top: 1px solid #2d3748;\n}\n\n/* 6. 반응형(모바일/태블릿) 설정 */\n@media (max-width: 992px) {\n  .date-outer, .post-outer {\n    width: 48%; /* 태블릿에서는 2열 */\n  }\n}\n\n@media (max-width: 600px) {\n  .date-outer, .post-outer {\n    width: 100%; /* 모바일에서는 1열 */\n    margin-bottom: 20px;\n  }\n}",
+  "Features": [
+    "세로 스크롤 최소화를 위한 3열 그리드 카드형 레이아웃 도입",
+    "Musicaesom 벤치마킹을 통한 마우스 호버(Hover) 다이내믹 애니메이션",
+    "모바일/태블릿을 위한 완벽한 반응형(Responsive) 너비 자동 조절",
+    "트레이딩 및 전문 차트 이미지에 어울리는 다크모드(Dark Mode) 전용 디자인 구축"
+  ]
+}

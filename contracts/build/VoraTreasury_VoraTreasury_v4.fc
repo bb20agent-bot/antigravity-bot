@@ -1,0 +1,943 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+;; VoraTreasury_VoraTreasury_v4.headers.fc
+;;
+;; Header files for VoraTreasury_v4
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_store_address_opt
+builder __tact_store_address_opt(builder b, slice address) inline;
+
+;; __tact_not_null
+forall X -> X __tact_not_null(X x) impure inline;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_context_get_sender
+slice __tact_context_get_sender() inline;
+
+;; __tact_dict_get_slice_int
+int __tact_dict_get_slice_int(cell d, int kl, slice k, int vl) inline;
+
+;; __tact_dict_set_slice_int
+(cell, ()) __tact_dict_set_slice_int(cell d, int kl, slice k, int v, int vl) inline;
+
+;; __tact_dict_get_slice_cell
+cell __tact_dict_get_slice_cell(cell d, int kl, slice k) inline;
+
+;; __tact_dict_set_slice_cell
+(cell, ()) __tact_dict_set_slice_cell(cell d, int kl, slice k, cell v) inline;
+
+;; $DeployOk$_store
+builder $DeployOk$_store(builder build_0, (int) v) inline;
+
+;; $DeployOk$_store_cell
+cell $DeployOk$_store_cell((int) v, builder b) inline;
+
+;; $TokenTransfer$_store
+builder $TokenTransfer$_store(builder build_0, (int, int, slice, slice, cell, int, slice) v) inline;
+
+;; $TokenTransfer$_store_cell
+cell $TokenTransfer$_store_cell((int, int, slice, slice, cell, int, slice) v, builder b) inline;
+
+;; $ReferrerInfo$_store
+builder $ReferrerInfo$_store(builder build_0, (slice, slice) v) inline;
+
+;; $ReferrerInfo$_store_cell
+cell $ReferrerInfo$_store_cell((slice, slice) v, builder b) inline;
+
+;; $ReferrerInfo$_load
+(slice, ((slice, slice))) $ReferrerInfo$_load(slice sc_0) inline;
+
+;; $ReferrerInfo$_as_optional
+tuple $ReferrerInfo$_as_optional((slice, slice) v) inline;
+
+;; $ReferrerInfo$_load_opt
+tuple $ReferrerInfo$_load_opt(cell cl) inline;
+
+;; $VoraTreasury_v4$_store
+builder $VoraTreasury_v4$_store(builder build_0, (slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) v) inline;
+
+;; $VoraTreasury_v4$_load
+(slice, ((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice))) $VoraTreasury_v4$_load(slice sc_0) inline;
+
+;; $Context$_get_value
+_ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $ReferrerInfo$_get_l1
+_ $ReferrerInfo$_get_l1((slice, slice) v) inline;
+
+;; $ReferrerInfo$_get_l2
+_ $ReferrerInfo$_get_l2((slice, slice) v) inline;
+
+;; $ReferrerInfo$_not_null
+((slice, slice)) $ReferrerInfo$_not_null(tuple v) inline;
+
+;; $VoraTreasury_v4$init$_load
+(slice, ((slice, slice, slice, slice, slice, slice))) $VoraTreasury_v4$init$_load(slice sc_0) inline;
+
+;; $VoraTreasury_v4$_contract_init
+(slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $VoraTreasury_v4$_contract_init(slice $owner, slice $strategy, slice $dev, slice $dex, slice $tech, slice $p2p) impure inline;
+
+;; $VoraTreasury_v4$_contract_load
+(slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $VoraTreasury_v4$_contract_load() impure inline;
+
+;; $VoraTreasury_v4$_contract_store
+() $VoraTreasury_v4$_contract_store((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) v) impure inline;
+
+;; $VoraTreasury_v4$_fun_get_dnft_tier
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), int) $VoraTreasury_v4$_fun_get_dnft_tier((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self, slice $user) impure inline_ref;
+
+;; $VoraTreasury_v4$_fun_get_stats
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), int) $VoraTreasury_v4$_fun_get_stats((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self) impure inline_ref;
+
+;; $SendParameters$_constructor_to_value_mode_body
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline;
+
+;; $TokenTransfer$_constructor_query_id_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload
+((int, int, slice, slice, cell, int, slice)) $TokenTransfer$_constructor_query_id_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload(int $query_id, int $amount, slice $destination, slice $response_destination, cell $custom_payload, int $forward_ton_amount, slice $forward_payload) inline;
+
+;; $VoraTreasury_v4$_fun_send_jettons
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), ()) $VoraTreasury_v4$_fun_send_jettons((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self, slice $to, int $amount, slice $memo) impure inline_ref;
+
+;; $MessageParameters$_constructor_bounce_to_value_mode_body
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
+
+;; $VoraTreasury_v4$_fun_notify
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), ()) $VoraTreasury_v4$_fun_notify((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self, cell $body) impure inline;
+
+;; $VoraTreasury_v4$_fun_requireOwner
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), ()) $VoraTreasury_v4$_fun_requireOwner((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self) impure inline_ref;
+
+;; $VoraTreasury_v4$_fun_owner
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), slice) $VoraTreasury_v4$_fun_owner((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self) impure inline_ref;
+
+;; $ReferrerInfo$_constructor_l1_l2
+((slice, slice)) $ReferrerInfo$_constructor_l1_l2(slice $l1, slice $l2) inline;
+
+;; $DeployOk$_constructor_queryId
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
+
+
+;; VoraTreasury_VoraTreasury_v4.stdlib.fc
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_child_contract_codes;
+global int __tact_randomized;
+
+(slice, slice) __tact_load_address_opt(slice cs) asm """
+
+            b{00} SDBEGINSQ
+            IF:<{
+              PUSHNULL
+            }>ELSE<{
+              LDMSGADDR
+              SWAP
+            }>
+
+""";
+
+builder __tact_store_addr_none(builder b) asm "b{00} STSLICECONST";
+
+builder __tact_store_address_opt(builder b, slice address) inline {
+    if (null?(address)) {
+        return __tact_store_addr_none(b);
+    } else {
+        return b.store_slice(address);
+    }
+}
+
+forall X -> X __tact_not_null(X x) impure inline {
+    throw_if(128, null?(x)); return x;
+}
+
+(cell, int) __tact_dict_delete(cell dict, int key_len, slice index) asm(index dict key_len) """
+    DICTDEL
+""";
+
+((cell), ()) __tact_dict_set_ref(cell dict, int key_len, slice index, cell value) asm(value index dict key_len) """
+    DICTSETREF
+""";
+
+(slice, int) __tact_dict_get(cell dict, int key_len, slice index) asm(index dict key_len) """
+    DICTGET NULLSWAPIFNOT
+""";
+
+(cell, int) __tact_dict_get_ref(cell dict, int key_len, slice index) asm(index dict key_len) """
+    DICTGETREF NULLSWAPIFNOT
+""";
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+forall X0, X1 -> tuple __tact_tuple_create_2((X0, X1) v) asm """
+    2 TUPLE
+""";
+
+forall X0, X1 -> (X0, X1) __tact_tuple_destroy_2(tuple v) asm """
+    2 UNTUPLE
+""";
+
+int __tact_dict_get_slice_int(cell d, int kl, slice k, int vl) inline {
+    var (r, ok) = __tact_dict_get(d, kl, k);
+    if (ok) {
+        return r~load_int(vl);
+    } else {
+        return null();
+    }
+}
+
+(cell, ()) __tact_dict_set_slice_int(cell d, int kl, slice k, int v, int vl) inline {
+    if (null?(v)) {
+        var (r, ok) = __tact_dict_delete(d, kl, k);
+        return (r, ());
+    } else {
+        return (dict_set_builder(d, kl, k, begin_cell().store_int(v, vl)), ());
+    }
+}
+
+cell __tact_dict_get_slice_cell(cell d, int kl, slice k) inline {
+    var (r, ok) = __tact_dict_get_ref(d, kl, k);
+    if (ok) {
+        return r;
+    } else {
+        return null();
+    }
+}
+
+(cell, ()) __tact_dict_set_slice_cell(cell d, int kl, slice k, cell v) inline {
+    if (null?(v)) {
+        var (r, ok) = __tact_dict_delete(d, kl, k);
+        return (r, ());
+    } else {
+        return __tact_dict_set_ref(d, kl, k, v);
+    }
+}
+
+int $global_myBalance() impure asm """
+    BALANCE FIRST
+""";
+
+() $global_nativeReserve(int $amount, int $mode) impure asm """
+    RAWRESERVE
+""";
+
+() $global_message((int, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+    STZEROES
+    // → Stack state
+    // s0: Builder
+    // s1: `body`
+    // s2: `mode`
+    STDICT
+    ENDC
+    SWAP
+    SENDRAWMSG
+""";
+
+() $global_send((int, cell, cell, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+    STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+    // → Stack state
+    // s0: Builder
+    // s1: `data`
+    // s2: `code`
+    // s3: `body`
+    // s4: `mode`
+
+    // Group 2: Placing the Builder after code and data, then checking those for nullability
+    s2 XCHG0
+    DUP2
+    ISNULL
+    SWAP
+    ISNULL
+    AND
+    // → Stack state
+    // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+    // s1: `code`
+    // s2: `data`
+    // s3: Builder
+    // s4: `body`
+    // s5: `mode`
+
+    // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+    <{
+        DROP2 // drop `data` and `code`, since either of those is null
+        b{0} STSLICECONST
+    }> PUSHCONT
+
+    // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+    <{
+        // _ split_depth:(Maybe (## 5))
+        //   special:(Maybe TickTock)
+        //   code:(Maybe ^Cell)
+        //   data:(Maybe ^Cell)
+        //   library:(Maybe ^Cell)
+        // = StateInit;
+        ROT                // place message Builder on top
+        b{10} STSLICECONST // store Maybe = true, Either = false
+        // Start composing inlined StateInit
+        b{00} STSLICECONST // store split_depth and special first
+        STDICT             // store code
+        STDICT             // store data
+        b{0} STSLICECONST  // store library
+    }> PUSHCONT
+
+    // Group 3: IFELSE that does the branching shown above
+    IFELSE
+    // → Stack state
+    // s0: Builder
+    // s1: null or StateInit
+    // s2: `body`
+    // s3: `mode`
+
+    // Group 4: Finalizing the message
+    STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+    ENDC
+    // → Stack state
+    // s0: Cell
+    // s1: `mode`
+
+    // Group 5: Sending the message, with `mode` on top
+    SWAP
+    SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+""";
+
+slice $String$_fun_asSlice(slice $self) impure asm "NOP";
+
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), ()) $VoraTreasury_v4$_fun_notify((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self, cell $body) impure inline {
+    var (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)) = $self;
+    slice $to = __tact_context_get_sender();
+    int $bounce = false;
+    if (false) {
+        int $balance = $global_myBalance();
+        int $balanceBeforeMessage = ($balance - $Context$_get_value(__tact_context_get()));
+        if (($balanceBeforeMessage < 0)) {
+            $global_nativeReserve(0, 0);
+            $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
+            return (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr), ());
+        }
+    }
+    $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
+    return (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr), ());
+}
+
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), ()) $VoraTreasury_v4$_fun_requireOwner((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self) impure inline_ref {
+    var (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)) = $self;
+    throw_unless(132, ( equal_slices_bits(__tact_context_get_sender(), $self'owner) ));
+    return (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr), ());
+}
+
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), slice) $VoraTreasury_v4$_fun_owner((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self) impure inline_ref {
+    var (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)) = $self;
+    var $fresh$ret_20 = $self'owner;
+    return (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr), $fresh$ret_20);
+}
+
+;; VoraTreasury_VoraTreasury_v4.constants.fc
+;; String "T2E L1 Reward"
+slice __gen_slice_string_6db81d08f7148b87d229db35957f7549ddc8a4fc63c9613f8b7bd22b9045c277() asm """
+    B{b5ee9c7241010101000f00001a543245204c31205265776172648b1b25a0} B>boc <s PUSHSLICE
+""";
+
+;; String "T2E L2 Reward"
+slice __gen_slice_string_f9d140805b1e4782178af2dffd304b7809981de6dd095d9a4d50d9c1304fc7e6() asm """
+    B{b5ee9c7241010101000f00001a543245204c3220526577617264e29c617b} B>boc <s PUSHSLICE
+""";
+
+;; String "Noblesse Oblige: Advisor Payout"
+slice __gen_slice_string_660f24521691360bbedf1f2183db088a4c76446952dda4234f18b9679c5df5e0() asm """
+    B{b5ee9c7241010101002100003e4e6f626c65737365204f626c6967653a2041647669736f72205061796f7574480a64cd} B>boc <s PUSHSLICE
+""";
+
+;; EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c
+slice __gen_slice_address_61ab4641fa30d9310391025086eec65d200d79268e1b7cd402565e01ba64be3c() asm """
+    B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
+""";
+
+;; String "Governance: Strategic Burn"
+slice __gen_slice_string_185081b1d37ab790dd7703a753f4b2b50ad076240ebd89ac5554475f2f43751a() asm """
+    B{b5ee9c7241010101001c000034476f7665726e616e63653a20537472617465676963204275726ecd0892ba} B>boc <s PUSHSLICE
+""";
+
+;; String "IDO Strat (50%)"
+slice __gen_slice_string_9e050647f86fc0946172b71e97a8a8ec0e7ae2e9b4264dad1b0a23313aec9fd5() asm """
+    B{b5ee9c7241010101001100001e49444f205374726174202835302529aebb7951} B>boc <s PUSHSLICE
+""";
+
+;; String "IDO Dev (20%)"
+slice __gen_slice_string_a1ad017621725e49977c3d0cc5e2cac2d36b867414b4c12dd6e61379afb8c75d() asm """
+    B{b5ee9c7241010101000f00001a49444f20446576202832302529f1dcb6c9} B>boc <s PUSHSLICE
+""";
+
+;; String "IDO DEX (30%)"
+slice __gen_slice_string_b6700994c16d883c20065c8110d1f2810f14de7151b6f5c1973966e089d2ffec() asm """
+    B{b5ee9c7241010101000f00001a49444f204445582028333025297ff1631f} B>boc <s PUSHSLICE
+""";
+
+;; String "SUB Strat (50%)"
+slice __gen_slice_string_38cf855bfe348c8dfd3d466792877eecb30ff4d45067bafb5134403639732656() asm """
+    B{b5ee9c7241010101001100001e535542205374726174202835302529ba1469be} B>boc <s PUSHSLICE
+""";
+
+;; String "SUB Tech (5%)"
+slice __gen_slice_string_26be4bd9177bc5cbc13d30f3bd963f34c2be2990ab47d78f7d29fe8cfaa76ae1() asm """
+    B{b5ee9c7241010101000f00001a5355422054656368202835252952a77e79} B>boc <s PUSHSLICE
+""";
+
+;; String "SUB DEX LP (20%)"
+slice __gen_slice_string_9656818130c18e791b2fab4484e939878f56c0d6066b62dc2594f24a9f23cce1() asm """
+    B{b5ee9c7241010101001200002053554220444558204c502028323025296ab61f5f} B>boc <s PUSHSLICE
+""";
+
+;; String "SUB P2P Brokers (25%)"
+slice __gen_slice_string_04a03e11fbb24d4c30d8355da747cac44de6ae73052a546f8aa536451de8741e() asm """
+    B{b5ee9c7241010101001700002a535542205032502042726f6b6572732028323525298afb43e0} B>boc <s PUSHSLICE
+""";
+
+;; VoraTreasury_VoraTreasury_v4.storage.fc
+;;
+;; Type: Context
+;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounceable, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell value:int257 to:address bounce:bool = SendParameters
+;;
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, null(), null(), $value, $to, true);
+}
+
+;;
+;; Type: MessageParameters
+;; TLB: _ mode:int257 body:Maybe ^cell value:int257 to:address bounce:bool = MessageParameters
+;;
+
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, $value, $to, $bounce);
+}
+
+;;
+;; Type: DeployOk
+;; Header: 0xaff90f57
+;; TLB: deploy_ok#aff90f57 queryId:uint64 = DeployOk
+;;
+
+builder $DeployOk$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $DeployOk$_store_cell((int) v, builder b) inline {
+    return $DeployOk$_store(b, v).end_cell();
+}
+
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline {
+    return ($queryId);
+}
+
+;;
+;; Type: TokenTransfer
+;; Header: 0x0f8a7ea5
+;; TLB: token_transfer#0f8a7ea5 query_id:uint64 amount:coins destination:address response_destination:address custom_payload:Maybe ^cell forward_ton_amount:coins forward_payload:remainder<slice> = TokenTransfer
+;;
+
+builder $TokenTransfer$_store(builder build_0, (int, int, slice, slice, cell, int, slice) v) inline {
+    var (v'query_id, v'amount, v'destination, v'response_destination, v'custom_payload, v'forward_ton_amount, v'forward_payload) = v;
+    build_0 = store_uint(build_0, 260734629, 32);
+    build_0 = build_0.store_uint(v'query_id, 64);
+    build_0 = build_0.store_varuint16(v'amount);
+    build_0 = build_0.store_slice(v'destination);
+    build_0 = __tact_store_address_opt(build_0, v'response_destination);
+    build_0 = build_0.store_maybe_ref(v'custom_payload);
+    build_0 = build_0.store_varuint16(v'forward_ton_amount);
+    build_0 = build_0.store_slice(v'forward_payload);
+    return build_0;
+}
+
+cell $TokenTransfer$_store_cell((int, int, slice, slice, cell, int, slice) v, builder b) inline {
+    return $TokenTransfer$_store(b, v).end_cell();
+}
+
+((int, int, slice, slice, cell, int, slice)) $TokenTransfer$_constructor_query_id_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload(int $query_id, int $amount, slice $destination, slice $response_destination, cell $custom_payload, int $forward_ton_amount, slice $forward_payload) inline {
+    return ($query_id, $amount, $destination, $response_destination, $custom_payload, $forward_ton_amount, $forward_payload);
+}
+
+;;
+;; Type: ReferrerInfo
+;; TLB: _ l1:address l2:address = ReferrerInfo
+;;
+
+builder $ReferrerInfo$_store(builder build_0, (slice, slice) v) inline {
+    var (v'l1, v'l2) = v;
+    build_0 = __tact_store_address_opt(build_0, v'l1);
+    build_0 = __tact_store_address_opt(build_0, v'l2);
+    return build_0;
+}
+
+cell $ReferrerInfo$_store_cell((slice, slice) v, builder b) inline {
+    return $ReferrerInfo$_store(b, v).end_cell();
+}
+
+(slice, ((slice, slice))) $ReferrerInfo$_load(slice sc_0) inline {
+    var v'l1 = sc_0~__tact_load_address_opt();
+    var v'l2 = sc_0~__tact_load_address_opt();
+    return (sc_0, (v'l1, v'l2));
+}
+
+tuple $ReferrerInfo$_as_optional((slice, slice) v) inline {
+    var (v'l1, v'l2) = v;
+    return __tact_tuple_create_2(v'l1, v'l2);
+}
+
+tuple $ReferrerInfo$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $ReferrerInfo$_as_optional(sc~$ReferrerInfo$_load());
+}
+
+_ $ReferrerInfo$_get_l1((slice, slice) v) inline {
+    var (v'l1, v'l2) = v;
+    return v'l1;
+}
+
+_ $ReferrerInfo$_get_l2((slice, slice) v) inline {
+    var (v'l1, v'l2) = v;
+    return v'l2;
+}
+
+((slice, slice)) $ReferrerInfo$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (slice vvv'l1, slice vvv'l2) = __tact_tuple_destroy_2(v);
+    return (vvv'l1, vvv'l2);
+}
+
+((slice, slice)) $ReferrerInfo$_constructor_l1_l2(slice $l1, slice $l2) inline {
+    return ($l1, $l2);
+}
+
+;;
+;; Type: VoraTreasury_v4
+;; TLB: _ owner:address vora_jetton_wallet:address referrers:dict<address, ^ReferrerInfo{l1:address,l2:address}> n_volume:dict<address, int> advisor_pool:coins tier5_users:dict<address, bool> tier5_count:int257 strategy_addr:address dev_addr:address dex_addr:address tech_addr:address p2p_addr:address = VoraTreasury_v4
+;;
+
+builder $VoraTreasury_v4$_store(builder build_0, (slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) v) inline {
+    var (v'owner, v'vora_jetton_wallet, v'referrers, v'n_volume, v'advisor_pool, v'tier5_users, v'tier5_count, v'strategy_addr, v'dev_addr, v'dex_addr, v'tech_addr, v'p2p_addr) = v;
+    build_0 = build_0.store_slice(v'owner);
+    build_0 = __tact_store_address_opt(build_0, v'vora_jetton_wallet);
+    build_0 = build_0.store_dict(v'referrers);
+    var build_1 = begin_cell();
+    build_1 = build_1.store_dict(v'n_volume);
+    build_1 = build_1.store_varuint16(v'advisor_pool);
+    build_1 = build_1.store_dict(v'tier5_users);
+    build_1 = build_1.store_int(v'tier5_count, 257);
+    build_1 = build_1.store_slice(v'strategy_addr);
+    build_1 = build_1.store_slice(v'dev_addr);
+    var build_2 = begin_cell();
+    build_2 = build_2.store_slice(v'dex_addr);
+    build_2 = build_2.store_slice(v'tech_addr);
+    build_2 = build_2.store_slice(v'p2p_addr);
+    build_1 = store_builder_ref(build_1, build_2);
+    build_0 = store_builder_ref(build_0, build_1);
+    return build_0;
+}
+
+(slice, ((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice))) $VoraTreasury_v4$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'vora_jetton_wallet = sc_0~__tact_load_address_opt();
+    var v'referrers = sc_0~load_dict();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'n_volume = sc_1~load_dict();
+    var v'advisor_pool = sc_1~load_varuint16();
+    var v'tier5_users = sc_1~load_dict();
+    var v'tier5_count = sc_1~load_int(257);
+    var v'strategy_addr = sc_1~load_msg_addr();
+    var v'dev_addr = sc_1~load_msg_addr();
+    slice sc_2 = sc_1~load_ref().begin_parse();
+    var v'dex_addr = sc_2~load_msg_addr();
+    var v'tech_addr = sc_2~load_msg_addr();
+    var v'p2p_addr = sc_2~load_msg_addr();
+    return (sc_0, (v'owner, v'vora_jetton_wallet, v'referrers, v'n_volume, v'advisor_pool, v'tier5_users, v'tier5_count, v'strategy_addr, v'dev_addr, v'dex_addr, v'tech_addr, v'p2p_addr));
+}
+
+(slice, ((slice, slice, slice, slice, slice, slice))) $VoraTreasury_v4$init$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'strategy = sc_0~load_msg_addr();
+    var v'dev = sc_0~load_msg_addr();
+    slice sc_1 = sc_0~load_ref().begin_parse();
+    var v'dex = sc_1~load_msg_addr();
+    var v'tech = sc_1~load_msg_addr();
+    var v'p2p = sc_1~load_msg_addr();
+    return (sc_0, (v'owner, v'strategy, v'dev, v'dex, v'tech, v'p2p));
+}
+
+(slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $VoraTreasury_v4$_contract_load() impure inline {
+    slice $sc = get_data().begin_parse();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$VoraTreasury_v4$_load();
+    }
+    else {
+        (slice $owner, slice $strategy, slice $dev, slice $dex, slice $tech, slice $p2p) = $sc~$VoraTreasury_v4$init$_load();
+        $sc.end_parse();
+        return $VoraTreasury_v4$_contract_init($owner, $strategy, $dev, $dex, $tech, $p2p);
+    }
+}
+
+() $VoraTreasury_v4$_contract_store((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_int(true, 1);
+    b = $VoraTreasury_v4$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Contract VoraTreasury_v4 functions
+;;
+
+(slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $VoraTreasury_v4$_contract_init(slice $owner, slice $strategy, slice $dev, slice $dex, slice $tech, slice $p2p) impure inline {
+    var (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)) = (null(), null(), null(), null(), 50000000000000000, null(), 0, null(), null(), null(), null(), null());
+    $self'owner = $owner;
+    $self'strategy_addr = $strategy;
+    $self'dev_addr = $dev;
+    $self'dex_addr = $dex;
+    $self'tech_addr = $tech;
+    $self'p2p_addr = $p2p;
+    return ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr);
+}
+
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), int) $VoraTreasury_v4$_fun_get_dnft_tier((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self, slice $user) impure inline_ref {
+    var (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)) = $self;
+    int $vol = 0;
+    if ((~ null?(__tact_dict_get_slice_int($self'n_volume, 267, $user, 257)))) {
+        $vol = __tact_not_null(__tact_dict_get_slice_int($self'n_volume, 267, $user, 257));
+    }
+    if (($vol >= 10000000000000000)) {
+        var $fresh$ret_14 = 5;
+        return (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr), $fresh$ret_14);
+    }
+    if (($vol >= 1000000000000000)) {
+        var $fresh$ret_15 = 4;
+        return (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr), $fresh$ret_15);
+    }
+    if (($vol >= 100000000000000)) {
+        var $fresh$ret_16 = 3;
+        return (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr), $fresh$ret_16);
+    }
+    if (($vol >= 10000000000000)) {
+        var $fresh$ret_17 = 2;
+        return (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr), $fresh$ret_17);
+    }
+    var $fresh$ret_18 = 1;
+    return (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr), $fresh$ret_18);
+}
+
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), int) $VoraTreasury_v4$_fun_get_stats((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self) impure inline_ref {
+    var (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)) = $self;
+    var $fresh$ret_19 = $self'tier5_count;
+    return (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr), $fresh$ret_19);
+}
+
+((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice), ()) $VoraTreasury_v4$_fun_send_jettons((slice, slice, cell, cell, int, cell, int, slice, slice, slice, slice, slice) $self, slice $to, int $amount, slice $memo) impure inline_ref {
+    var (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)) = $self;
+    throw_unless(31063, (~ null?($self'vora_jetton_wallet)));
+    $global_send($SendParameters$_constructor_to_value_mode_body(__tact_not_null($self'vora_jetton_wallet), 50000000, 1, $TokenTransfer$_store_cell($TokenTransfer$_constructor_query_id_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload(0, $amount, $to, $self'owner, null(), 10000000, $String$_fun_asSlice($memo)), begin_cell())));
+    return (($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr), ());
+}
+
+;;
+;; Get methods of a Contract VoraTreasury_v4
+;;
+
+_ %get_dnft_tier(slice $user) method_id(76743) {
+    slice $user = $user;
+    var self = $VoraTreasury_v4$_contract_load();
+    var res = self~$VoraTreasury_v4$_fun_get_dnft_tier($user);
+    return res;
+}
+
+_ %get_stats() method_id(74074) {
+    var self = $VoraTreasury_v4$_contract_load();
+    var res = self~$VoraTreasury_v4$_fun_get_stats();
+    return res;
+}
+
+_ %owner() method_id(83229) {
+    var self = $VoraTreasury_v4$_contract_load();
+    var res = self~$VoraTreasury_v4$_fun_owner();
+    return res;
+}
+
+;;
+;; Routing of a Contract VoraTreasury_v4
+;;
+
+;; message opcode reader utility: only binary receivers
+;; Returns 32 bit message opcode, otherwise throws the "Invalid incoming message" exit code
+(slice, int) ~load_opcode_internal(slice s) asm( -> 1 0) "32 LDUQ 130 THROWIFNOT";
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    cs~skip_bits(2);
+    var msg_bounceable = cs~load_int(1);
+    var msg_bounced = cs~load_int(1);
+    slice msg_sender_addr = cs~load_msg_addr();
+    __tact_context = (msg_bounceable, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr) = $VoraTreasury_v4$_contract_load();
+    
+    ;; Handle bounced messages
+    if (msg_bounced) { return (); }
+    int op = 0;
+    int in_msg_length = slice_bits(in_msg);
+    if (in_msg_length >= 32) {
+        op = in_msg~load_uint(32);
+        ;; Receive RecordT2EVolume message
+        if (op == 510331182) {
+            var $msg'user = in_msg~load_msg_addr();
+            var $msg'amount = in_msg~load_varuint16();
+            ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_requireOwner();
+            int $vol = 0;
+            if ((~ null?(__tact_dict_get_slice_int($self'n_volume, 267, $msg'user, 257)))) {
+                $vol = __tact_not_null(__tact_dict_get_slice_int($self'n_volume, 267, $msg'user, 257));
+            }
+            int $new_vol = ($vol + $msg'amount);
+            $self'n_volume~__tact_dict_set_slice_int(267, $msg'user, $new_vol, 257);
+            if (( (($new_vol >= 10000000000000000)) ? (null?(__tact_dict_get_slice_int($self'tier5_users, 267, $msg'user, 1))) : (false) )) {
+                $self'tier5_users~__tact_dict_set_slice_int(267, $msg'user, true, 1);
+                $self'tier5_count = ($self'tier5_count + 1);
+            }
+            tuple $info = $ReferrerInfo$_load_opt(__tact_dict_get_slice_cell($self'referrers, 267, $msg'user));
+            if ((~ null?($info))) {
+                if ((~ null?($ReferrerInfo$_get_l1($ReferrerInfo$_not_null($info))))) {
+                    ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_send_jettons(__tact_not_null($ReferrerInfo$_get_l1($ReferrerInfo$_not_null($info))), (($msg'amount * 15) / 100), __gen_slice_string_6db81d08f7148b87d229db35957f7549ddc8a4fc63c9613f8b7bd22b9045c277());
+                }
+                if ((~ null?($ReferrerInfo$_get_l2($ReferrerInfo$_not_null($info))))) {
+                    ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_send_jettons(__tact_not_null($ReferrerInfo$_get_l2($ReferrerInfo$_not_null($info))), (($msg'amount * 5) / 100), __gen_slice_string_f9d140805b1e4782178af2dffd304b7809981de6dd095d9a4d50d9c1304fc7e6());
+                }
+            }
+            $VoraTreasury_v4$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr));
+            return ();
+        }
+        
+        ;; Receive PayoutAdvisor message
+        if (op == 2966411870) {
+            var $msg'amount = in_msg~load_varuint16();
+            var $msg'recipient = in_msg~load_msg_addr();
+            ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_requireOwner();
+            throw_unless(53440, ($self'tier5_count >= 10));
+            throw_unless(36513, ($self'advisor_pool >= $msg'amount));
+            $self'advisor_pool = ($self'advisor_pool - $msg'amount);
+            ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_send_jettons($msg'recipient, $msg'amount, __gen_slice_string_660f24521691360bbedf1f2183db088a4c76446952dda4234f18b9679c5df5e0());
+            $VoraTreasury_v4$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr));
+            return ();
+        }
+        
+        ;; Receive VoteBurn message
+        if (op == 491364719) {
+            var $msg'amount = in_msg~load_varuint16();
+            throw_unless(55160, (~ null?(__tact_dict_get_slice_int($self'tier5_users, 267, __tact_context_get_sender(), 1))));
+            ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_send_jettons(__gen_slice_address_61ab4641fa30d9310391025086eec65d200d79268e1b7cd402565e01ba64be3c(), $msg'amount, __gen_slice_string_185081b1d37ab790dd7703a753f4b2b50ad076240ebd89ac5554475f2f43751a());
+            $VoraTreasury_v4$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr));
+            return ();
+        }
+        
+        ;; Receive WithdrawIDO message
+        if (op == 1070403341) {
+            var $msg'strategy = in_msg~load_varuint16();
+            var $msg'dev = in_msg~load_varuint16();
+            var $msg'dex = in_msg~load_varuint16();
+            ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_requireOwner();
+            if (($msg'strategy > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_send_jettons($self'strategy_addr, $msg'strategy, __gen_slice_string_9e050647f86fc0946172b71e97a8a8ec0e7ae2e9b4264dad1b0a23313aec9fd5());
+            }
+            if (($msg'dev > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_send_jettons($self'dev_addr, $msg'dev, __gen_slice_string_a1ad017621725e49977c3d0cc5e2cac2d36b867414b4c12dd6e61379afb8c75d());
+            }
+            if (($msg'dex > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_send_jettons($self'dex_addr, $msg'dex, __gen_slice_string_b6700994c16d883c20065c8110d1f2810f14de7151b6f5c1973966e089d2ffec());
+            }
+            $VoraTreasury_v4$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr));
+            return ();
+        }
+        
+        ;; Receive WithdrawSubscription message
+        if (op == 1173465678) {
+            var $msg'strategy = in_msg~load_varuint16();
+            var $msg'tech = in_msg~load_varuint16();
+            var $msg'lp = in_msg~load_varuint16();
+            var $msg'p2p = in_msg~load_varuint16();
+            ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_requireOwner();
+            if (($msg'strategy > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_send_jettons($self'strategy_addr, $msg'strategy, __gen_slice_string_38cf855bfe348c8dfd3d466792877eecb30ff4d45067bafb5134403639732656());
+            }
+            if (($msg'tech > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_send_jettons($self'tech_addr, $msg'tech, __gen_slice_string_26be4bd9177bc5cbc13d30f3bd963f34c2be2990ab47d78f7d29fe8cfaa76ae1());
+            }
+            if (($msg'lp > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_send_jettons($self'dex_addr, $msg'lp, __gen_slice_string_9656818130c18e791b2fab4484e939878f56c0d6066b62dc2594f24a9f23cce1());
+            }
+            if (($msg'p2p > 0)) {
+                ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_send_jettons($self'p2p_addr, $msg'p2p, __gen_slice_string_04a03e11fbb24d4c30d8355da747cac44de6ae73052a546f8aa536451de8741e());
+            }
+            $VoraTreasury_v4$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr));
+            return ();
+        }
+        
+        ;; Receive SetReferrer message
+        if (op == 2763147121) {
+            var $msg'user = in_msg~load_msg_addr();
+            var $msg'referrer = in_msg~load_msg_addr();
+            tuple $current = $ReferrerInfo$_load_opt(__tact_dict_get_slice_cell($self'referrers, 267, $msg'user));
+            throw_unless(59710, null?($current));
+            tuple $l1_info = $ReferrerInfo$_load_opt(__tact_dict_get_slice_cell($self'referrers, 267, $msg'referrer));
+            slice $l2 = null();
+            if ((~ null?($l1_info))) {
+                $l2 = $ReferrerInfo$_get_l1($ReferrerInfo$_not_null($l1_info));
+            }
+            $self'referrers~__tact_dict_set_slice_cell(267, $msg'user, $ReferrerInfo$_store_cell($ReferrerInfo$_constructor_l1_l2($msg'referrer, $l2), begin_cell()));
+            $VoraTreasury_v4$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr));
+            return ();
+        }
+        
+        ;; Receive Deploy message
+        if (op == 0x946a98b6) {
+            var $deploy'queryId = in_msg~load_uint(64);
+            ($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr)~$VoraTreasury_v4$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+            $VoraTreasury_v4$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr));
+            return ();
+        }
+        
+    }
+    ;; Empty Receiver and Text Receivers
+    var text_op = slice_hash(in_msg);
+    ;; Receive "Set Jetton Wallet" message
+    if (text_op == 0x71a1ec67b1d252cdd4096d9115e629e01397e30cc2422b00d08f3b5aba8eb347) {
+        $self'vora_jetton_wallet = __tact_context_get_sender();
+        $VoraTreasury_v4$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'referrers, $self'n_volume, $self'advisor_pool, $self'tier5_users, $self'tier5_count, $self'strategy_addr, $self'dev_addr, $self'dex_addr, $self'tech_addr, $self'p2p_addr));
+        return ();
+    }
+    ;; Throw if not handled
+    throw(130);
+}
+
+
+() __tact_selector_hack_asm() impure asm """
+@atend @ 1 {
+        execute current@ context@ current!
+        {
+            // The core idea of this function is to save gas by avoiding unnecessary dict jump, when recv_internal/recv_external is called
+            // We want to extract recv_internal/recv_external from the dict and select needed function
+            // not by jumping to the needed function by it's index, but by using usual IF statements.
+
+            }END> b> // Close previous builder, now we have a cell of previous code on top of the stack
+
+            <{ // Start of the new code builder
+                SETCP0
+                // Swap the new code builder with the previous code, now we have previous code on top of the stack
+                swap
+                // Transform cell to slice and load first ref from the previous code, now we have the dict on top of the stack
+                <s ref@
+
+                // Extract the recv_internal from the dict
+                dup 0 swap @procdictkeylen idict@ { "internal shortcut error" abort } ifnot
+                swap
+
+                // Delete the recv_internal from the dict
+                0 swap @procdictkeylen idict- drop
+                // Delete the recv_external from the dict (it's okay if it's not there)
+                -1 swap @procdictkeylen idict- drop
+                // Delete the __tact_selector_hack from the dict
+                65535 swap @procdictkeylen idict- drop
+
+                // Bring the code builder from the bottom of the stack
+                // because if recv_external extraction is optional, and the number of elements on the stack is not fixed
+                depth 1- roll
+                // Swap with the dict from which we extracted recv_internal and (maybe) recv_external
+                swap
+
+                // Check if the dict is empty
+                dup null?
+                // Store a copy of this flag in the bottom of the stack
+                dup depth 1- -roll
+                {
+                    // If the dict is empty, just drop it (it will be null if it's empty)
+                    drop
+                }
+                {
+                    // If the dict is not empty, prepare continuation to be stored in c3
+                    <{
+                        // Save this dict as first ref in this continuation, it will be pushed in runtime by DICTPUSHCONST
+                        swap @procdictkeylen DICTPUSHCONST
+                        // Jump to the needed function by it's index
+                        DICTIGETJMPZ
+                        // If such key is not found, throw 11 along with the key as an argument
+                        11 THROWARG
+                    }> PUSHCONT
+                    // Store the continuation in c3
+                    c3 POP
+                } cond
+
+                // Function id is on top of the (runtime) stack
+                DUP IFNOTJMP:<{
+                    // place recv_internal here
+                    DROP swap @addop
+                }>
+
+                // Bring back the flag, indicating if the dict is empty or not from the bottom of the stack
+                depth 1- roll
+                {
+                    // If the dict is empty, throw 11
+                    11 THROWARG
+                }
+                {
+                    // If the dict is not empty, jump to continuation from c3
+                    c3 PUSH JMPX
+                } cond
+            }> b>
+        } : }END>c
+        current@ context! current!
+    } does @atend !
+""";
+
+() __tact_selector_hack() method_id(65535) {
+    return __tact_selector_hack_asm();
+}

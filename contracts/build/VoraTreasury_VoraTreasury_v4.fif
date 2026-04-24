@@ -1,0 +1,1144 @@
+// automatically generated from `@stdlib/std/stdlib.fc` `C:/antigravity-bot/contracts/build/VoraTreasury_VoraTreasury_v4.fc` 
+PROGRAM{
+  DECLPROC __tact_store_address_opt
+  DECLPROC __tact_not_null
+  DECLPROC __tact_context_get
+  DECLPROC __tact_context_get_sender
+  DECLPROC __tact_dict_get_slice_int
+  DECLPROC __tact_dict_set_slice_int
+  DECLPROC __tact_dict_get_slice_cell
+  DECLPROC __tact_dict_set_slice_cell
+  DECLPROC $DeployOk$_store
+  DECLPROC $DeployOk$_store_cell
+  DECLPROC $TokenTransfer$_store
+  DECLPROC $TokenTransfer$_store_cell
+  DECLPROC $ReferrerInfo$_store
+  DECLPROC $ReferrerInfo$_store_cell
+  DECLPROC $ReferrerInfo$_load
+  DECLPROC $ReferrerInfo$_as_optional
+  DECLPROC $ReferrerInfo$_load_opt
+  DECLPROC $VoraTreasury_v4$_store
+  DECLPROC $VoraTreasury_v4$_load
+  DECLPROC $Context$_get_value
+  DECLPROC $ReferrerInfo$_get_l1
+  DECLPROC $ReferrerInfo$_get_l2
+  DECLPROC $ReferrerInfo$_not_null
+  DECLPROC $VoraTreasury_v4$init$_load
+  DECLPROC $VoraTreasury_v4$_contract_init
+  DECLPROC $VoraTreasury_v4$_contract_load
+  DECLPROC $VoraTreasury_v4$_contract_store
+  DECLPROC $VoraTreasury_v4$_fun_get_dnft_tier
+  DECLPROC $VoraTreasury_v4$_fun_get_stats
+  DECLPROC $SendParameters$_constructor_to_value_mode_body
+  DECLPROC $TokenTransfer$_constructor_query_id_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload
+  DECLPROC $VoraTreasury_v4$_fun_send_jettons
+  DECLPROC $MessageParameters$_constructor_bounce_to_value_mode_body
+  DECLPROC $VoraTreasury_v4$_fun_notify
+  DECLPROC $VoraTreasury_v4$_fun_requireOwner
+  DECLPROC $VoraTreasury_v4$_fun_owner
+  DECLPROC $ReferrerInfo$_constructor_l1_l2
+  DECLPROC $DeployOk$_constructor_queryId
+  76743 DECLMETHOD %get_dnft_tier
+  74074 DECLMETHOD %get_stats
+  83229 DECLMETHOD %owner
+  DECLPROC recv_internal
+  65535 DECLMETHOD __tact_selector_hack
+  DECLGLOBVAR __tact_context
+  DECLGLOBVAR __tact_context_sender
+  DECLGLOBVAR __tact_child_contract_codes
+  DECLGLOBVAR __tact_randomized
+  __tact_store_address_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      b{00} STSLICECONST
+    }>ELSE<{
+      SWAP
+      STSLICE
+    }>
+  }>
+  __tact_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+  }>
+  __tact_context_get PROCINLINE:<{
+    __tact_context GETGLOB
+    4 UNTUPLE
+  }>
+  __tact_context_get_sender PROCINLINE:<{
+    __tact_context_sender GETGLOB
+  }>
+  __tact_dict_get_slice_int PROCINLINE:<{
+    s1 s3 s3 XCHG3
+        DICTGET NULLSWAPIFNOT
+    IF:<{
+      SWAP
+      LDIX
+      DROP
+    }>ELSE<{
+      2DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_set_slice_int PROCINLINE:<{
+    OVER
+    ISNULL
+    IF:<{
+      2DROP
+      -ROT
+          DICTDEL
+      DROP
+    }>ELSE<{
+      NEWC
+      SWAP
+      STIX
+      s1 s3 s3 XCHG3
+      DICTSETB
+    }>
+  }>
+  __tact_dict_get_slice_cell PROCINLINE:<{
+    -ROT
+        DICTGETREF NULLSWAPIFNOT
+    IF:<{
+    }>ELSE<{
+      DROP
+      PUSHNULL
+    }>
+  }>
+  __tact_dict_set_slice_cell PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      -ROT
+          DICTDEL
+      DROP
+    }>ELSE<{
+      s1 s3 s3 XCHG3
+          DICTSETREF
+    }>
+  }>
+  $DeployOk$_store PROCINLINE:<{
+    2952335191 PUSHINT
+    ROT
+    32 STU
+    64 STU
+  }>
+  $DeployOk$_store_cell PROCINLINE:<{
+    SWAP
+    $DeployOk$_store INLINECALLDICT
+    ENDC
+  }>
+  $TokenTransfer$_store PROCINLINE:<{
+    260734629 PUSHINT
+    s0 s8 XCHG2
+    32 STU
+    s1 s6 XCHG
+    64 STU
+    s0 s4 XCHG2
+    STVARUINT16
+    s1 s2 XCHG
+    STSLICE
+    SWAP
+    __tact_store_address_opt INLINECALLDICT
+    STOPTREF
+    SWAP
+    STVARUINT16
+    STSLICE
+  }>
+  $TokenTransfer$_store_cell PROCINLINE:<{
+    7 -ROLL
+    $TokenTransfer$_store INLINECALLDICT
+    ENDC
+  }>
+  $ReferrerInfo$_store PROCINLINE:<{
+    -ROT
+    __tact_store_address_opt INLINECALLDICT
+    SWAP
+    __tact_store_address_opt INLINECALLDICT
+  }>
+  $ReferrerInfo$_store_cell PROCINLINE:<{
+    -ROT
+    $ReferrerInfo$_store INLINECALLDICT
+    ENDC
+  }>
+  $ReferrerInfo$_load PROCINLINE:<{
+                b{00} SDBEGINSQ
+                IF:<{
+                  PUSHNULL
+                }>ELSE<{
+                  LDMSGADDR
+                  SWAP
+                }>
+    SWAP
+                b{00} SDBEGINSQ
+                IF:<{
+                  PUSHNULL
+                }>ELSE<{
+                  LDMSGADDR
+                  SWAP
+                }>
+    s1 s2 XCHG
+  }>
+  $ReferrerInfo$_as_optional PROCINLINE:<{
+        2 TUPLE
+  }>
+  $ReferrerInfo$_load_opt PROCINLINE:<{
+    DUP
+    ISNULL
+    IF:<{
+      DROP
+      PUSHNULL
+    }>ELSE<{
+      CTOS
+      $ReferrerInfo$_load INLINECALLDICT
+      1 2 BLKDROP2
+      $ReferrerInfo$_as_optional INLINECALLDICT
+    }>
+  }>
+  $VoraTreasury_v4$_store PROCINLINE:<{
+    s11 s12 XCHG2
+    STSLICE
+    s0 s9 XCHG2
+    __tact_store_address_opt INLINECALLDICT
+    s1 s7 XCHG
+    STDICT
+    s0 s5 XCHG
+    NEWC
+    STDICT
+    s0 s4 XCHG2
+    STVARUINT16
+    s1 s2 XCHG
+    STDICT
+    257 PUSHINT
+    STIX
+    STSLICE
+    s1 s2 XCHG
+    STSLICE
+    s0 s2 XCHG
+    NEWC
+    STSLICE
+    s1 s3 XCHG
+    STSLICE
+    s1 s3 XCHG
+    STSLICE
+    s1 s2 XCHG
+    STBREFR
+    STBREFR
+  }>
+  $VoraTreasury_v4$_load PROCINLINE:<{
+    LDMSGADDR
+                b{00} SDBEGINSQ
+                IF:<{
+                  PUSHNULL
+                }>ELSE<{
+                  LDMSGADDR
+                  SWAP
+                }>
+    SWAP
+    LDDICT
+    LDREF
+    SWAP
+    CTOS
+    LDDICT
+    LDVARUINT16
+    LDDICT
+    257 PUSHINT
+    LDIX
+    LDMSGADDR
+    LDMSGADDR
+    LDREF
+    DROP
+    CTOS
+    LDMSGADDR
+    LDMSGADDR
+    LDMSGADDR
+    DROP
+    s9 s12 XCHG
+    s9 s11 XCHG
+    s9 s10 XCHG
+  }>
+  $Context$_get_value PROCINLINE:<{
+    s1 s3 XCHG
+    3 BLKDROP
+  }>
+  $ReferrerInfo$_get_l1 PROCINLINE:<{
+    DROP
+  }>
+  $ReferrerInfo$_get_l2 PROCINLINE:<{
+    NIP
+  }>
+  $ReferrerInfo$_not_null PROCINLINE:<{
+    DUP
+    ISNULL
+    128 THROWIF
+        2 UNTUPLE
+  }>
+  $VoraTreasury_v4$init$_load PROCINLINE:<{
+    LDMSGADDR
+    LDMSGADDR
+    LDMSGADDR
+    LDREF
+    SWAP
+    CTOS
+    LDMSGADDR
+    LDMSGADDR
+    LDMSGADDR
+    DROP
+    s3 s6 XCHG
+    s3 s5 XCHG
+    s3 s4 XCHG
+  }>
+  $VoraTreasury_v4$_contract_init PROCINLINE:<{
+    PUSHNULL
+    s0 s5 XCHG
+    PUSHNULL
+    PUSHNULL
+    s6 s5 XCHG2
+    50000000000000000 PUSHINT
+    PUSHNULL
+    s6 s5 XCHG2
+    0 PUSHINT
+    5 -ROLL
+  }>
+  $VoraTreasury_v4$_contract_load PROCINLINE:<{
+    c4 PUSH
+    CTOS
+    1 LDI
+    SWAP
+    IF:<{
+      $VoraTreasury_v4$_load INLINECALLDICT
+      1 12 BLKDROP2
+    }>ELSE<{
+      $VoraTreasury_v4$init$_load INLINECALLDICT
+      s0 s6 XCHG
+      ENDS
+      5 ROLL
+      $VoraTreasury_v4$_contract_init INLINECALLDICT
+    }>
+  }>
+  $VoraTreasury_v4$_contract_store PROCINLINE:<{
+    NEWC
+    TRUE
+    SWAP
+    1 STI
+    12 -ROLL
+    $VoraTreasury_v4$_store INLINECALLDICT
+    ENDC
+    c4 POP
+  }>
+  $VoraTreasury_v4$_fun_get_dnft_tier PROCREF:<{
+    0 PUSHINT
+    s10 PUSH
+    267 PUSHINT
+    s3 PUSH
+    257 PUSHINT
+    __tact_dict_get_slice_int INLINECALLDICT
+    ISNULL
+    NOT
+    IF:<{
+      DROP
+      267 PUSHINT
+      s10 PUSH
+      s0 s2 XCHG
+      257 PUSHINT
+      __tact_dict_get_slice_int INLINECALLDICT
+      __tact_not_null INLINECALLDICT
+    }>ELSE<{
+      NIP
+    }>
+    DUP
+    10000000000000000 PUSHINT
+    GEQ
+    IFJMP:<{
+      DROP
+      5 PUSHINT
+    }>
+    DUP
+    1000000000000000 PUSHINT
+    GEQ
+    IFJMP:<{
+      DROP
+      4 PUSHINT
+    }>
+    DUP
+    100000000000000 PUSHINT
+    GEQ
+    IFJMP:<{
+      DROP
+      3 PUSHINT
+    }>
+    10000000000000 PUSHINT
+    GEQ
+    IFJMP:<{
+      2 PUSHINT
+    }>
+    1 PUSHINT
+  }>
+  $VoraTreasury_v4$_fun_get_stats PROCREF:<{
+    s5 PUSH
+  }>
+  $SendParameters$_constructor_to_value_mode_body PROCINLINE:<{
+    2SWAP
+    PUSHNULL
+    PUSHNULL
+    s0 s0 s3 XCHG3
+    TRUE
+  }>
+  $TokenTransfer$_constructor_query_id_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload PROCINLINE:<{
+  }>
+  $VoraTreasury_v4$_fun_send_jettons PROCREF:<{
+    31063 PUSHINT
+    s14 PUSH
+    ISNULL
+    NOT
+    THROWANYIFNOT
+    s13 PUSH
+    __tact_not_null INLINECALLDICT
+    50000000 PUSHINT
+    1 PUSHINT
+    0 PUSHINT
+    PUSHNULL
+    10000000 PUSHINT
+    s5 s1 s6 XCHG3
+    s4 s7 XCHG
+    s3 s8 XCHG
+    20 s() PUSH
+    s0 s3 XCHG
+    s7 s7 XCHG2
+    $TokenTransfer$_constructor_query_id_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload INLINECALLDICT
+    NEWC
+    $TokenTransfer$_store_cell INLINECALLDICT
+    s1 s3 XCHG
+    $SendParameters$_constructor_to_value_mode_body INLINECALLDICT
+        NEWC
+        b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+        1 STI               // store `bounce`
+        b{000} STSLICECONST // store bounced = false and src = addr_none
+        STSLICE             // store `to`
+        SWAP
+        STGRAMS             // store `value`
+        105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+        STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+        // → Stack state
+        // s0: Builder
+        // s1: `data`
+        // s2: `code`
+        // s3: `body`
+        // s4: `mode`
+        // Group 2: Placing the Builder after code and data, then checking those for nullability
+        s2 XCHG0
+        DUP2
+        ISNULL
+        SWAP
+        ISNULL
+        AND
+        // → Stack state
+        // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+        // s1: `code`
+        // s2: `data`
+        // s3: Builder
+        // s4: `body`
+        // s5: `mode`
+        // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+        <{
+            DROP2 // drop `data` and `code`, since either of those is null
+            b{0} STSLICECONST
+        }> PUSHCONT
+        // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+        <{
+            // _ split_depth:(Maybe (## 5))
+            //   special:(Maybe TickTock)
+            //   code:(Maybe ^Cell)
+            //   data:(Maybe ^Cell)
+            //   library:(Maybe ^Cell)
+            // = StateInit;
+            ROT                // place message Builder on top
+            b{10} STSLICECONST // store Maybe = true, Either = false
+            // Start composing inlined StateInit
+            b{00} STSLICECONST // store split_depth and special first
+            STDICT             // store code
+            STDICT             // store data
+            b{0} STSLICECONST  // store library
+        }> PUSHCONT
+        // Group 3: IFELSE that does the branching shown above
+        IFELSE
+        // → Stack state
+        // s0: Builder
+        // s1: null or StateInit
+        // s2: `body`
+        // s3: `mode`
+        // Group 4: Finalizing the message
+        STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+        ENDC
+        // → Stack state
+        // s0: Cell
+        // s1: `mode`
+        // Group 5: Sending the message, with `mode` on top
+        SWAP
+        SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+  }>
+  $MessageParameters$_constructor_bounce_to_value_mode_body PROCINLINE:<{
+    s3 s3 XCHG2
+    s0 s4 XCHG
+  }>
+  $VoraTreasury_v4$_fun_notify PROCINLINE:<{
+    __tact_context_get_sender INLINECALLDICT
+    FALSE
+    0 PUSHINT
+    s0 s3 XCHG2
+    66 PUSHINT
+    SWAP
+    $MessageParameters$_constructor_bounce_to_value_mode_body INLINECALLDICT
+        NEWC
+        b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+        1 STI               // store `bounce`
+        b{000} STSLICECONST // store bounced = false and src = addr_none
+        STSLICE             // store `to`
+        SWAP
+        STGRAMS             // store `value`
+        106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+        STZEROES
+        // → Stack state
+        // s0: Builder
+        // s1: `body`
+        // s2: `mode`
+        STDICT
+        ENDC
+        SWAP
+        SENDRAWMSG
+  }>
+  $VoraTreasury_v4$_fun_requireOwner PROCREF:<{
+    __tact_context_get_sender INLINECALLDICT
+    s12 PUSH
+    SDEQ
+    132 THROWIFNOT
+  }>
+  $VoraTreasury_v4$_fun_owner PROCREF:<{
+    s11 PUSH
+  }>
+  $ReferrerInfo$_constructor_l1_l2 PROCINLINE:<{
+  }>
+  $DeployOk$_constructor_queryId PROCINLINE:<{
+  }>
+  %get_dnft_tier PROC:<{
+    $VoraTreasury_v4$_contract_load INLINECALLDICT
+    12 ROLL
+    $VoraTreasury_v4$_fun_get_dnft_tier INLINECALLDICT
+    12 1 BLKDROP2
+  }>
+  %get_stats PROC:<{
+    $VoraTreasury_v4$_contract_load INLINECALLDICT
+    $VoraTreasury_v4$_fun_get_stats INLINECALLDICT
+    12 1 BLKDROP2
+  }>
+  %owner PROC:<{
+    $VoraTreasury_v4$_contract_load INLINECALLDICT
+    $VoraTreasury_v4$_fun_owner INLINECALLDICT
+    12 1 BLKDROP2
+  }>
+  recv_internal PROC:<{
+    c2 SAVE
+    SAMEALTSAVE
+    SWAP
+    CTOS
+    2 PUSHINT
+    SDSKIPFIRST
+    1 LDI
+    1 LDI
+    LDMSGADDR
+    OVER
+    s3 s4 XCHG
+    s6 s6 XCHG2
+    4 TUPLE
+    __tact_context SETGLOB
+    s0 s2 XCHG
+    __tact_context_sender SETGLOB
+    $VoraTreasury_v4$_contract_load INLINECALLDICT
+    s0 s13 XCHG
+    IFJMP:<{
+      13 BLKDROP
+    }>
+    s11 PUSH
+    SBITS
+    31 GTINT
+    IF:<{
+      s0 s11 XCHG
+      32 LDU
+      OVER
+      510331182 PUSHINT
+      EQUAL
+      IFJMP:<{
+        NIP
+        LDMSGADDR
+        LDVARUINT16
+        DROP
+        s12 s13 XCHG2
+        $VoraTreasury_v4$_fun_requireOwner INLINECALLDICT
+        0 PUSHINT
+        s9 PUSH
+        267 PUSHINT
+        s15 PUSH
+        257 PUSHINT
+        __tact_dict_get_slice_int INLINECALLDICT
+        ISNULL
+        NOT
+        IF:<{
+          DROP
+          s8 PUSH
+          267 PUSHINT
+          s14 PUSH
+          257 PUSHINT
+          __tact_dict_get_slice_int INLINECALLDICT
+          __tact_not_null INLINECALLDICT
+        }>
+        s14 PUSH
+        ADD
+        s0 s9 XCHG
+        267 PUSHINT
+        s14 s10 PUSH2
+        257 PUSHINT
+        __tact_dict_set_slice_int INLINECALLDICT
+        s0 s9 XCHG
+        10000000000000000 PUSHINT
+        GEQ
+        IF:<{
+          s6 PUSH
+          267 PUSHINT
+          s14 PUSH
+          1 PUSHINT
+          __tact_dict_get_slice_int INLINECALLDICT
+          ISNULL
+        }>ELSE<{
+          FALSE
+        }>
+        IF:<{
+          s0 s6 XCHG
+          267 PUSHINT
+          s13 PUSH
+          TRUE
+          1 PUSHINT
+          __tact_dict_set_slice_int INLINECALLDICT
+          s0 s5 XCHG
+          INC
+          s0 s5 XCHG
+          s0 s6 XCHG
+        }>
+        267 PUSHINT
+        s10 s0 s13 PUXC2
+        __tact_dict_get_slice_cell INLINECALLDICT
+        $ReferrerInfo$_load_opt INLINECALLDICT
+        DUP
+        ISNULL
+        NOT
+        IF:<{
+          DUP
+          $ReferrerInfo$_not_null INLINECALLDICT
+          $ReferrerInfo$_get_l1 INLINECALLDICT
+          ISNULL
+          NOT
+          IF:<{
+            DUP
+            $ReferrerInfo$_not_null INLINECALLDICT
+            $ReferrerInfo$_get_l1 INLINECALLDICT
+            __tact_not_null INLINECALLDICT
+            s14 PUSH
+            15 MULCONST
+            100 PUSHINT
+            DIV
+                B{b5ee9c7241010101000f00001a543245204c31205265776172648b1b25a0} B>boc <s PUSHSLICE
+            s3 s15 XCHG
+            $VoraTreasury_v4$_fun_send_jettons INLINECALLDICT
+            s0 s12 XCHG
+          }>
+          DUP
+          $ReferrerInfo$_not_null INLINECALLDICT
+          $ReferrerInfo$_get_l2 INLINECALLDICT
+          ISNULL
+          NOT
+          IF:<{
+            $ReferrerInfo$_not_null INLINECALLDICT
+            $ReferrerInfo$_get_l2 INLINECALLDICT
+            __tact_not_null INLINECALLDICT
+            s0 s13 XCHG
+            5 MULCONST
+            100 PUSHINT
+            DIV
+                B{b5ee9c7241010101000f00001a543245204c3220526577617264e29c617b} B>boc <s PUSHSLICE
+            s12 s14 XCHG
+            s11 s13 XCHG
+            s10 s12 XCHG
+            s9 s11 XCHG
+            s8 s10 XCHG
+            s7 s9 XCHG
+            s6 s8 XCHG
+            s5 s7 XCHG
+            s4 s6 XCHG
+            s3 s5 XCHG
+            s2 s4 XCHG
+            $VoraTreasury_v4$_fun_send_jettons INLINECALLDICT
+            10 2 BLKSWAP
+          }>ELSE<{
+            DROP
+            s12 POP
+          }>
+        }>ELSE<{
+          DROP
+          s12 POP
+        }>
+        2 10 BLKSWAP
+        $VoraTreasury_v4$_contract_store INLINECALLDICT
+        RETALT
+      }>
+      OVER
+      2966411870 PUSHINT
+      EQUAL
+      IFJMP:<{
+        NIP
+        LDVARUINT16
+        LDMSGADDR
+        DROP
+        s12 s13 XCHG2
+        $VoraTreasury_v4$_fun_requireOwner INLINECALLDICT
+        53440 PUSHINT
+        s6 PUSH
+        9 GTINT
+        THROWANYIFNOT
+        36513 PUSHINT
+        s8 s13 PUSH2
+        GEQ
+        THROWANYIFNOT
+        s7 s12 XCPU
+        SUB
+            B{b5ee9c7241010101002100003e4e6f626c65737365204f626c6967653a2041647669736f72205061796f7574480a64cd} B>boc <s PUSHSLICE
+        s12 s14 XCHG
+        s11 s13 XCHG
+        s10 s12 XCHG
+        s9 s11 XCHG
+        s1 s10 XCHG
+        s7 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
+        s1 s4 s0 XCHG3
+        s1 s3 XCHG
+        $VoraTreasury_v4$_fun_send_jettons INLINECALLDICT
+        $VoraTreasury_v4$_contract_store INLINECALLDICT
+        RETALT
+      }>
+      OVER
+      491364719 PUSHINT
+      EQUAL
+      IFJMP:<{
+        NIP
+        LDVARUINT16
+        DROP
+        55160 PUSHINT
+        267 PUSHINT
+        __tact_context_get_sender INLINECALLDICT
+        s8 PUSH
+        -ROT
+        1 PUSHINT
+        __tact_dict_get_slice_int INLINECALLDICT
+        ISNULL
+        NOT
+        THROWANYIFNOT
+            B{b5ee9c72410101010024000043800000000000000000000000000000000000000000000000000000000000000000104aec829d} B>boc <s PUSHSLICE
+            B{b5ee9c7241010101001c000034476f7665726e616e63653a20537472617465676963204275726ecd0892ba} B>boc <s PUSHSLICE
+        s12 s14 XCHG
+        s11 s13 XCHG
+        s10 s12 XCHG
+        s9 s11 XCHG
+        s8 s10 XCHG
+        s7 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
+        s3 s4 XCHG
+        s1 s2 XCHG
+        $VoraTreasury_v4$_fun_send_jettons INLINECALLDICT
+        $VoraTreasury_v4$_contract_store INLINECALLDICT
+        RETALT
+      }>
+      OVER
+      1070403341 PUSHINT
+      EQUAL
+      IFJMP:<{
+        NIP
+        LDVARUINT16
+        LDVARUINT16
+        LDVARUINT16
+        DROP
+        s11 s12 XCHG
+        s10 s12 XCHG
+        s9 s12 XCHG
+        s8 s12 XCHG
+        s7 s12 XCHG
+        s6 s12 XCHG
+        s5 s12 XCHG
+        s4 s12 XCHG
+        s3 s12 XCHG
+        s12 s13 s14 XCHG3
+        $VoraTreasury_v4$_fun_requireOwner INLINECALLDICT
+        s12 PUSH
+        0 GTINT
+        IF:<{
+              B{b5ee9c7241010101001100001e49444f205374726174202835302529aebb7951} B>boc <s PUSHSLICE
+          s12 s13 XCHG
+          s11 s12 XCHG
+          s10 s11 XCHG
+          s5 PUSH
+          s10 s11 XCHG
+          s9 s10 XCHG
+          s8 s9 XCHG
+          s0 s7 XCHG
+          s0 s8 XCHG
+          s5 s6 XCHG
+          s4 s5 XCHG
+          s3 s4 XCHG
+          s3 s0 s0 XCHG3
+          $VoraTreasury_v4$_fun_send_jettons INLINECALLDICT
+          11 -ROLL
+        }>ELSE<{
+          s12 POP
+        }>
+        s12 PUSH
+        0 GTINT
+        IF:<{
+              B{b5ee9c7241010101000f00001a49444f20446576202832302529f1dcb6c9} B>boc <s PUSHSLICE
+          s11 s13 XCHG
+          s10 s12 XCHG
+          s9 s11 XCHG
+          s8 s10 XCHG
+          s3 PUSH
+          s8 s10 XCHG
+          s7 s9 XCHG
+          s6 s8 XCHG
+          s5 s7 XCHG
+          s0 s6 XCHG
+          s3 s5 XCHG
+          s4 s0 s0 XCHG3
+          $VoraTreasury_v4$_fun_send_jettons INLINECALLDICT
+          10 2 BLKSWAP
+        }>ELSE<{
+          s12 POP
+        }>
+        s12 PUSH
+        0 GTINT
+        IF:<{
+              B{b5ee9c7241010101000f00001a49444f204445582028333025297ff1631f} B>boc <s PUSHSLICE
+          s10 s13 XCHG
+          s9 s12 XCHG
+          s8 s11 XCHG
+          s7 s10 XCHG
+          s6 s9 XCHG
+          OVER
+          s6 s9 XCHG
+          s5 s8 XCHG
+          s4 s7 XCHG
+          s3 s6 XCHG
+          s5 s5 XCHG2
+          $VoraTreasury_v4$_fun_send_jettons INLINECALLDICT
+          9 3 BLKSWAP
+        }>ELSE<{
+          s12 POP
+        }>
+        3 9 BLKSWAP
+        $VoraTreasury_v4$_contract_store INLINECALLDICT
+        RETALT
+      }>
+      OVER
+      1173465678 PUSHINT
+      EQUAL
+      IFJMP:<{
+        NIP
+        LDVARUINT16
+        LDVARUINT16
+        LDVARUINT16
+        LDVARUINT16
+        DROP
+        s11 s13 XCHG
+        5 9 REVERSE
+        s8 s12 XCHG
+        s7 s13 XCHG
+        s6 s12 XCHG
+        s5 s13 XCHG
+        s4 s12 XCHG
+        s3 s13 XCHG
+        s12 s14 s15 XCHG3
+        $VoraTreasury_v4$_fun_requireOwner INLINECALLDICT
+        s13 PUSH
+        0 GTINT
+        IF:<{
+              B{b5ee9c7241010101001100001e535542205374726174202835302529ba1469be} B>boc <s PUSHSLICE
+          s12 s13 XCHG
+          s11 s12 XCHG
+          s10 s11 XCHG
+          s5 PUSH
+          s10 s11 XCHG
+          s9 s10 XCHG
+          s8 s9 XCHG
+          s0 s7 XCHG
+          s0 s8 XCHG
+          s5 s6 XCHG
+          s4 s5 XCHG
+          s3 s4 XCHG
+          s3 s15 s15 XCHG3
+          $VoraTreasury_v4$_fun_send_jettons INLINECALLDICT
+          12 -ROLL
+        }>ELSE<{
+          s13 POP
+        }>
+        s11 PUSH
+        0 GTINT
+        IF:<{
+              B{b5ee9c7241010101000f00001a5355422054656368202835252952a77e79} B>boc <s PUSHSLICE
+          s11 s13 XCHG
+          s10 s12 XCHG
+          s9 s11 XCHG
+          s8 s10 XCHG
+          s7 s9 XCHG
+          s6 s8 XCHG
+          OVER
+          s6 s8 XCHG
+          s5 s7 XCHG
+          s4 s6 XCHG
+          s3 s5 XCHG
+          s0 s4 XCHG
+          s3 s3 XCHG2
+          $VoraTreasury_v4$_fun_send_jettons INLINECALLDICT
+          s0 s11 XCHG
+          9 2 BLKSWAP
+        }>ELSE<{
+          s11 POP
+        }>
+        s12 PUSH
+        0 GTINT
+        IF:<{
+              B{b5ee9c7241010101001200002053554220444558204c502028323025296ab61f5f} B>boc <s PUSHSLICE
+          s10 s13 XCHG
+          s9 s12 XCHG
+          s8 s11 XCHG
+          s7 s10 XCHG
+          s6 s9 XCHG
+          OVER
+          s6 s9 XCHG
+          s5 s8 XCHG
+          s4 s7 XCHG
+          s3 s6 XCHG
+          s0 s5 XCHG
+          s3 s4 XCHG
+          SWAP
+          $VoraTreasury_v4$_fun_send_jettons INLINECALLDICT
+          s11 s9 s10 XCHG3
+          s8 s6 s7 XCHG3
+          s5 s4 s4 XCHG3
+          s0 s3 XCHG
+        }>ELSE<{
+          s12 POP
+        }>
+        s12 PUSH
+        0 GTINT
+        IF:<{
+              B{b5ee9c7241010101001700002a535542205032502042726f6b6572732028323525298afb43e0} B>boc <s PUSHSLICE
+          s9 s13 XCHG
+          s8 s12 XCHG
+          s7 s11 XCHG
+          s6 s10 XCHG
+          s5 s9 XCHG
+          s4 s8 XCHG
+          s3 s7 XCHG
+          s6 s5 s0 XCHG3
+          s3 PUSH
+          s3 s4 XCHG
+          -ROT
+          $VoraTreasury_v4$_fun_send_jettons INLINECALLDICT
+          s3 s11 XCHG
+          s10 s8 s9 XCHG3
+          s3 s7 XCHG
+          s6 s5 s5 XCHG3
+          s0 s4 XCHG
+        }>ELSE<{
+          s12 POP
+        }>
+        s7 s11 XCHG
+        s6 s10 XCHG
+        s5 s9 XCHG
+        s4 s8 XCHG
+        s3 s7 XCHG
+        s6 s4 s4 XCHG3
+        s0 s5 XCHG
+        $VoraTreasury_v4$_contract_store INLINECALLDICT
+        RETALT
+      }>
+      OVER
+      2763147121 PUSHINT
+      EQUAL
+      IFJMP:<{
+        NIP
+        LDMSGADDR
+        LDMSGADDR
+        DROP
+        s9 PUSH
+        267 PUSHINT
+        s3 PUSH
+        __tact_dict_get_slice_cell INLINECALLDICT
+        $ReferrerInfo$_load_opt INLINECALLDICT
+        59710 PUSHINT
+        SWAP
+        ISNULL
+        THROWANYIFNOT
+        s9 PUSH
+        267 PUSHINT
+        s2 PUSH
+        __tact_dict_get_slice_cell INLINECALLDICT
+        $ReferrerInfo$_load_opt INLINECALLDICT
+        PUSHNULL
+        OVER
+        ISNULL
+        NOT
+        IF:<{
+          DROP
+          $ReferrerInfo$_not_null INLINECALLDICT
+          $ReferrerInfo$_get_l1 INLINECALLDICT
+        }>ELSE<{
+          NIP
+        }>
+        SWAP
+        267 PUSHINT
+        s0 s2 XCHG
+        $ReferrerInfo$_constructor_l1_l2 INLINECALLDICT
+        NEWC
+        $ReferrerInfo$_store_cell INLINECALLDICT
+        s3 s10 XCHG
+        s1 s2 XCHG
+        __tact_dict_set_slice_cell INLINECALLDICT
+        s9 s11 XCHG
+        s8 s10 XCHG
+        s0 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
+        s4 s3 s0 XCHG3
+        s1 s2 XCHG
+        $VoraTreasury_v4$_contract_store INLINECALLDICT
+        RETALT
+      }>
+      SWAP
+      2490013878 PUSHINT
+      EQUAL
+      IFJMP:<{
+        64 LDU
+        DROP
+        $DeployOk$_constructor_queryId INLINECALLDICT
+        NEWC
+        $DeployOk$_store_cell INLINECALLDICT
+        s10 s12 XCHG
+        s9 s11 XCHG
+        s8 s10 XCHG
+        s7 s9 XCHG
+        s6 s8 XCHG
+        s5 s7 XCHG
+        s4 s6 XCHG
+        s3 s5 XCHG
+        s4 s3 s0 XCHG3
+        s1 s2 XCHG
+        $VoraTreasury_v4$_fun_notify INLINECALLDICT
+        $VoraTreasury_v4$_contract_store INLINECALLDICT
+        RETALT
+      }>
+      s9 POP
+      s8 s10 XCHG
+    }>ELSE<{
+      s9 POP
+    }>
+    s0 s10 XCHG
+    HASHSU
+    51397445875077568728336872703556865047223020498526896692705585287615673709383 PUSHINT
+    EQUAL
+    IFJMP:<{
+      __tact_context_get_sender INLINECALLDICT
+      s9 s11 XCHG
+      s0 s10 XCHG
+      s7 s9 XCHG
+      2 7 BLKSWAP
+      $VoraTreasury_v4$_contract_store INLINECALLDICT
+    }>
+    11 BLKDROP
+    130 THROW
+  }>
+  __tact_selector_hack PROC:<{
+    @atend @ 1 {
+            execute current@ context@ current!
+            {
+                // The core idea of this function is to save gas by avoiding unnecessary dict jump, when recv_internal/recv_external is called
+                // We want to extract recv_internal/recv_external from the dict and select needed function
+                // not by jumping to the needed function by it's index, but by using usual IF statements.
+                }END> b> // Close previous builder, now we have a cell of previous code on top of the stack
+                <{ // Start of the new code builder
+                    SETCP0
+                    // Swap the new code builder with the previous code, now we have previous code on top of the stack
+                    swap
+                    // Transform cell to slice and load first ref from the previous code, now we have the dict on top of the stack
+                    <s ref@
+                    // Extract the recv_internal from the dict
+                    dup 0 swap @procdictkeylen idict@ { "internal shortcut error" abort } ifnot
+                    swap
+                    // Delete the recv_internal from the dict
+                    0 swap @procdictkeylen idict- drop
+                    // Delete the recv_external from the dict (it's okay if it's not there)
+                    -1 swap @procdictkeylen idict- drop
+                    // Delete the __tact_selector_hack from the dict
+                    65535 swap @procdictkeylen idict- drop
+                    // Bring the code builder from the bottom of the stack
+                    // because if recv_external extraction is optional, and the number of elements on the stack is not fixed
+                    depth 1- roll
+                    // Swap with the dict from which we extracted recv_internal and (maybe) recv_external
+                    swap
+                    // Check if the dict is empty
+                    dup null?
+                    // Store a copy of this flag in the bottom of the stack
+                    dup depth 1- -roll
+                    {
+                        // If the dict is empty, just drop it (it will be null if it's empty)
+                        drop
+                    }
+                    {
+                        // If the dict is not empty, prepare continuation to be stored in c3
+                        <{
+                            // Save this dict as first ref in this continuation, it will be pushed in runtime by DICTPUSHCONST
+                            swap @procdictkeylen DICTPUSHCONST
+                            // Jump to the needed function by it's index
+                            DICTIGETJMPZ
+                            // If such key is not found, throw 11 along with the key as an argument
+                            11 THROWARG
+                        }> PUSHCONT
+                        // Store the continuation in c3
+                        c3 POP
+                    } cond
+                    // Function id is on top of the (runtime) stack
+                    DUP IFNOTJMP:<{
+                        // place recv_internal here
+                        DROP swap @addop
+                    }>
+                    // Bring back the flag, indicating if the dict is empty or not from the bottom of the stack
+                    depth 1- roll
+                    {
+                        // If the dict is empty, throw 11
+                        11 THROWARG
+                    }
+                    {
+                        // If the dict is not empty, jump to continuation from c3
+                        c3 PUSH JMPX
+                    } cond
+                }> b>
+            } : }END>c
+            current@ context! current!
+        } does @atend !
+  }>
+}END>c

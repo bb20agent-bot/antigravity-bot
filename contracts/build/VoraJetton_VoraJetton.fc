@@ -1,0 +1,491 @@
+#pragma version =0.4.6;
+#pragma allow-post-modification;
+#pragma compute-asm-ltr;
+
+;; VoraJetton_VoraJetton.headers.fc
+;;
+;; Header files for VoraJetton
+;; NOTE: declarations are sorted for optimal order
+;;
+
+;; __tact_context_get
+(int, slice, int, slice) __tact_context_get() inline;
+
+;; __tact_context_get_sender
+slice __tact_context_get_sender() inline;
+
+;; $DeployOk$_store
+builder $DeployOk$_store(builder build_0, (int) v) inline;
+
+;; $DeployOk$_store_cell
+cell $DeployOk$_store_cell((int) v, builder b) inline;
+
+;; $VoraJetton$_store
+builder $VoraJetton$_store(builder build_0, (slice, int, slice) v) inline;
+
+;; $VoraJetton$_load
+(slice, ((slice, int, slice))) $VoraJetton$_load(slice sc_0) inline;
+
+;; $Context$_get_value
+_ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $JettonData$_to_external
+(int, int, slice, cell, cell) $JettonData$_to_external(((int, int, slice, cell, cell)) v) inline;
+
+;; $VoraJetton$init$_load
+(slice, ((slice))) $VoraJetton$init$_load(slice sc_0) inline;
+
+;; $VoraJetton$_contract_init
+(slice, int, slice) $VoraJetton$_contract_init(slice $owner) impure inline;
+
+;; $VoraJetton$_contract_load
+(slice, int, slice) $VoraJetton$_contract_load() impure inline;
+
+;; $VoraJetton$_contract_store
+() $VoraJetton$_contract_store((slice, int, slice) v) impure inline;
+
+;; $JettonData$_constructor_totalSupply_mintable_adminAddress_jettonContent_walletCode
+((int, int, slice, cell, cell)) $JettonData$_constructor_totalSupply_mintable_adminAddress_jettonContent_walletCode(int $totalSupply, int $mintable, slice $adminAddress, cell $jettonContent, cell $walletCode) inline;
+
+;; $VoraJetton$_fun_get_jetton_data
+((slice, int, slice), (int, int, slice, cell, cell)) $VoraJetton$_fun_get_jetton_data((slice, int, slice) $self) impure inline_ref;
+
+;; $MessageParameters$_constructor_bounce_to_value_mode_body
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
+
+;; $VoraJetton$_fun_notify
+((slice, int, slice), ()) $VoraJetton$_fun_notify((slice, int, slice) $self, cell $body) impure inline;
+
+;; $SendParameters$_constructor_to_value_mode_body
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline;
+
+;; $DeployOk$_constructor_queryId
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
+
+
+;; VoraJetton_VoraJetton.stdlib.fc
+global (int, slice, int, slice) __tact_context;
+global slice __tact_context_sender;
+global cell __tact_child_contract_codes;
+global int __tact_randomized;
+
+(int, slice, int, slice) __tact_context_get() inline {
+    return __tact_context;
+}
+
+slice __tact_context_get_sender() inline {
+    return __tact_context_sender;
+}
+
+cell $global_emptyCell() impure asm """
+    <b b> PUSHREF // Pure Fift: "<b" creates a builder, "b>" turns it into a cell at compile time
+""";
+
+int $global_myBalance() impure asm """
+    BALANCE FIRST
+""";
+
+() $global_nativeReserve(int $amount, int $mode) impure asm """
+    RAWRESERVE
+""";
+
+() $global_message((int, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    106 PUSHINT         // 1 + 4 + 4 + 64 + 32 + 1
+    STZEROES
+    // → Stack state
+    // s0: Builder
+    // s1: `body`
+    // s2: `mode`
+    STDICT
+    ENDC
+    SWAP
+    SENDRAWMSG
+""";
+
+() $global_send((int, cell, cell, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+    STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+    // → Stack state
+    // s0: Builder
+    // s1: `data`
+    // s2: `code`
+    // s3: `body`
+    // s4: `mode`
+
+    // Group 2: Placing the Builder after code and data, then checking those for nullability
+    s2 XCHG0
+    DUP2
+    ISNULL
+    SWAP
+    ISNULL
+    AND
+    // → Stack state
+    // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+    // s1: `code`
+    // s2: `data`
+    // s3: Builder
+    // s4: `body`
+    // s5: `mode`
+
+    // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+    <{
+        DROP2 // drop `data` and `code`, since either of those is null
+        b{0} STSLICECONST
+    }> PUSHCONT
+
+    // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+    <{
+        // _ split_depth:(Maybe (## 5))
+        //   special:(Maybe TickTock)
+        //   code:(Maybe ^Cell)
+        //   data:(Maybe ^Cell)
+        //   library:(Maybe ^Cell)
+        // = StateInit;
+        ROT                // place message Builder on top
+        b{10} STSLICECONST // store Maybe = true, Either = false
+        // Start composing inlined StateInit
+        b{00} STSLICECONST // store split_depth and special first
+        STDICT             // store code
+        STDICT             // store data
+        b{0} STSLICECONST  // store library
+    }> PUSHCONT
+
+    // Group 3: IFELSE that does the branching shown above
+    IFELSE
+    // → Stack state
+    // s0: Builder
+    // s1: null or StateInit
+    // s2: `body`
+    // s3: `mode`
+
+    // Group 4: Finalizing the message
+    STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+    ENDC
+    // → Stack state
+    // s0: Cell
+    // s1: `mode`
+
+    // Group 5: Sending the message, with `mode` on top
+    SWAP
+    SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+""";
+
+((slice, int, slice), ()) $VoraJetton$_fun_notify((slice, int, slice) $self, cell $body) impure inline {
+    var (($self'owner, $self'totalSupply, $self'symbol)) = $self;
+    slice $to = __tact_context_get_sender();
+    int $bounce = false;
+    if (false) {
+        int $balance = $global_myBalance();
+        int $balanceBeforeMessage = ($balance - $Context$_get_value(__tact_context_get()));
+        if (($balanceBeforeMessage < 0)) {
+            $global_nativeReserve(0, 0);
+            $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
+            return (($self'owner, $self'totalSupply, $self'symbol), ());
+        }
+    }
+    $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
+    return (($self'owner, $self'totalSupply, $self'symbol), ());
+}
+
+;; VoraJetton_VoraJetton.constants.fc
+;; String "VORA"
+slice __gen_slice_string_bdb40f411216753712cdf353ebc2bc1008f72952acfefe5eb5551bef5e7b0587() asm """
+    B{b5ee9c72410101010006000008564f5241eabf6b56} B>boc <s PUSHSLICE
+""";
+
+;; Cell E3jLywMTmwjbodlBnFwMTUsF1ErnYEb/domTf6cXUvA=
+cell __gen_cell_cell_1378cbcb03139b08dba1d9419c5c0c4d4b05d44ae76046ff7689937fa71752f0() asm """
+    B{b5ee9c7241010101001700002a000000004275726e204e6f74696669636174696f6ea36f52ae} B>boc PUSHREF
+""";
+
+;; VoraJetton_VoraJetton.storage.fc
+;;
+;; Type: Context
+;; TLB: _ bounceable:bool sender:address value:int257 raw:^slice = Context
+;;
+
+_ $Context$_get_value((int, slice, int, slice) v) inline {
+    var (v'bounceable, v'sender, v'value, v'raw) = v;
+    return v'value;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell value:int257 to:address bounce:bool = SendParameters
+;;
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, null(), null(), $value, $to, true);
+}
+
+;;
+;; Type: MessageParameters
+;; TLB: _ mode:int257 body:Maybe ^cell value:int257 to:address bounce:bool = MessageParameters
+;;
+
+((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, $value, $to, $bounce);
+}
+
+;;
+;; Type: DeployOk
+;; Header: 0xaff90f57
+;; TLB: deploy_ok#aff90f57 queryId:uint64 = DeployOk
+;;
+
+builder $DeployOk$_store(builder build_0, (int) v) inline {
+    var (v'queryId) = v;
+    build_0 = store_uint(build_0, 2952335191, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    return build_0;
+}
+
+cell $DeployOk$_store_cell((int) v, builder b) inline {
+    return $DeployOk$_store(b, v).end_cell();
+}
+
+((int)) $DeployOk$_constructor_queryId(int $queryId) inline {
+    return ($queryId);
+}
+
+;;
+;; Type: JettonData
+;; TLB: _ totalSupply:int257 mintable:bool adminAddress:address jettonContent:^cell walletCode:^cell = JettonData
+;;
+
+(int, int, slice, cell, cell) $JettonData$_to_external(((int, int, slice, cell, cell)) v) inline {
+    var (v'totalSupply, v'mintable, v'adminAddress, v'jettonContent, v'walletCode) = v; 
+    return (v'totalSupply, v'mintable, v'adminAddress, v'jettonContent, v'walletCode);
+}
+
+((int, int, slice, cell, cell)) $JettonData$_constructor_totalSupply_mintable_adminAddress_jettonContent_walletCode(int $totalSupply, int $mintable, slice $adminAddress, cell $jettonContent, cell $walletCode) inline {
+    return ($totalSupply, $mintable, $adminAddress, $jettonContent, $walletCode);
+}
+
+;;
+;; Type: VoraJetton
+;; TLB: _ owner:address totalSupply:coins symbol:^string = VoraJetton
+;;
+
+builder $VoraJetton$_store(builder build_0, (slice, int, slice) v) inline {
+    var (v'owner, v'totalSupply, v'symbol) = v;
+    build_0 = build_0.store_slice(v'owner);
+    build_0 = build_0.store_varuint16(v'totalSupply);
+    build_0 = build_0.store_builder_ref(begin_cell().store_slice(v'symbol));
+    return build_0;
+}
+
+(slice, ((slice, int, slice))) $VoraJetton$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    var v'totalSupply = sc_0~load_varuint16();
+    var v'symbol = sc_0~load_ref().begin_parse();
+    return (sc_0, (v'owner, v'totalSupply, v'symbol));
+}
+
+(slice, ((slice))) $VoraJetton$init$_load(slice sc_0) inline {
+    var v'owner = sc_0~load_msg_addr();
+    return (sc_0, (v'owner));
+}
+
+(slice, int, slice) $VoraJetton$_contract_load() impure inline {
+    slice $sc = get_data().begin_parse();
+    int $loaded = $sc~load_int(1);
+    if ($loaded) {
+        return $sc~$VoraJetton$_load();
+    }
+    else {
+        (slice $owner) = $sc~$VoraJetton$init$_load();
+        $sc.end_parse();
+        return $VoraJetton$_contract_init($owner);
+    }
+}
+
+() $VoraJetton$_contract_store((slice, int, slice) v) impure inline {
+    builder b = begin_cell();
+    b = b.store_int(true, 1);
+    b = $VoraJetton$_store(b, v);
+    set_data(b.end_cell());
+}
+
+;;
+;; Contract VoraJetton functions
+;;
+
+(slice, int, slice) $VoraJetton$_contract_init(slice $owner) impure inline {
+    var (($self'owner, $self'totalSupply, $self'symbol)) = (null(), null(), __gen_slice_string_bdb40f411216753712cdf353ebc2bc1008f72952acfefe5eb5551bef5e7b0587());
+    $self'owner = $owner;
+    $self'totalSupply = 0;
+    return ($self'owner, $self'totalSupply, $self'symbol);
+}
+
+((slice, int, slice), (int, int, slice, cell, cell)) $VoraJetton$_fun_get_jetton_data((slice, int, slice) $self) impure inline_ref {
+    var (($self'owner, $self'totalSupply, $self'symbol)) = $self;
+    var $fresh$ret_12 = $JettonData$_constructor_totalSupply_mintable_adminAddress_jettonContent_walletCode($self'totalSupply, true, $self'owner, $global_emptyCell(), $global_emptyCell());
+    return (($self'owner, $self'totalSupply, $self'symbol), $fresh$ret_12);
+}
+
+;;
+;; Get methods of a Contract VoraJetton
+;;
+
+_ %get_jetton_data() method_id(106029) {
+    var self = $VoraJetton$_contract_load();
+    var res = self~$VoraJetton$_fun_get_jetton_data();
+    return $JettonData$_to_external(res);
+}
+
+;;
+;; Routing of a Contract VoraJetton
+;;
+
+;; message opcode reader utility: only binary receivers
+;; Returns 32 bit message opcode, otherwise throws the "Invalid incoming message" exit code
+(slice, int) ~load_opcode_internal(slice s) asm( -> 1 0) "32 LDUQ 130 THROWIFNOT";
+
+() recv_internal(int msg_value, cell in_msg_cell, slice in_msg) impure {
+    
+    ;; Context
+    var cs = in_msg_cell.begin_parse();
+    cs~skip_bits(2);
+    var msg_bounceable = cs~load_int(1);
+    var msg_bounced = cs~load_int(1);
+    slice msg_sender_addr = cs~load_msg_addr();
+    __tact_context = (msg_bounceable, msg_sender_addr, msg_value, cs);
+    __tact_context_sender = msg_sender_addr;
+    
+    ;; Load contract data
+    var ($self'owner, $self'totalSupply, $self'symbol) = $VoraJetton$_contract_load();
+    
+    ;; Handle bounced messages
+    if (msg_bounced) { return (); }
+    var op = in_msg~load_opcode_internal();
+    ;; Receive Mint message
+    if (op == 4235234258) {
+        var $msg'amount = in_msg~load_int(257);
+        var $msg'receiver = in_msg~load_msg_addr();
+        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        throw_unless(1291, ( equal_slices_bits($ctx'sender, $self'owner) ));
+        $self'totalSupply = ($self'totalSupply + $msg'amount);
+        $VoraJetton$_contract_store(($self'owner, $self'totalSupply, $self'symbol));
+        return ();
+    }
+    
+    ;; Receive Burn message
+    if (op == 1016126195) {
+        var $msg'amount = in_msg~load_int(257);
+        var $msg'responseDestination = in_msg~load_msg_addr();
+        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        $self'totalSupply = ($self'totalSupply - $msg'amount);
+        $global_send($SendParameters$_constructor_to_value_mode_body($msg'responseDestination, 0, 64, __gen_cell_cell_1378cbcb03139b08dba1d9419c5c0c4d4b05d44ae76046ff7689937fa71752f0()));
+        $VoraJetton$_contract_store(($self'owner, $self'totalSupply, $self'symbol));
+        return ();
+    }
+    
+    ;; Receive Deploy message
+    if (op == 0x946a98b6) {
+        var $deploy'queryId = in_msg~load_uint(64);
+        ($self'owner, $self'totalSupply, $self'symbol)~$VoraJetton$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+        $VoraJetton$_contract_store(($self'owner, $self'totalSupply, $self'symbol));
+        return ();
+    }
+    
+    ;; Throw if not handled
+    throw(130);
+}
+
+
+() __tact_selector_hack_asm() impure asm """
+@atend @ 1 {
+        execute current@ context@ current!
+        {
+            // The core idea of this function is to save gas by avoiding unnecessary dict jump, when recv_internal/recv_external is called
+            // We want to extract recv_internal/recv_external from the dict and select needed function
+            // not by jumping to the needed function by it's index, but by using usual IF statements.
+
+            }END> b> // Close previous builder, now we have a cell of previous code on top of the stack
+
+            <{ // Start of the new code builder
+                SETCP0
+                // Swap the new code builder with the previous code, now we have previous code on top of the stack
+                swap
+                // Transform cell to slice and load first ref from the previous code, now we have the dict on top of the stack
+                <s ref@
+
+                // Extract the recv_internal from the dict
+                dup 0 swap @procdictkeylen idict@ { "internal shortcut error" abort } ifnot
+                swap
+
+                // Delete the recv_internal from the dict
+                0 swap @procdictkeylen idict- drop
+                // Delete the recv_external from the dict (it's okay if it's not there)
+                -1 swap @procdictkeylen idict- drop
+                // Delete the __tact_selector_hack from the dict
+                65535 swap @procdictkeylen idict- drop
+
+                // Bring the code builder from the bottom of the stack
+                // because if recv_external extraction is optional, and the number of elements on the stack is not fixed
+                depth 1- roll
+                // Swap with the dict from which we extracted recv_internal and (maybe) recv_external
+                swap
+
+                // Check if the dict is empty
+                dup null?
+                // Store a copy of this flag in the bottom of the stack
+                dup depth 1- -roll
+                {
+                    // If the dict is empty, just drop it (it will be null if it's empty)
+                    drop
+                }
+                {
+                    // If the dict is not empty, prepare continuation to be stored in c3
+                    <{
+                        // Save this dict as first ref in this continuation, it will be pushed in runtime by DICTPUSHCONST
+                        swap @procdictkeylen DICTPUSHCONST
+                        // Jump to the needed function by it's index
+                        DICTIGETJMPZ
+                        // If such key is not found, throw 11 along with the key as an argument
+                        11 THROWARG
+                    }> PUSHCONT
+                    // Store the continuation in c3
+                    c3 POP
+                } cond
+
+                // Function id is on top of the (runtime) stack
+                DUP IFNOTJMP:<{
+                    // place recv_internal here
+                    DROP swap @addop
+                }>
+
+                // Bring back the flag, indicating if the dict is empty or not from the bottom of the stack
+                depth 1- roll
+                {
+                    // If the dict is empty, throw 11
+                    11 THROWARG
+                }
+                {
+                    // If the dict is not empty, jump to continuation from c3
+                    c3 PUSH JMPX
+                } cond
+            }> b>
+        } : }END>c
+        current@ context! current!
+    } does @atend !
+""";
+
+() __tact_selector_hack() method_id(65535) {
+    return __tact_selector_hack_asm();
+}

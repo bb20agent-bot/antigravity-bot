@@ -1,0 +1,112 @@
+{
+  "name": "VORA Brown AI Agent (Operating Hours)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": ["message"]
+      },
+      "id": "telegram-trigger",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $now.setZone('Asia/Seoul').hour }}",
+              "operation": "largerEqual",
+              "value2": 10
+            }
+          ]
+        }
+      },
+      "id": "check-hours",
+      "name": "Check Operating Hours (10~24 KST)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "🚫 [매니저 브라운 부재중 안내]\n\n현재는 운영 시간이 아닙니다. 브라운 매니저는 트레이딩 및 업무 집중을 위해 아래 시간에만 활동합니다.\n\n⏰ 운영 시간: 매일 10:00 ~ 24:00 (KST)\n\n메시지를 남겨주시면 운영 시간에 순차적으로 답변드리겠습니다. 감사합니다.",
+        "replyMarkup": "none"
+      },
+      "id": "closed-message",
+      "name": "Closed Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [650, 500]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-pro",
+        "options": {
+          "systemInstruction": "당신은 Vora 생태계의 메인 트레이더 '매니저 브라운'입니다. 10:00~24:00 사이에만 활동하며, 냉철하고 확신에 찬 어조로 유저를 리드합니다. 백서를 기반으로 CS, 부스트 판매, P2P 중개 등을 수행하세요."
+        }
+      },
+      "id": "gemini-agent",
+      "name": "Google Gemini Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "replyMarkup": "none"
+      },
+      "id": "telegram-reply",
+      "name": "Telegram Reply",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [950, 300]
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check Operating Hours (10~24 KST)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Operating Hours (10~24 KST)": {
+      "main": [
+        [
+          {
+            "node": "Google Gemini Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Closed Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

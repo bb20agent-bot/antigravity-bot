@@ -15,8 +15,6 @@ import {
     Contract,
     ContractABI,
     ABIType,
-    ABIGetter,
-    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -1233,7 +1231,7 @@ const Treasury_opcodes = {
     "SetVoraTokenAddress": 4068122196,
 }
 
-const Treasury_getters: ABIGetter[] = [
+const Treasury_getters: any[] = [
     {"name":"get_balance","methodId":130343,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
 ]
 

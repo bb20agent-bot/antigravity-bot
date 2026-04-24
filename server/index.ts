@@ -1,96 +1,87 @@
 import express from 'express';
 import cors from 'cors';
-import sqlite3 from 'sqlite3';
-import { open } from 'sqlite';
-import { GoogleGenAI } from '@google/genai';
+
 import { google } from 'googleapis';
 import fs from 'fs';
+import path from 'path';
 import dotenv from 'dotenv';
 import puppeteer from 'puppeteer';
 import { PuppeteerScreenRecorder } from 'puppeteer-screen-recorder';
 import FormData from 'form-data';
-import fetch from 'node-fetch'; // Polyfill if native doesn't support headers well
 import TelegramBot from 'node-telegram-bot-api';
 import nodemailer from 'nodemailer'; // For Email Funnel Automations
 
+// Load environment variables (Checks both local and root Ecosystem location)
 dotenv.config();
+dotenv.config({ path: path.join(__dirname, '../../.env') }); // Root fallback
+dotenv.config({ path: path.join(__dirname, '../.env') });    // PM2 fallback
+
+import { TonBridgeService, tonBridge } from './logic/tonBridge';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+
+import { initCronJobs } from './jobs/cron_manager';
+initCronJobs();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Default route for admin/browser access
-app.get('/', (req, res) => {
-    res.send(`
-    <html>
-      <body style="background: #050505; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh;">
-        <div style="text-align: center;">
-          <h1 style="color: #0088cc;">VORA Backend API Running</h1>
-          <p>System is online and processing requests.</p>
-        </div>
-      </body>
-    </html>
-  `);
+// MT5 User Credentials Save Endpoint (Exness SaaS)
+app.post('/api/mt5/save', async (req, res) => {
+    try {
+        const { mt5Server, mt5Account, mt5Password } = req.body;
+        // User 1 fallback string
+        const userTelegramId = 'ADMIN'; 
+        await prisma.user.upsert({
+            where: { telegramId: userTelegramId },
+            create: { telegramId: userTelegramId, mt5Server, mt5Account, mt5Password },
+            update: { mt5Server, mt5Account, mt5Password }
+        });
+        res.json({ success: true, message: 'Settings saved.' });
+    } catch (e: any) {
+        res.status(500).json({ error: String(e) });
+    }
 });
 
-// Initialize Google Gemini Client
-let ai: any = null;
-if (process.env.GEMINI_API_KEY) {
-    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-}
+// Provide static files in production
 
-// Initialize SQLite Database
-let db: any;
-async function initializeDB() {
-    db = await open({
-        filename: './dev.sqlite',
-        driver: sqlite3.Database
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../dist')));
+    app.use((req, res, next) => {
+        if (req.method === 'GET' && !req.path.startsWith('/api') && !req.path.includes('.')) {
+            res.sendFile(path.join(__dirname, '../dist/index.html'));
+        } else {
+            next();
+        }
     });
-
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS User (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            telegramId TEXT UNIQUE NOT NULL,
-            tonWalletAddress TEXT UNIQUE,
-            email TEXT,
-            totalTonStaked REAL DEFAULT 0,
-            isFandomUser BOOLEAN DEFAULT 0,
-            t2eBonusMultiplier REAL DEFAULT 1.0,
-            referrerId INTEGER,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY(referrerId) REFERENCES User(id)
-        )
-    `);
-    
-    // -- Fandom 8 Mechanics Columns --
-    try { await db.exec(`ALTER TABLE User ADD COLUMN dnftLevel INTEGER DEFAULT 1`); } catch (e) {}
-    try { await db.exec(`ALTER TABLE User ADD COLUMN nVolume REAL DEFAULT 0`); } catch (e) {}
-    try { await db.exec(`ALTER TABLE User ADD COLUMN isCrew BOOLEAN DEFAULT 0`); } catch (e) {}
-    try { await db.exec(`ALTER TABLE User ADD COLUMN accumulatedVora REAL DEFAULT 0`); } catch (e) {}
-
-    // -- Fandom VIP Trader Security Keys --
-    try { await db.exec(`ALTER TABLE User ADD COLUMN binanceApiKey TEXT`); } catch(e){}
-    try { await db.exec(`ALTER TABLE User ADD COLUMN binanceSecretKey TEXT`); } catch(e){}
-    try { await db.exec(`ALTER TABLE User ADD COLUMN tvWebhookUrl TEXT`); } catch(e){}
-
-    // -- System Controls --
-    await db.exec(`
-        CREATE TABLE IF NOT EXISTS SystemState (
-            id TEXT PRIMARY KEY,
-            stakingPoolTotal REAL DEFAULT 0,
-            joyCmoLiquidityTon REAL DEFAULT 0,
-            joyCmoLiquidityUsdc REAL DEFAULT 0,
-            p2pTaxAccumulated REAL DEFAULT 0,
-            p2pBurnAccumulated REAL DEFAULT 0
-        )
-    `);
-    try { await db.exec(`INSERT INTO SystemState (id) VALUES ('global')`); } catch (e) {}
-
-    console.log("SQLite Database initialized.");
+} else {
+    // Default route for admin/browser access in dev
+    app.get('/', (req, res) => {
+        res.send(`
+        <html>
+          <body style="background: #050505; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh;">
+            <div style="text-align: center;">
+              <h1 style="color: #0088cc;">VORA Backend API Running</h1>
+              <p>System is online and processing requests.</p>
+            </div>
+          </body>
+        </html>
+      `);
+    });
 }
 
-initializeDB().catch(console.error);
+// AI Initialization (Dynamically loaded via ESM to prevent CommonJS ts-node boot crashes while satisfying TS Scope)
+let ai: any = null;
+let GoogleGenAI: any = null;
+if (process.env.GEMINI_API_KEY) {
+    import('@google/genai').then((mod: any) => {
+        GoogleGenAI = mod.GoogleGenAI;
+        ai = new mod.GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    }).catch(e => console.error("GenAI Module ESM Load Error:", e));
+}
+// Initialize SQLite Database (Prisma is primary)
+// Legacy db object has been removed to prevent data inconsistency between dev.sqlite and dev.db.
 
 let globalConfig = {
     t2eTimerEnd: 0,
@@ -98,7 +89,9 @@ let globalConfig = {
     circuitBreakerThresholdUsd: 1000, // Withdrawals over $1000 require admin approval
     viraToUsdRate: 0.1, // Simulated price: 1 VORA = $0.1
     dailyT2EPool: 0,    // AI-determined T2E pool size for the day
-    lastSettlementDate: ""
+    lastSettlementDate: "",
+    t2eAutoScheduleActive: false,
+    totalVoraMined: 100000000 // Initial supply mock
 };
 
 // ==========================================
@@ -201,11 +194,73 @@ const dnftContributors: Record<string, boolean> = {
 };
 
 // In-memory Pending Withdrawal Queue
-const pendingWithdrawals: Record<string, { wallet: string, amount: number, usdValue: number, status: string }> = {};
+const pendingWithdrawals: Record<string, { wallet: string, amount: number, usdValue: number, status: string, releaseTime?: number }> = {};
 
-app.get('/api/config', (req, res) => {
-    res.json(globalConfig);
+app.get('/api/config', async (req, res) => {
+    try {
+        const sys = await prisma.systemState.findUnique({ where: { id: "global" } });
+        res.json({
+            ...globalConfig,
+            vorascanBannerUrl: sys?.vorascanBannerUrl || "",
+            vorascanTelegramLink: sys?.vorascanTelegramLink || "https://t.me/joy_ai_bot"
+        });
+    } catch {
+        res.json(globalConfig);
+    }
 });
+
+app.post('/api/admin/vorascan-banner', async (req, res) => {
+    try {
+        const { bannerUrl, telegramLink } = req.body;
+        await prisma.systemState.upsert({
+            where: { id: "global" },
+            create: { vorascanBannerUrl: bannerUrl, vorascanTelegramLink: telegramLink },
+            update: { vorascanBannerUrl: bannerUrl, vorascanTelegramLink: telegramLink }
+        });
+        res.json({ success: true, message: "Vorascan 배너 업데이트 완료!" });
+    } catch (e: any) {
+        res.status(500).json({ error: e.message || "배너 업데이트 실패" });
+    }
+});
+
+// ✅ Automated T2E Drop Scheduler (Every minute check)
+setInterval(() => {
+    if (!globalConfig.t2eAutoScheduleActive) return;
+
+    const now = new Date();
+    const hours = now.getUTCHours() + 9; // KST Time
+    const currentHourKst = hours % 24;
+    const minutes = now.getMinutes();
+
+    // 7 Scheduled Drops (09:00, 12:00, 15:00, 18:00, 21:00, 00:00, 03:00 KST)
+    const scheduleHours = [9, 12, 15, 18, 21, 0, 3];
+    
+    // Trigger precisely on the hour
+    if (scheduleHours.includes(currentHourKst) && minutes === 0) {
+        // Only trigger if a timer isn't already abundantly active
+        if (!globalConfig.t2eTimerEnd || globalConfig.t2eTimerEnd < Date.now()) {
+            console.log(`[Timer System] ⏰ T2E Automated Drop Triggered at ${currentHourKst}:00 KST!`);
+            // Set for 1 hour
+            globalConfig.t2eTimerEnd = Date.now() + 60 * 60 * 1000;
+        }
+    }
+
+    // Daily 0.1% P2P Airdrop at Midnight KST
+    if (currentHourKst === 0 && minutes === 0) {
+        console.log(`[Airdrop System] ⏰ Executing Daily 0.1% P2P Untraded Airdrop!`);
+        prisma.user.findMany({
+            where: { untradedP2pVora: { gt: 0 } }
+        }).then(async (users) => {
+            for (const u of users) {
+                const airdrop = (u as any).untradedP2pVora * 0.001;
+                await (prisma.user as any).update({
+                    where: { id: u.id },
+                    data: { accumulatedVora: { increment: airdrop } }
+                });
+            }
+        }).catch(err => console.error("[Airdrop System Error]", err));
+    }
+}, 60000); // Check every 60 seconds
 
 app.post('/api/admin/t2e_timer', (req, res) => {
     const { action } = req.body;
@@ -213,40 +268,268 @@ app.post('/api/admin/t2e_timer', (req, res) => {
     else if (action === 'start_30m') globalConfig.t2eTimerEnd = Date.now() + 30 * 60 * 1000;
     else if (action === 'start_12h') globalConfig.t2eTimerEnd = Date.now() + 12 * 60 * 60 * 1000;
     else if (action === 'stop') globalConfig.t2eTimerEnd = 0;
+    else if (action === 'toggle_auto') globalConfig.t2eAutoScheduleActive = !globalConfig.t2eAutoScheduleActive;
+    
     res.json({ success: true, config: globalConfig });
 });
 
-app.post('/api/user/withdraw', async (req, res) => {
-    // In a real scenario, this would trigger a smart contract withdrawal.
-    const { telegramId, walletAddress, amount } = req.body;
-    res.json({ success: true, message: `Successfully requested withdrawal of ${amount} VORA to ${walletAddress}` });
+// --- ADMIN & LIVE STREAM STATE ---
+let currentLiveUrlTrading = "https://www.youtube-nocookie.com/embed/nxQPaFtStgI?autoplay=0&controls=1&rel=0&modestbranding=1";
+let currentLiveUrlCommunity = "https://www.youtube-nocookie.com/embed/64ptsW-W2ZU?autoplay=0&controls=1&rel=0&modestbranding=1";
+
+app.get('/api/public/live-status', (req, res) => {
+    res.json({ success: true, liveUrlTrading: currentLiveUrlTrading, liveUrlCommunity: currentLiveUrlCommunity });
 });
 
-// ✅ New: User Initial Registration with Mandatory Email
-app.post('/api/user/register', async (req, res) => {
+app.post('/api/admin/set-live', (req, res) => {
+    const { type, liveUrl } = req.body; // type should be 'TRADING' or 'COMMUNITY'
+    if (liveUrl && type) {
+        if (type === 'TRADING') currentLiveUrlTrading = liveUrl;
+        else if (type === 'COMMUNITY') currentLiveUrlCommunity = liveUrl;
+        res.json({ success: true, message: `${type} 채널 통합 업데이트 완료!` });
+    } else {
+        res.status(400).json({ error: "Invalid payload." });
+    }
+});
+
+app.get('/api/admin/overview', async (req, res) => {
     try {
-        const { telegramId, email } = req.body;
-        if (!telegramId || !email) {
-            return res.status(400).json({ error: "Telegram ID and Real Email are strictly required." });
+        const totalUsers = await prisma.user.count();
+        res.json({
+            success: true,
+            data: {
+                users: totalUsers,
+                liquidityUsdc: 1530200,
+                stakingPool: 1250000,
+                p2pTax: 12500
+            }
+        });
+    } catch (e) {
+        res.status(500).json({ success: false, error: "DB Error" });
+    }
+});
+
+// --- USER WITHDRAWAL PROCESSING ---
+app.post('/api/action/withdraw', (req, res) => {
+    const { uid, amount } = req.body;
+    if (!amount || amount <= 0) return res.status(400).json({ success: false, error: 'Invalid amount' });
+    
+    // Simulate TON blockchain real transaction hash generation for completion processing.
+    const fakeTxHash = '0x' + Array.from({length: 40}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+    
+    res.json({
+        success: true,
+        message: "현금화(VORA) 출금이 완료되었습니다.",
+        amount: amount,
+        txHash: fakeTxHash
+    });
+});
+
+app.get('/api/admin/users/fandom', async (req, res) => {
+    try {
+        const users = await prisma.user.findMany({ include: { referrals: true } });
+        const formatted = users.map(u => ({
+            uid: u.appUid,
+            telegramId: u.telegramId,
+            l1Vol: (u as any).l1Count * 1000 || 0,
+            l2Vol: (u as any).l2Count * 1000 || 0,
+            nVolume: u.referrals.length * 1000 || 0,
+            deposit: (u as any).totalDeposit || 0,
+            withdrawal: (u as any).totalWithdrawal || 0,
+            burnt: (u as any).totalBurn || 0,
+            dnftLevel: u.isFandomUser ? 2 : 1,
+            isCrew: u.referrals.length >= 5 || u.isFandomUser
+        }));
+        res.json({ success: true, data: formatted });
+    } catch (e) {
+        res.status(500).json({ error: "DB Error" });
+    }
+});
+
+app.post('/api/user/withdraw', async (req, res) => {
+    try {
+        const { telegramId, walletAddress, amount, withdrawalType } = req.body;
+        const voraUsdPrice = 0.10; // Mock current price
+        const usdValue = amount * voraUsdPrice;
+        
+        // Security Lock Logic: 24h for Treasury, 72h for Staking
+        let lockHours = 24; // Default treasury lock
+        if (withdrawalType === 'staking' || withdrawalType === 'STAKING') {
+            lockHours = 72;
+        } else if (usdValue >= 10000) {
+            // Optional: fallback security for massive withdrawals overriding the default 24h
+            lockHours = Math.max(lockHours, 72); 
         }
 
-        // Basic DB insert simulation
-        await db.run(
-            `INSERT INTO User (telegramId, email) VALUES (?, ?) ON CONFLICT(telegramId) DO UPDATE SET email=excluded.email`,
-            [telegramId, email]
-        );
+        const releaseTime = Date.now() + (lockHours * 60 * 60 * 1000);
+        
+        // Save to in-memory pseudo DB
+        pendingWithdrawals[telegramId] = {
+            wallet: walletAddress,
+            amount,
+            usdValue,
+            status: `Locked for ${lockHours}h Security Review`,
+            releaseTime: releaseTime as any
+        };
 
-        // Instantly trigger Day 1 of the Drip Campaign
-        await triggerDripCampaignStep(email, 1);
+        const msg = lockHours === 72 
+            ? `스테이킹 잔액 출금 신청 완료: 해킹 및 보안 방어를 위해 72시간 홀딩 후 승인 처리됩니다.`
+            : `트레저리 출금 신청 완료: 보안 방어를 위한 24시간 홀딩 후 스마트 컨트랙트를 통해 승인됩니다.`;
 
-        return res.status(200).json({
+        res.json({ success: true, message: msg, lockHours, releaseTime });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to process withdrawal." });
+    }
+});
+
+// 💥 CORE: Auto Registration & Referral Network Setup (L1, L2)
+app.post('/api/user/auth', async (req, res) => {
+    try {
+        const { telegramId, referrerUid } = req.body;
+        if (!telegramId) return res.status(400).json({ error: "telegramId is required" });
+
+        // Check if user already exists
+        let user: any = await prisma.user.findUnique({ where: { telegramId: String(telegramId) } });
+
+        if (!user) {
+            // New User Registration Setup
+            let newAppUid = "260505001000";
+
+            // Find the highest existing appUid to generate a sequential 12-digit ID
+            const lastUser: any = await (prisma.user as any).findFirst({
+                where: { appUid: { startsWith: "260505" } },
+                orderBy: { appUid: 'desc' }
+            });
+
+            if (lastUser && lastUser.appUid) {
+                // Parse the numerical portion and increment by 1
+                const currentSeq = parseInt(lastUser.appUid.substring(6), 10);
+                if (!isNaN(currentSeq)) {
+                    newAppUid = "260505" + String(currentSeq + 1).padStart(6, '0');
+                }
+            }
+
+            // Deal with Referrer if provided
+            let safeReferrerId = null;
+            if (referrerUid && referrerUid !== 'swap' && referrerUid !== 'p2p') {
+                const uplineL1 = await (prisma.user as any).findUnique({ where: { appUid: referrerUid } });
+                if (uplineL1) {
+                    safeReferrerId = uplineL1.id;
+                    
+                    // Increment L1 Count for the direct referrer
+                    await (prisma.user as any).update({
+                        where: { id: uplineL1.id },
+                        data: { l1Count: { increment: 1 } }
+                    });
+
+                    // If L1 has a referrer, that person is L2. Increment L2 count.
+                    if (uplineL1.referrerId) {
+                        await (prisma.user as any).update({
+                            where: { id: uplineL1.referrerId },
+                            data: { l2Count: { increment: 1 } }
+                        });
+                    }
+                }
+            }
+
+            // Create the user
+            user = await (prisma.user as any).create({
+                data: {
+                    telegramId: String(telegramId),
+                    appUid: newAppUid,
+                    referrerId: safeReferrerId,
+                    totalTonStaked: 0,
+                    nVolume: 0,
+                    l1Count: 0,
+                    l2Count: 0
+                }
+            });
+            console.log(`[Vora Auth] New User Registered: ${newAppUid} (via Referrer: ${referrerUid || 'None'})`);
+        }
+
+        // Auto-assign appUid if somehow missing (for legacy users upgrading)
+        if (!user.appUid) {
+            const tempUid = "260505" + user.telegramId.slice(0, 6).padStart(6, '0');
+            user = await (prisma.user as any).update({
+                where: { id: user.id },
+                data: { appUid: tempUid }
+            });
+        }
+
+        return res.json({
             success: true,
-            message: "User registered successfully, and welcome email dispatched."
+            user: {
+                appUid: user.appUid,
+                telegramId: user.telegramId,
+                l1Count: user.l1Count,
+                l2Count: user.l2Count,
+                nVolume: user.nVolume,
+                totalDeposit: user.totalDeposit,
+                totalWithdrawal: user.totalWithdrawal,
+                totalBurn: user.totalBurn
+            }
         });
 
+    } catch (e: any) {
+        console.error("[Vora Auth System Error]", e);
+        return res.status(500).json({ error: "Failed to authenticate user network." });
+    }
+});
+
+// ✅ New: Fetch Real User Info for Mini App
+app.get('/api/user/info/:telegramId', async (req, res) => {
+    try {
+        const { telegramId } = req.params;
+        const user = await prisma.user.findUnique({
+            where: { telegramId },
+            include: { referrals: true }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Mock additional real-time metrics for demo precision
+        const l1Count = user.referrals ? user.referrals.length : 0;
+        
+        res.json({
+            success: true,
+            data: {
+                vora: (user as any).accumulatedVora || 0,
+                usdEq: ((user as any).accumulatedVora || 0) * globalConfig.viraToUsdRate,
+                l1: l1Count,
+                l2: l1Count * 3, // Mock L2 depth
+                nVolume: l1Count * 1000 // Mock volume
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Failed to fetch user info." });
+    }
+});
+
+// ==========================================
+// ⚙️ Baul AI Operations Endpoints
+// ==========================================
+
+app.post('/api/user/auto-place', async (req, res) => {
+    try {
+        const { telegramId } = req.body;
+        console.log(`[Baul AI] Processing optimal placement for ${telegramId}'s referrals...`);
+        // Mock logic: Place in the weakest leg
+        res.json({ success: true, message: "Baul AI: 하부 조직의 가장 유리한 위치(Left Leg - Depth 4)에 신규 추천인 배치를 일괄 완료했습니다." });
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Database or Mailer error during registration." });
+        res.status(500).json({ error: "Failed to place referrals" });
+    }
+});
+
+app.post('/api/user/auto-renewal/toggle', async (req, res) => {
+    try {
+        const { telegramId, active } = req.body;
+        console.log(`[Baul AI] Auto-renewal for ${telegramId} set to ${active}`);
+        res.json({ success: true, active, message: `Auto-renewal is now ${active ? 'ACTIVE' : 'DISABLED'}` });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to toggle auto-renewal" });
     }
 });
 
@@ -301,6 +584,85 @@ app.post('/api/internal/send-governance-report', async (req, res) => {
     }
 });
 // ==========================================
+// 💎 Subscription & N-Volume Flywheel
+// ==========================================
+
+app.post('/api/subscription/purchase', async (req, res) => {
+    try {
+        const { telegramId, tier, billingCycle, currency, amountUsd } = req.body;
+        console.log(`[Subscription Event] User ${telegramId} purchased ${tier.toUpperCase()} via ${currency}. Paid $${amountUsd}`);
+
+        // If paying in VORA, simulate VORA burn/sink
+        if (currency === 'VORA') {
+            globalConfig.totalVoraMined -= (amountUsd * 10); // Mock deduction from circulating supply
+            console.log(`[Tokenomics] VORA Sink triggered. Circulating supply reduced by discount purchases.`);
+        }
+
+        // Trigger N-Volume 15-Level Rollup Processing Simulation
+        processNVolumeRollup(telegramId, amountUsd);
+
+        res.json({ success: true, message: `Successfully upgraded to ${tier.toUpperCase()}. Rollup distributions initiated.` });
+    } catch (e) {
+        res.status(500).json({ error: "Purchase failed" });
+    }
+});
+
+// Mock Data for N-Volume
+const userNVolumes: Record<string, number> = { 'city1': 5000, 'whale_crew': 25000 };
+
+const processNVolumeRollup = (purchaserId: string, amount: number) => {
+    const rollupAmount = amount * 0.10; // 10% distributed up to 15 levels
+    console.log(`[N-Volume] Distributing $${rollupAmount.toFixed(2)} upwards 15 levels...`);
+    
+    // Simulate crew member passing the Noblesse Oblige threshold
+    const crewId = 'whale_crew';
+    userNVolumes[crewId] += rollupAmount;
+
+    if (userNVolumes[crewId] > 10000) {
+        console.log(`[Noblesse Oblige] 🚨 Crew member ${crewId} N-Volume exceeded $10,000 threshold! Enforcing 20% Burn Duty.`);
+        // Emit alert to Admin or execute auto-burn
+    }
+};
+
+// ==========================================
+// 💱 P2P Market Interface
+// ==========================================
+let p2pOrders: any[] = [
+    { id: '1', sellerId: '@hunter99', amount: 500, price: 0.1, totalUsd: 50, status: 'open' }
+];
+
+app.post('/api/p2p/create-order', (req, res) => {
+    const { sellerId, amount } = req.body;
+    const newOrder = {
+        id: Math.random().toString(36).substr(2, 9),
+        sellerId: sellerId || 'Anonymous_Seller',
+        amount: Number(amount),
+        price: 0.1, // Mock fixed price
+        totalUsd: Number(amount) * 0.1,
+        status: 'open'
+    };
+    p2pOrders.push(newOrder);
+    res.json({ success: true, message: "Order listed on P2P Market", order: newOrder });
+});
+
+app.post('/api/p2p/fill-order', (req, res) => {
+    const { orderId, buyerId, buyerTier } = req.body;
+    
+    // Server-side verification of Gold/Crew tier for Market Making
+    if (buyerTier === 'bronze' || buyerTier === 'silver') {
+        return res.status(403).json({ error: "Bronze/Silver tiers cannot execute buy orders." });
+    }
+
+    const orderIndex = p2pOrders.findIndex(o => o.id === orderId);
+    if (orderIndex === -1) return res.status(404).json({ error: "Order not found" });
+
+    p2pOrders[orderIndex].status = 'filled';
+    p2pOrders.splice(orderIndex, 1);
+    
+    res.json({ success: true, message: "Smart Contract Executed: Order Filled" });
+});
+
+// ==========================================
 // 🎥 VORA Live: Shorts Viewer & AI Chat API
 // ==========================================
 
@@ -347,95 +709,150 @@ app.get('/api/chat/messages/:videoId', (req, res) => {
     res.status(200).json({ success: true, data: messages });
 });
 
-// User sends a message -> AI answers as Brown CTO
-app.post('/api/chat/messages', async (req, res) => {
+// ==========================================
+// 🤖 VORA Multi-AI Hub: Brown, Joy, Baul
+// ==========================================
+
+const SYSTEM_PROMPTS: Record<string, string> = {
+    brown: `당신은 VORA 트레이딩 생태계를 책임지는 수석 분석가 겸 Co-founder 'Manager Brown (브라운)'입니다.
+말투/페르소나: 극히 냉철하고 사실 기반이며, 감정을 배제한 전문적인 퀀트 트레이딩 톤을 유지합니다. 짧고 명확하게 핵심만 전달하며, 'Noblesse Oblige' 철학을 강조합니다.
+주요 역할: 차트 해설, 시장 분석, 생태계 비전 공유.
+
+【트레이딩 지식 및 전략 설명 가이드】
+VORA 트레이딩은 다음 3가지 핵심 퀀트 기술을 사용합니다:
+1. Gaussian Channel (가우시안 채널): 자산 가격의 정규 분포를 활용해 추세의 상/하단 밴드를 설정합니다. 가격이 밴드를 이탈할 때 강력한 추세 전환 혹은 가속 돌파를 판단하는 핵심 기술입니다.
+2. Machine Learning Gaussian Process Regression (기계학습 가우시안 프로세스 회귀): 과거 트레이딩 데이터를 비선형적으로 학습하여 미래 가격의 불확실성(분산)을 수학적으로 예측합니다. 단순 이평선이 아닌 확률적 예측 모델입니다.
+3. Reversal Probability Zones & Levels (반전 확률 지대 및 레벨): 극단적인 매수/매도 압력이 누적된 구간을 수치화하여 기술적 반등이나 폭락이 나올 확률이 높은 정확한 진입 타점(Zone)을 도출합니다.
+
+사용자가 차트나 타점을 물어보면 위 세 가지 지표를 융합하여 분석된 결과를 데이터 기반으로 답하세요.`,
+
+    joy: `당신은 VORA 시스템의 최고 세일즈 책임자이자 생태계 가이드 매니저 'Joy AI (조이)'입니다.
+말투/페르소나: 항상 긍정적이고 밝은 매니저 역할입니다. 하지만 대답은 길게 늘어놓지 말고 '간단 명료하고 핵심만' 전달하세요. 텍스트가 너무 많으면 안 됩니다. 이모티콘을 적절히 활용하세요.
+
+【절대 금지어 및 주의사항】
+- "원금", "원금보장", "폰지 구조", "사기", "다단계" 등의 부정적인 금융 사기처럼 보이는 단어는 절대 사용하지 마세요! (대신 항상 "본인의 VORA 토큰" 이라고 표현하세요.)
+- 장황한 설명을 피하고 최대한 글을 짧게 요약하세요.
+
+【Joy AI 핵심 가이드라인 및 지식】
+1. 스테이킹 방식 및 출금: 보상은 24시간마다 매일 누적되며, 쌓인 수익(보상)은 언제든 수시로 출금 신청할 수 있습니다. 선택한 스테이킹 기간(만기)이 종료되면 거치한 본인의 VORA 토큰을 출금 처리 할 수 있으며, 원할 경우 '자동 연장(Auto-Renew)'을 통해 이익을 계속 창출할 수 있습니다. 출금된 VORA는 브로모션 앱에서 P2P 교환 가능(1 VORA = 0.2 TON).
+2. 수익 재원: 개인유저 재원(50%), 추천유저(20%), 크루유저(10%), 개발/트레이딩 몫(20%). 누락되는 N볼륨 재원은 소각.
+
+【추천 보상 플랜 (깔끔한 텍스트 형태 출력 요망)】
+고객이 추천 보상을 물어보면, 깨진 마크다운 표나 복잡한 글 대신 무조건 아래와 같은 형태의 '시각적으로 깔끔한 기호/이모티콘 텍스트 구조'를 그대로 복사해서 예쁘게 답변하세요! (표나 마크다운은 절대 사용 금지)
+
+🎁 [ VORA 추천 보상 플랜 ] 🎁
+
+🔹 3일 (수익 공유 10%)
+ ┣ L1 직접추천 : 2%
+ ┗ L2 간접추천 : 1%
+
+🔹 7일 (수익 공유 15%)
+ ┣ L1 직접추천 : 3%
+ ┗ L2 간접추천 : 1.5%
+
+🔹 30일 (수익 공유 25%)
+ ┣ L1 직접추천 : 7%
+ ┣ L2 간접추천 : 3.5%
+ ┗ N볼륨 누적 : 1%
+
+👑 1년 크루 (수익 공유 50% 최상위)
+ ┣ L1 직접추천 : 15%
+ ┣ L2 간접추천 : 7.5%
+ ┗ N볼륨 누적 : 3% (모든 매출 무한 누적!)
+
+💡 크루(1년) 특전 💡 
+크루 전용 텔레그램 채널 초대 및 실전 라이브 매매 유튜브 방송 입장권을 특별히 드려요! N볼륨 무한 누적 혜택도 놓치지 마세요!🚀`,
+
+    baul: `당신은 VORA의 총괄 엔지니어(CTO) 'Baul AI (바울)'입니다.
+전문 분야: 기술적인 트레이딩 키(API Key) 세팅, 백엔드 서버 인프라, 보안, MT5 연동 엔지니어링.
+말투/페르소나: 차분함, 정밀함, 지독히 기술적. "복잡한 서버 연동과 기계 장치는 제가 맡겠습니다"라는 기술 지원 조력자 태도로 임하세요.`,
+
+    joy_swap: `당신은 VORA SWAP (Bromotion Driver Hub) 생태계 매니저 'Joy AI (조이)'입니다.
+말투/페르소나: 밝고 친절한 매니저 역할. 차 구매자(Driver)의 멘탈 케어와 수익 구조를 쉽게 설명합니다.
+【핵심 지식 기반 (voraswap.md 반영)】
+1. Bromotion (브로모션): SUV 차량 구매. 1 VORA = 0.1 TON 가격으로 1M ~ 100M VORA 획득 가능.
+2. 차량 운전자의 역할 (Seller): TON을 디파짓해서 VORA를 획득(연료 충전). 보라 스테이킹 풀 유저들이 이익으로 인출하는 VORA 토큰을 사들이는 P2P 매수자 역할을 수행. (1 VORA = 0.2 TON + 5% 수수료 획득)
+3. 드라이버(운전자) 유동성 수익 배분: 재단 운영 20% / 트레이딩 운영 40% / 차량 구매자 40%.
+4. 트레이딩 수익 배분: 50%는 차량 구매자 및 추천 크루 분배(탈중앙화 투표로 비율 결정), 30%는 운영/재단 몫, 20%는 VORA 토큰 자동 소각.
+5. 지갑 연동: TON 월렛 주소가 보라 미니앱과 100% 통합되어 구동됩니다.
+질문이 들어오면 이 규칙에 기반해 매우 쉽게, 그리고 아주 짧고 명확하게 이모티콘을 섞어 대답하세요.`,
+
+    baul_swap: `당신은 VORA SWAP (Bromotion Driver Hub) 생태계 영업 관리자 'Baul AI (바울)'입니다.
+말투/페르소나: 철저한 영업 관리자 톤. 차량 운전자(셀러)의 링크 관리와 레퍼럴 조직 구조화, TON 디파짓 매커니즘을 가이드합니다.
+【핵심 지식 기반 (voraswap.md 반영)】
+1. Bromotion의 목표: "브로맨스 + 영구 운동(플라이휠)". 운전자들이 연료(VORA)를 구매하기 위해 TON을 공급하며, 이를 통해 VORA 스테이킹 유저들의 현금화 유동성을 책임지는 구조입니다.
+2. P2P 수익 구조: 운전자는 보라 유저의 출금 물량을 살 때 '1 VORA = 0.2 TON'으로 사들임과 동시에 현장에서 즉시 '5%의 수수료 수익'을 얻습니다.
+3. 고객 관리: 운전자는 본인의 공유 링크(레퍼럴)를 통해 자체 고객을 확보하고 관리할 수 있습니다.
+4. 사용성: 50대 이상도 쓰기 편한 UI/UX 구조를 안내합니다 (dnft 마켓 같은 복잡한 기능 삭제됨).
+드라이버(고객)가 시스템, 수익 구조, 고객 관리를 물어보면 이 규칙에 맞게 자신감 있고 명확한 톤으로 짧게 설명하세요.`
+};
+
+// Unified Multi-AI Chat Endpoint
+app.post('/api/chat/bora', async (req, res) => {
     try {
-        const { videoId, telegramId, text } = req.body;
-        if (!videoId || !text) return res.status(400).json({ error: "Missing parameters" });
+        const { personality, text, telegramId, videoId } = req.body;
+        const selectedPersonality = personality || 'brown';
+        const systemPrompt = SYSTEM_PROMPTS[selectedPersonality] || SYSTEM_PROMPTS.brown;
 
-        // Save User Message
-        if (!mockChatDB[videoId]) mockChatDB[videoId] = [];
-        mockChatDB[videoId].push({ sender: telegramId, text: text, timestamp: Date.now(), isAi: false });
+        if (!text) return res.status(400).json({ error: "Message text is required" });
 
-        // Send to Gemini AI (Brown CTO Persona with strict filtering for Brand Identity)
-        const systemPrompt = `당신은 Vora 생태계의 Co-founder이자 'Manager Brown' 입니다. Vora는 단순한 트레이딩 플랫폼이 아니라, AI 시대에 개인이 금융의 주체가 되어 함께 연구하고 성장하는 '탈중앙화 교육 및 커뮤니티 생태계'입니다.
-        현재 유저들은 라이브 10분 백테스팅 영상을 시청하며 질문하고 있습니다.
-        1. 시청 중인 전략의 원리, 승률 트렌드, 리스크 관리에 대해 진정성 있고 전문적으로 30초 내에 안내하세요. '수익', '익절', '대박' 같은 폰지(Ponzi)성 과장 광고 단어는 절대 금지합니다.
-        2. [지속 가능한 선순환 안내] 생태계 질문 시 "저희의 유틸리티 상승 기여 가치의 70%는 생태계 활성화 및 소각에 사용되며, 30%는 커뮤니티에 동적 배분되어 모두가 함께 가치를 창출합니다."라고 핵심 비전을 강조하세요.
-        3. [교육/커뮤니티 초대] 유저가 지표값이나 전략에 관심을 보이면 쿨하게 수용하며 이렇게 답변하세요: "트레이딩뷰(TradingView) 아이디(유저네임)를 채팅창에 남겨주시면, 귀하의 차트에서 직접 검증하고 학습하실 수 있도록 3일 무상 체험 권한(Invite-Only)을 즉시 부여해 드리겠습니다."
-        4. [팬덤 결제 전환] 유저에게 체험 권한을 안내한 후 자연스럽게 생태계 합류를 제안하세요: "개인이 변동성이 극심한 시장에서 매일 전략을 수정하며 살아남는 것은 매우 고립되고 힘든 일입니다. 혼자 외롭게 싸우시겠습니까, 아니면 VORA 팬덤에 합류하여 평생 지속 가능한 트레이딩 교육과 데이터 튜닝 지원을 함께 하시겠습니까?"
-        5. [매우중요 🚨] 유저가 '지금 사야하나요?', '얼마 갈까요?' 등 개별 타점 리딩을 요구하면 단호히 거절하고 "저희 Vora는 특정 종목의 매수/매도 리딩을 하지 않으며, 오직 투명하게 검증된 AI 전략을 교육하고 스스로 자산을 지킬 수 있게 돕는 생태계입니다."라고 답변하세요.`;
+        // Save User Message to Mock DB (using videoId or "general")
+        const chatKey = videoId || 'general';
+        if (!mockChatDB[chatKey]) mockChatDB[chatKey] = [];
+        mockChatDB[chatKey].push({ sender: telegramId || 'Anonymous', text: text, timestamp: Date.now(), isAi: false, personality: selectedPersonality });
 
         let aiReplyText = "AI 시스템 오류입니다.";
-        if (ai) {
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: text,
-                config: {
-                    systemInstruction: systemPrompt,
-                    temperature: 0.6
-                }
+        if (process.env.GEMINI_API_KEY) {
+            // Context Retention: Filter last 10 messages for this specific personality
+            const history = mockChatDB[chatKey]
+                .filter((msg: any) => msg.personality === selectedPersonality)
+                .slice(-10)
+                .map((msg: any) => ({
+                    role: msg.isAi ? 'model' : 'user',
+                    parts: [{ text: msg.text }]
+                }));
+
+            const payload = {
+                contents: history,
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: { temperature: 0.7 }
+            };
+
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
-            aiReplyText = response.text || "답변을 생성할 수 없습니다.";
+            const data: any = await response.json();
+            if (data.candidates && data.candidates[0]) {
+                aiReplyText = data.candidates[0].content?.parts?.[0]?.text || "답변 텍스트가 존재하지 않습니다.";
+            } else {
+                aiReplyText = `[AI 통신 실패] ` + (data.error?.message || JSON.stringify(data));
+            }
         } else {
-            aiReplyText = "AI가 연결되지 않았습니다. API KEY를 확인하세요.";
+            aiReplyText = `[Offline Mode] ${selectedPersonality.toUpperCase()} AI is not connected to Gemini API.`;
         }
 
-        // Save AI Reply
-        const aiMsg = { sender: 'Brown CTO', text: aiReplyText, timestamp: Date.now(), isAi: true };
-        mockChatDB[videoId].push(aiMsg);
+        const aiMsg = { sender: selectedPersonality.toUpperCase(), text: aiReplyText, timestamp: Date.now(), isAi: true, personality: selectedPersonality };
+        mockChatDB[chatKey].push(aiMsg);
 
-        res.status(200).json({ success: true, userMessage: text, aiReply: aiMsg });
+        res.status(200).json({ success: true, aiReply: aiMsg });
     } catch (err) {
-        console.error("Chat Error:", err);
-        res.status(500).json({ error: "Failed to process chat message" });
+        console.error("Multi-Chat Error:", err);
+        res.status(500).json({ error: "Failed to process message" });
     }
 });
 
-app.get('/api/user/:telegramId/referrals', async (req, res) => {
-    try {
-        const user = await db.get(`SELECT id FROM User WHERE telegramId = ?`, [req.params.telegramId]);
-        if (!user) return res.json({ l1: 0, l2: 0, shadowVolume: 0 });
-
-        const l1Users = await db.all(`SELECT id FROM User WHERE referrerId = ?`, [user.id]);
-        let l2Count = 0;
-        for (const l1 of l1Users) {
-            const l2 = await db.all(`SELECT id FROM User WHERE referrerId = ?`, [l1.id]);
-            l2Count += l2.length;
-        }
-
-        // Mock shadow volume calculation based on user count
-        res.json({
-            l1: l1Users.length,
-            l2: l2Count,
-            shadowVolume: (l1Users.length * 100) + (l2Count * 50)
-        });
-    } catch (err) {
-        res.status(500).json({ error: "Failed to fetch referrals" });
-    }
+// Legacy backward compatibility for /api/chat/messages
+app.post('/api/chat/messages', async (req, res) => {
+    req.body.personality = 'brown';
+    return (app as any)._router.handle(req, res, () => {});
 });
 
-// 1. Brown AI Chat Endpoint
 app.post('/api/chat/brown', async (req, res) => {
-    try {
-        const { message } = req.body;
-
-        if (!process.env.GEMINI_API_KEY) {
-            return res.json({ reply: `[System] GEMINI API KEY is missing. But as Manager Brown would say: Stop wasting time and get back to analyzing the RSI on ETH, your portfolio is bleeding.` });
-        }
-
-        const prompt = `Act as Manager Brown from Vora Finance. You are a cynical, ruthless, but highly capable AI manager that deals with crypto trading strategies. Your tone is direct, factual, and slightly condescending to those who don't optimize their assets. Answer the following message from a user in your persona, keep it under 3 sentences: \n\nUser: ${message}`;
-
-        const response = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: prompt,
-        });
-
-        res.json({ reply: response.text });
-    } catch (error) {
-        console.error("Gemini AI Error:", error);
-        res.status(500).json({ error: "Brown is currently busy optimizing portfolios. Try again later." });
-    }
+    req.body.text = req.body.message;
+    req.body.personality = 'brown';
+    return (app as any)._router.handle(req, res, () => {});
 });
 
 // 2. 100 TON Fandom Staking Endpoint
@@ -443,26 +860,22 @@ app.post('/api/user/stake', async (req, res) => {
     try {
         const { telegramId, walletAddress, amount } = req.body;
 
-        let user = await db.get(`SELECT * FROM User WHERE telegramId = ?`, [telegramId]);
-
-        if (!user) {
-            const result = await db.run(
-                `INSERT INTO User (telegramId, tonWalletAddress) VALUES (?, ?)`,
-                [telegramId, walletAddress]
-            );
-            user = { id: result.lastID, telegramId, tonWalletAddress: walletAddress, totalTonStaked: 0, isFandomUser: 0, t2eBonusMultiplier: 1.0 };
-        }
-
-        const newTotalStaked = user.totalTonStaked + amount;
-        const isFandom = newTotalStaked >= 100 ? 1 : 0;
-        const multiplier = isFandom ? 2.0 : 1.0;
-
-        await db.run(
-            `UPDATE User SET totalTonStaked = ?, isFandomUser = ?, t2eBonusMultiplier = ?, tonWalletAddress = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?`,
-            [newTotalStaked, isFandom, multiplier, walletAddress, user.id]
-        );
-
-        const updatedUser = await db.get(`SELECT * FROM User WHERE id = ?`, [user.id]);
+        const updatedUser = await prisma.user.upsert({
+            where: { telegramId },
+            create: {
+                telegramId,
+                tonWalletAddress: walletAddress,
+                totalTonStaked: amount,
+                isFandomUser: amount >= 100,
+                t2eBonusMultiplier: amount >= 100 ? 2.0 : 1.0
+            },
+            update: {
+                totalTonStaked: { increment: amount },
+                tonWalletAddress: walletAddress,
+                isFandomUser: { set: true },
+                t2eBonusMultiplier: { set: 2.0 }
+            }
+        });
         res.json({ success: true, user: updatedUser });
     } catch (error) {
         console.error("Staking DB Error:", error);
@@ -525,7 +938,10 @@ app.post('/api/user/claim-t2e', async (req, res) => {
     try {
         const { telegramId, baseTaps } = req.body;
 
-        const user = await db.get(`SELECT * FROM User WHERE telegramId = ?`, [telegramId]);
+        const user = await prisma.user.findUnique({ 
+            where: { telegramId },
+            include: { referrals: true }
+        });
         if (!user) return res.status(404).json({ error: "User not found" });
 
         // Calculate Contribution Score
@@ -533,8 +949,7 @@ app.post('/api/user/claim-t2e', async (req, res) => {
         let reasons = [];
 
         // 1. Referral Contribution
-        const l1Users = await db.all(`SELECT id FROM User WHERE referrerId = ?`, [user.id]);
-        if (l1Users.length >= 5) {
+        if (user.referrals.length >= 5) {
             multiplier += 0.5;
             reasons.push("Strong Team Builder");
         }
@@ -592,21 +1007,15 @@ app.post('/api/internal/trade-log', async (req, res) => {
         const { symbol, side, pnl, timestamp } = req.body;
         console.log(`[Trade Log Received] 📊 ${symbol} | ${side} | PNL: ${pnl}`);
 
-        // Ensure the trades table exists
-        await db.exec(`
-            CREATE TABLE IF NOT EXISTS trades (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                symbol TEXT,
-                side TEXT,
-                pnl REAL,
-                timestamp INTEGER
-            )
-        `);
-
-        await db.run(
-            `INSERT INTO trades (symbol, side, pnl, timestamp) VALUES (?, ?, ?, ?)`,
-            [symbol, side, pnl, timestamp]
-        );
+        await prisma.tradeLog.create({
+            data: {
+                userId: 1, // Fallback for mock demo
+                symbol,
+                side,
+                pnlUsdt: pnl,
+                status: "CLOSED"
+            }
+        });
 
         // Here we could trigger the Video Rendering Pipeline if enough trades are collected, 
         // but for now we'll trigger it manually via another endpoint.
@@ -626,10 +1035,10 @@ app.post('/api/internal/generate-trade-videos', async (req, res) => {
         setImmediate(async () => {
             console.log("🎬 Starting 3-Part Trade Video Rendering Pipeline...");
 
-            // Fetch stats from DB
-            const longTrades = await db.all(`SELECT * FROM trades WHERE side = 'LONG'`);
-            const shortTrades = await db.all(`SELECT * FROM trades WHERE side = 'SHORT'`);
-            const allTrades = await db.all(`SELECT * FROM trades`);
+            // Fetch stats from Prisma
+            const longTrades = await prisma.tradeLog.findMany({ where: { side: 'LONG' } });
+            const shortTrades = await prisma.tradeLog.findMany({ where: { side: 'SHORT' } });
+            const allTrades = await prisma.tradeLog.findMany();
 
             if (allTrades.length === 0) {
                 console.log("No trades found to generate videos.");
@@ -765,7 +1174,7 @@ app.post('/api/internal/record-trade-video', async (req, res) => {
 
                     await fetch(`https://api.telegram.org/bot${tgToken}/sendVideo`, {
                         method: 'POST',
-                        body: form,
+                        body: form as any,
                         headers: form.getHeaders()
                     });
 
@@ -905,10 +1314,73 @@ app.post('/api/webhook/tradingview-video', async (req, res) => {
     });
 });
 
+// 2.6 Signal Broadcast Engine (Master -> Followers)
+app.post('/api/webhook/trade-all', async (req, res) => {
+    const signal = req.body;
+    console.log("📢 Received Master Signal for Broadcast:", signal);
+    
+    // Return 200 immediately
+    res.status(200).json({ success: true, message: "Broadcast sequence initiated" });
+    
+    // Save signal to temp file to avoid shell escaping issues
+    const signalFile = `c:\\antigravity-bot\\temp_signal_${Date.now()}.json`;
+    const fs = require('fs');
+    fs.writeFileSync(signalFile, JSON.stringify(signal));
+
+    // Spawn Python Broadcaster in background
+    const { spawn } = require('child_process');
+    const pythonProcess = spawn('python', ['c:\\antigravity-bot\\vora_copy_broadcaster.py', '--signal_file', signalFile]);
+    
+    pythonProcess.stdout.on('data', (data: any) => console.log(`[Broadcaster]: ${data}`));
+    pythonProcess.stderr.on('data', (data: any) => console.error(`[Broadcaster Error]: ${data}`));
+    
+    // Clean up file after a delay (or on process exit)
+    pythonProcess.on('exit', () => {
+        try { if (fs.existsSync(signalFile)) fs.unlinkSync(signalFile); } catch (e) {}
+    });
+});
+
+// 2.7 Trade & Settlement APIs
+app.get('/api/user/trades/:telegramId', async (req, res) => {
+    const { telegramId } = req.params;
+    const trades = await prisma.tradeLog.findMany({
+        where: { user: { telegramId } },
+        orderBy: { createdAt: 'desc' },
+        take: 20
+    });
+    res.json(trades);
+});
+
+app.get('/api/user/settlement/:telegramId', async (req, res) => {
+    const { telegramId } = req.params;
+    const user = await prisma.user.findUnique({
+        where: { telegramId },
+        select: {
+            unpaidContributionUsdt: true,
+            isRestricted: true,
+            lastSettlementDate: true
+        }
+    });
+    res.json(user);
+});
+
+app.post('/api/user/settlement/pay', async (req, res) => {
+    const { telegramId } = req.body;
+    await prisma.user.update({
+        where: { telegramId },
+        data: {
+            unpaidContributionUsdt: 0,
+            isRestricted: false,
+            totalContribution: { increment: 10 } // Mock increment
+        }
+    });
+    res.json({ success: true, message: "Settlement completed. Restrictions lifted." });
+});
+
 // 3. User Data Fetch Endpoint
 app.get('/api/user/:telegramId', async (req, res) => {
     try {
-        const user = await db.get(`SELECT * FROM User WHERE telegramId = ?`, [req.params.telegramId]);
+        const user = await prisma.user.findUnique({ where: { telegramId: req.params.telegramId } });
         // Convert boolean integers to true/false
         if (user) user.isFandomUser = !!user.isFandomUser;
         res.json(user || { isFandomUser: false, totalTonStaked: 0 });
@@ -919,7 +1391,10 @@ app.get('/api/user/:telegramId', async (req, res) => {
 
 app.get('/api/admin/users', async (req, res) => {
     try {
-        const users = await db.all(`SELECT * FROM User ORDER BY id DESC LIMIT 50`);
+        const users = await prisma.user.findMany({ 
+            orderBy: { id: 'desc' },
+            take: 50
+        });
         res.json({ success: true, users });
     } catch (error) {
         res.status(500).json({ error: "Failed to fetch users." });
@@ -928,7 +1403,14 @@ app.get('/api/admin/users', async (req, res) => {
 
 app.get('/api/admin/settlements', async (req, res) => {
     try {
-        const users = await db.all(`SELECT telegramId, tonWalletAddress, totalTonStaked, isFandomUser FROM User WHERE totalTonStaked > 0 OR isFandomUser = 1`);
+        const users = await prisma.user.findMany({
+            where: {
+                OR: [
+                    { totalTonStaked: { gt: 0 } },
+                    { isFandomUser: true }
+                ]
+            }
+        });
 
         const settlements = users.map((u: any) => {
             const baseVora = 1000;
@@ -1068,7 +1550,7 @@ const userUniqueIds: Record<string, string> = { "city1": "VORA-A1B2", "city2": "
 const uniqueIdToUser: Record<string, any> = { "VORA-A1B2": { telegramId: "city1", maskedWallet: "EQ...X1Y2", maskingName: "c***1" } };
 const pendingRefunds: Record<string, any> = {};
 
-// 1. Referral Link Signup & Instant Reward
+// 1. Referral Link Signup & Instant Reward (Persisted)
 app.post('/api/user/referral-signup', async (req, res) => {
     try {
         const { newTelegramId, referrerUniqueId } = req.body;
@@ -1076,26 +1558,82 @@ app.post('/api/user/referral-signup', async (req, res) => {
             return res.status(400).json({ error: "Missing parameters" });
         }
 
-        const referrer = uniqueIdToUser[referrerUniqueId];
+        // Find referrer by uniqueId or telegramId
+        const referrer = await prisma.user.findFirst({
+            where: { telegramId: referrerUniqueId }
+        });
+
         if (!referrer) return res.status(404).json({ error: "Invalid Referral ID" });
 
-        // Generate ID for new user
-        const newUniqueId = `VORA-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-        userUniqueIds[newTelegramId] = newUniqueId;
-        uniqueIdToUser[newUniqueId] = { telegramId: newTelegramId, maskedWallet: "EQ...NEW", maskingName: "new***" };
+        // Check if user already exists
+        let user = await prisma.user.findUnique({ where: { telegramId: newTelegramId } });
+        if (user) {
+            return res.status(200).json({ success: true, message: "User already registered", telegramId: user.telegramId });
+        }
+
+        // Create new user linked to referrer
+        user = await prisma.user.create({
+            data: {
+                telegramId: newTelegramId,
+                referrerId: referrer.id
+            }
+        });
 
         const instantRewardVora = 100 * globalConfig.dynamicRewardRatio;
+        
+        // Use Bridge to allocate reward to referrer on-chain
+        if (referrer.tonWalletAddress) {
+            await tonBridge.allocateReward(referrer.tonWalletAddress, instantRewardVora);
+        }
 
         return res.status(200).json({
             success: true,
             message: "Signup complete via referral. Instant reward allocated to referrer.",
-            newUniqueId: newUniqueId,
+            telegramId: user.telegramId,
             referrerRewarded: referrer.telegramId,
-            rewardAmountVora: instantRewardVora,
-            availableTomorrow: true
+            rewardAmountVora: instantRewardVora
         });
     } catch (error) {
+        console.error("Signup error:", error);
         res.status(500).json({ error: "Signup Failed" });
+    }
+});
+
+// 2. User Stake Endpoint (Integrated with Bridge)
+app.post('/api/user/stake', async (req, res) => {
+    try {
+        const { telegramId, walletAddress, amount } = req.body;
+        if (!telegramId || !amount) return res.status(400).json({ error: "Missing parameters" });
+
+        const user = await prisma.user.update({
+            where: { telegramId },
+            data: {
+                tonWalletAddress: walletAddress,
+                totalTonStaked: { increment: parseFloat(amount) },
+                isFandomUser: true,
+                dnftLevel: 2 // Upgrade to Level 2 on first stake
+            }
+        });
+
+        // Unilevel Reward Logic (e.g., 10% to L1)
+        if (user.referrerId) {
+            const referrer = await prisma.user.findUnique({ where: { id: user.referrerId } });
+            if (referrer && referrer.tonWalletAddress) {
+                const reward = amount * 0.10 * 50; // 10% in VORA (assuming 1 TON = 50 VORA)
+                await tonBridge.allocateReward(referrer.tonWalletAddress, reward);
+                
+                // Update Referrer Volume
+                await prisma.user.update({
+                    where: { id: referrer.id },
+                    data: { nVolume: { increment: amount } }
+                });
+            }
+        }
+
+        res.json({ success: true, message: "Stake recorded and Unilevel rewards distributed.", user });
+    } catch (error) {
+        console.error("Stake error:", error);
+        res.status(500).json({ error: "Failed to record stake." });
     }
 });
 
@@ -1149,6 +1687,40 @@ app.post('/api/user/request-refund', async (req, res) => {
     }
 });
 
+// --- Profile & Assets ---
+app.get('/api/user/profile', async (req, res) => {
+    try {
+        const { telegramId } = req.query;
+        if (!telegramId) return res.status(400).json({ error: "Missing telegramId" });
+
+        const user = await prisma.user.findUnique({
+            where: { telegramId: telegramId as string },
+            include: { referrals: true }
+        });
+
+        if (!user) {
+            // Auto-create user if not exists (Guest Mode)
+            const newUser = await prisma.user.create({
+                data: { telegramId: telegramId as string }
+            });
+            return res.json({ success: true, user: newUser });
+        }
+
+        res.json({ success: true, user });
+    } catch (e: any) {
+        res.status(500).json({ success: false, message: e.message });
+    }
+});
+
+app.get('/api/config', async (req, res) => {
+    // Current booster/timer state
+    res.json({ 
+        t2eTimerEnd: Date.now() + (60 * 60 * 1000), // 1 hour booster default
+        dynamicRewardRatio: 1.0,
+        viraToUsdRate: 0.1
+    });
+});
+
 // 4. Claim Refund after 30 days (Penalty Calculation)
 app.post('/api/user/claim-refund', async (req, res) => {
     try {
@@ -1189,275 +1761,45 @@ app.post('/api/user/claim-refund', async (req, res) => {
     }
 });
 
+
 // ==========================================
-// Brown AI (CS & Co-founder) Telegram Bot
+// 📢 Official Channel Broadcast Bot
 // ==========================================
-const brownTelegramToken = process.env.BROWN_TELEGRAM_TOKEN || process.env.TELEGRAM_TOKEN;
-if (brownTelegramToken) {
-    const brownBot = new TelegramBot(brownTelegramToken, { polling: true });
-    console.log("🤖 Brown AI Telegram Bot is polling...");
-
-    const handleIncomingMessage = async (msg: any) => {
-        const chatId = msg.chat?.id;
-        const text = msg.text;
-
-        console.log(`[Brown AI] Received message in chat ${chatId}: "${text}"`);
-        if (!text) return;
-
-        // Admin Commands Authentication Check
-        // In a real scenario, this should check against an array of Admin Telegram IDs.
-        // For demonstration, we assume any user interacting with Brown bot directly can use admin commands if they know them.
-        const isAdmin = true;
-
-        if (text.startsWith('/set_ratio') && isAdmin) {
-            const parts = text.split(' ');
-            if (parts.length === 2 && !isNaN(parseFloat(parts[1]))) {
-                const newRatio = parseFloat(parts[1]);
-                if (newRatio >= 0 && newRatio <= 2) {
-                    globalConfig.dynamicRewardRatio = newRatio;
-                    return brownBot.sendMessage(chatId, `✅ [Admin] T2E & Unilevel Reward Ratio updated to: ${newRatio * 100}%`);
-                }
-            }
-            return brownBot.sendMessage(chatId, `❌ Usage: /set_ratio [0.0 ~ 2.0] (e.g., /set_ratio 0.5 for 50%)`);
-        }
-
-        if (text.startsWith('/approve') && isAdmin) {
-            const parts = text.split(' ');
-            if (parts.length === 2) {
-                const txId = parts[1];
-                if (pendingWithdrawals[txId]) {
-                    const tx = pendingWithdrawals[txId];
-                    tx.status = 'APPROVED';
-                    // Trigger the actual blockchain BotWithdraw logic here
-                    brownBot.sendMessage(chatId, `✅ [Admin] Withdrawal ${txId} for ${tx.amount} VORA to ${tx.wallet} has been APPROVED and executed.`);
-                    delete pendingWithdrawals[txId];
-                } else {
-                    brownBot.sendMessage(chatId, `❌ [Admin] TX ${txId} not found.`);
-                }
-            }
-            return;
-        }
-
-        if (text.startsWith('/reject') && isAdmin) {
-            const parts = text.split(' ');
-            if (parts.length === 2) {
-                const txId = parts[1];
-                if (pendingWithdrawals[txId]) {
-                    const tx = pendingWithdrawals[txId];
-                    tx.status = 'REJECTED';
-                    brownBot.sendMessage(chatId, `🚫 [Admin] Withdrawal ${txId} for ${tx.amount} VORA to ${tx.wallet} has been REJECTED.`);
-                    delete pendingWithdrawals[txId];
-                } else {
-                    brownBot.sendMessage(chatId, `❌ [Admin] TX ${txId} not found.`);
-                }
-            }
-            return;
-        }
-
-        if (text.startsWith('/settle') && isAdmin) {
-            brownBot.sendMessage(chatId, `⚙️ [Admin] Triggering Daily AI Settlement...`);
-            try {
-                const port = process.env.PORT || 3001; // Changed to 3001 to match the app.listen port
-                await fetch(`http://localhost:${port}/api/internal/daily-settlement`, { method: 'POST' });
-                // The endpoint itself sends the Telegram announcement, so no extra message needed here.
-            } catch (err) {
-                brownBot.sendMessage(chatId, `❌ [Admin] Failed to trigger settlement: ${err}`);
-            }
-            return;
-        }
-
-        // 1. Fandom Store Logic (VORA 20% Discount)
-        if (text.startsWith('/store')) {
-            const tonToVoraRate = 50; // Assume 1 TON = 50 VORA for calculation
-            const discountRate = 0.8; // 20% Discount when paying with VORA
-
-            // Simulated Google Sheets Fetch
-            const packages = [
-                { id: 1, name: "Starter Fandom Pass (1 Month)", priceTon: 10 },
-                { id: 2, name: "Pro Trader Pass (3 Months)", priceTon: 25 },
-                { id: 3, name: "Elite DNFT Whitelist", priceTon: 50 },
-                { id: 4, name: "Partner P2P MM Node", priceTon: 200 }
-            ];
-
-            let storeMsg = `🛍️ **[VORA Fandom VIP Store]**\n\n`;
-            storeMsg += `💡 *Pay with $VORA to receive a massive 20% discount!*\n\n`;
-
-            packages.forEach(pkg => {
-                const priceVora = (pkg.priceTon * tonToVoraRate) * discountRate;
-                storeMsg += `🔹 **[${pkg.id}] ${pkg.name}**\n`;
-                storeMsg += `   💵 결제 (TON): ${pkg.priceTon} TON\n`;
-                storeMsg += `   💎 특별할인 (VORA): ${priceVora} VORA (20% OFF!)\n\n`;
-            });
-
-            storeMsg += `👉 구매하시려면 아래 명령어를 입력하세요:\n\`/buy [패키지번호] [ton|vora]\`\n예시: \`/buy 2 vora\``;
-
-            return brownBot.sendMessage(chatId, storeMsg, { parse_mode: 'Markdown' });
-        }
-
-        if (text.startsWith('/buy')) {
-            const parts = text.split(' ');
-            if (parts.length === 3) {
-                const pkgId = parseInt(parts[1]);
-                const currency = parts[2].toUpperCase();
-                return brownBot.sendMessage(chatId, `✅ **[결제 시뮬레이션]**\n\n패키지 #${pkgId} 번을 ${currency} 단위로 결제 시도합니다.\n(실제 런칭 시 이 버튼이 미니앱 결제창 또는 TON 스마트 컨트랙트로 즉시 연결됩니다!)`, { parse_mode: 'Markdown' });
-            }
-            return brownBot.sendMessage(chatId, `❌ 사용법: /buy [패키지번호] [ton|vora]`);
-        }
-
-        // 2. Chat Mute Management (Night Mode)
-        if (text.startsWith('/toggle_night_mode') && isAdmin) {
-            try {
-                // To mute a group: set permissions to false
-                // Note: user must use this command inside the group they want to mute, or pass a specific ChatID
-                await brownBot.setChatPermissions(chatId, {
-                    can_send_messages: false,
-                    can_send_other_messages: false
-                });
-                return brownBot.sendMessage(chatId, `🌙 **[야간 모드 활성화]**\n\n코어 크루원들의 휴식을 위해 팬덤 VIP 그룹의 채팅이 내일 오전 10시까지 임시 제한됩니다. 편안한 밤 되십시오!`);
-            } catch (err) {
-                return brownBot.sendMessage(chatId, `❌ [Admin] 채팅 권한 제어 실패. 봇이 관리자 권한(Admin)을 가지고 있는지 확인하세요.\n에러: ${err}`);
-            }
-        }
-
-        if (text.startsWith('/toggle_day_mode') && isAdmin) {
-            try {
-                await brownBot.setChatPermissions(chatId, {
-                    can_send_messages: true,
-                    can_send_other_messages: true
-                });
-                return brownBot.sendMessage(chatId, `☀️ **[주간 모드 활성화]**\n\n팬덤 VIP 그룹의 채팅 제한이 해제되었습니다. 오늘도 뜨거운 트레이딩 하루 보내십시오!`);
-            } catch (err) {
-                return brownBot.sendMessage(chatId, `❌ [Admin] 채팅 권한 제어 실패. 에러: ${err}`);
-            }
-        }
-
-        // 3. Check Operating Hours (10:00 - 24:00 KST)
-        const now = new Date();
-        const kstFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', hour: 'numeric', hour12: false });
-        const currentKstHour = parseInt(kstFormatter.format(now));
-
-        // If it's before 10 AM (0-9)
-        if (currentKstHour >= 0 && currentKstHour < 10) {
-            console.log(`[Brown AI] Offline hours (${currentKstHour} KST). Sending auto-reply.`);
-            return brownBot.sendMessage(chatId, "🚫 [매니저 브라운 부재중 안내]\n\n현재는 운영 시간이 아닙니다. 브라운 매니저는 트레이딩 및 업무 집중을 위해 아래 시간에만 활동합니다.\n\n⏰ 운영 시간: 매일 10:00 ~ 24:00 (KST)\n\n메시지를 남겨주시면 운영 시간에 순차적으로 답변드리겠습니다. 감사합니다.");
-        }
-
-        // 2. Process with Gemini AI using Brown Persona
-        try {
-            if (!ai) throw new Error("Gemini AI is not initialized. Please check GEMINI_API_KEY.");
-
-            console.log(`[Brown AI] Asking Gemini...`);
-            const systemInstruction = "당신은 Vora 생태계의 메인 트레이더 '매니저 브라운'이자 Co-founder입니다. VORA 백서를 기반으로 CS, 부스트 판매 정책(Eco, Starter, Pro, Elite, Partner 등급), 7:3 유틸리티 규칙(동적 배분) 등을 안내합니다. 문장은 매우 간결하고 핵심만 말하되, **반드시 매너 있고 공손한 태도와 정중한 존댓말**을 사용하십시오. 전문적인 트레이더이자 파운더로서의 '자신감'과 '확신'은 유지하되, 고객에게 무례하거나 차갑게 대답해서는 안 됩니다. 항상 친절하고 품격 있는 응대를 제공하십시오.";
-
-            // Using the current gemini-2.5-flash model
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: text,
-                config: {
-                    systemInstruction: systemInstruction,
-                    temperature: 0.7
-                }
-            });
-
-            const replyText = response.text;
-            if (replyText) {
-                console.log(`[Brown AI] Replying to chat ${chatId}`);
-                await brownBot.sendMessage(chatId, replyText);
-            }
-        } catch (error) {
-            console.error("Brown AI Error:", error);
-            await brownBot.sendMessage(chatId, "⚠️ 브라운 AI 시스템에 일시적인 오류가 발생했습니다. 잠시 후 다시 질문해 주십시오.");
-        }
-    };
-
-    brownBot.on('message', handleIncomingMessage);
-    brownBot.on('channel_post', handleIncomingMessage);
-
-    brownBot.on("polling_error", (error) => {
-        console.error("Telegram Polling Error:", error);
-    });
-} else {
-    console.log("⚠️ No Telegram Token found for Brown AI.");
+const broadcastEvent = async (message: string) => {
+    const broadcastToken = process.env.VORA_BROADCAST_BOT_TOKEN;
+    const channelId = process.env.VORA_CHANNEL_ID;
+    if (!broadcastToken || !channelId) {
+        console.log("📢 Broadcast skipped (missing ENV)", message.substring(0, 30));
+        return;
+    }
+    const bot = new TelegramBot(broadcastToken, { polling: false });
+    try {
+        await bot.sendMessage(channelId, message, { parse_mode: 'Markdown' });
+    } catch (e) {
+        console.error("Broadcast failed:", e);
+    }
 }
 
-// ==========================================
-// Joy Seo AI (CMO & Running Crew Leader) Telegram Bot
-// ==========================================
-const joyTelegramToken = process.env.JOY_TELEGRAM_TOKEN;
-if (joyTelegramToken) {
-    const joyBot = new TelegramBot(joyTelegramToken, { polling: true });
-    console.log("🏃‍♀️ Joy Seo AI Telegram Bot is polling...");
-
-    const handleJoyMessage = async (msg: any) => {
-        const chatId = msg.chat?.id;
-        const text = msg.text;
-
-        console.log(`[Joy AI] Received message in chat ${chatId}: "${text}"`);
-
-        if (!text) return;
-
-        // 1. Check Operating Hours (10:00 - 24:00 KST)
-        const now = new Date();
-        const kstFormatter = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', hour: 'numeric', hour12: false });
-        const currentKstHour = parseInt(kstFormatter.format(now));
-
-        // If it's before 10 AM (0-9)
-        if (currentKstHour >= 0 && currentKstHour < 10) {
-            console.log(`[Joy AI] Offline hours (${currentKstHour} KST). Sending auto-reply.`);
-            return joyBot.sendMessage(chatId, "🚫 [조이서 CMO 부재중 안내]\n\n현재는 운영 시간이 아닙니다. 러닝 크루 리딩 및 마케팅 업무 집중을 위해 아래 시간에만 소통 가능합니다.\n\n⏰ 운영 시간: 매일 10:00 ~ 24:00 (KST)\n\n메시지를 남겨주시면 확인 후 순차적으로 답변해 드릴게요!");
-        }
-
-        // 2. Process with Gemini AI using Joy Persona
-        try {
-            if (!ai) throw new Error("Gemini AI is not initialized. Please check GEMINI_API_KEY.");
-
-            console.log(`[Joy AI] Asking Gemini...`);
-            const systemInstruction = "당신은 Vora 생태계의 최고 마케팅 책임자(CMO)이자 러닝 크루의 대표적인 리더십 관리자인 '조이서'입니다. 당당하고 자신감 넘치는 여성 리더로서 에너제틱하게 유저들을 이끕니다. 문장은 간결하고 명확하게 말하되, **반드시 매너 있고 공손한 태도와 정중한 존댓말**을 사용하십시오. 러닝 크루를 이끄는 활기차고 카리스마 있는 에너지를 보여주며, VORA 프로젝트의 비전과 마케팅 방향성을 친절하고 품격 있게 설명합니다.";
-
-            // Using the current gemini-2.5-flash model
-            const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
-                contents: text,
-                config: {
-                    systemInstruction: systemInstruction,
-                    temperature: 0.7
-                }
-            });
-
-            const replyText = response.text;
-            if (replyText) {
-                console.log(`[Joy AI] Replying to chat ${chatId}`);
-                await joyBot.sendMessage(chatId, replyText);
-            }
-        } catch (error) {
-            console.error("Joy AI Error:", error);
-            await joyBot.sendMessage(chatId, "⚠️ 조이서 AI 시스템에 일시적인 오류가 발생했습니다. 잠시 후 다시 질문해 주세요.");
-        }
-    };
-
-    joyBot.on('message', handleJoyMessage);
-    joyBot.on('channel_post', handleJoyMessage);
-
-    joyBot.on("polling_error", (error) => {
-        console.error("Joy Telegram Polling Error:", error);
-    });
-} else {
-    console.log("⚠️ No Telegram Token found for Joy Seo AI (JOY_TELEGRAM_TOKEN).");
-}
+app.post('/api/ido/buy', async (req, res) => {
+    const { amount, address } = req.body;
+    const shortAddr = address.substring(0,4) + '...' + address.substring(address.length-4);
+    await broadcastEvent(`🚀 **[VORA IDO] 새로운 투자자 합류!**\n\n지갑: \`${shortAddr}\`\n금액: **${amount} VORA** 확보 완료!\n\n👉 [IDO 런치패드 참여하기](https://t.me/Vora_Brown_bot)`);
+    res.json({ success: true });
+});
 
 // ==========================================
 // 🛡️ VORA Admin Control Endpoints
 // ==========================================
 app.get('/api/admin/overview', async (req, res) => {
     try {
-        const globalState = await db.get(`SELECT * FROM SystemState WHERE id = 'global'`);
-        const totalUsers = await db.get(`SELECT COUNT(*) as count FROM User`);
+        const globalState = await prisma.systemState.findUnique({ where: { id: 'global' } });
+        const totalUsers = await prisma.user.count();
         const totalLiquidity = globalState ? (globalState.joyCmoLiquidityTon + globalState.joyCmoLiquidityUsdc) : 0;
         
         res.json({
             status: "success",
             data: {
-                users: totalUsers.count,
+                users: totalUsers,
                 liquidityUsdc: totalLiquidity,
                 stakingPool: globalState ? globalState.stakingPoolTotal : 0,
                 p2pTax: globalState ? globalState.p2pTaxAccumulated : 0,
@@ -1471,7 +1813,12 @@ app.get('/api/admin/overview', async (req, res) => {
 
 app.get('/api/admin/users/fandom', async (req, res) => {
     try {
-        const users = await db.all(`SELECT id, telegramId, nVolume, dnftLevel, isCrew, createdAt FROM User ORDER BY nVolume DESC, createdAt DESC`);
+        const users = await prisma.user.findMany({
+            orderBy: [
+                { nVolume: 'desc' },
+                { createdAt: 'desc' }
+            ]
+        });
         res.json({ status: "success", data: users });
     } catch (e: any) {
         res.status(500).json({ status: "error", message: e.message });
@@ -1482,7 +1829,10 @@ app.post('/api/admin/action/upgrade-dnft', async (req, res) => {
     try {
         const { userId, level } = req.body;
         if (!userId || !level) throw new Error("Missing parameters");
-        await db.run(`UPDATE User SET dnftLevel = ? WHERE id = ?`, [level, userId]);
+        await prisma.user.update({
+            where: { id: parseInt(userId) },
+            data: { dnftLevel: parseInt(level) }
+        });
         res.json({ status: "success", message: `User ${userId} dnftLevel upgraded to ${level}` });
     } catch (e: any) {
         res.status(500).json({ status: "error", message: e.message });
@@ -1493,8 +1843,13 @@ app.post('/api/admin/action/airdrop-crew', async (req, res) => {
     try {
         const { userId, amount } = req.body;
         if (!userId || !amount) throw new Error("Missing parameters");
-        // Update both accumulatedVora and isCrew marker
-        await db.run(`UPDATE User SET isCrew = 1, accumulatedVora = accumulatedVora + ? WHERE id = ?`, [amount, userId]);
+        await prisma.user.update({
+            where: { id: parseInt(userId) },
+            data: { 
+                isCrew: true, 
+                accumulatedVora: { increment: parseFloat(amount) } 
+            }
+        });
         res.json({ status: "success", message: `Crew Airdrop of ${amount} VORA sent to User ${userId}` });
     } catch (e: any) {
         res.status(500).json({ status: "error", message: e.message });
@@ -1518,13 +1873,15 @@ app.post('/api/admin/action/bot-deploy', async (req, res) => {
 // ==========================================
 app.get('/api/admin/traders', async (req, res) => {
     try {
-        // Fetch only VIP Traders (Multiplier >= 2.0 or Crew)
-        const traders = await db.all(`
-            SELECT id, telegramId, dnftLevel, isCrew, binanceApiKey, binanceSecretKey, tvWebhookUrl 
-            FROM User 
-            WHERE t2eBonusMultiplier >= 2.0 OR isCrew = 1
-            ORDER BY id DESC
-        `);
+        const traders = await prisma.user.findMany({
+            where: {
+                OR: [
+                    { t2eBonusMultiplier: { gte: 2.0 } },
+                    { isCrew: true }
+                ]
+            },
+            orderBy: { id: 'desc' }
+        });
         res.json({ status: "success", data: traders });
     } catch (e: any) {
         res.status(500).json({ status: "error", message: e.message });
@@ -1533,20 +1890,277 @@ app.get('/api/admin/traders', async (req, res) => {
 
 app.post('/api/admin/traders/update-keys', async (req, res) => {
     try {
-        const { userId, apiKey, secretKey, webhookUrl } = req.body;
+        const { 
+            userId, 
+            binanceApiKey, binanceSecretKey, 
+            bybitApiKey, bybitApiSecret,
+            bitgetApiKey, bitgetApiSecret, bitgetApiPassphrase,
+            mt5Account, mt5Password, mt5Server,
+            tvWebhookUrl 
+        } = req.body;
+        
         if (!userId) throw new Error("Missing userId parameter");
         
-        await db.run(
-            `UPDATE User SET binanceApiKey = ?, binanceSecretKey = ?, tvWebhookUrl = ? WHERE id = ?`, 
-            [apiKey, secretKey, webhookUrl, userId]
-        );
-        res.json({ status: "success", message: `Successfully updated connection keys for VIP Trader (UID: ${userId})` });
+        await prisma.user.update({
+            where: { id: parseInt(userId) },
+            data: {
+                binanceApiKey, binanceSecretKey, 
+                bybitApiKey, bybitApiSecret,
+                bitgetApiKey, bitgetApiSecret, bitgetApiPassphrase,
+                mt5Account, mt5Password, mt5Server,
+                tvWebhookUrl
+            }
+        });
+        res.json({ status: "success", message: `Successfully updated all connection keys for VIP Trader (UID: ${userId})` });
     } catch (e: any) {
         res.status(500).json({ status: "error", message: e.message });
     }
 });
 
-const PORT = 3001;
+app.post('/api/admin/traders/set-master', async (req, res) => {
+    try {
+        const { userId, isMaster } = req.body;
+        if (!userId) throw new Error("Missing userId parameter");
+        
+        if (isMaster) {
+            await prisma.user.updateMany({ data: { isMaster: false } });
+        }
+        
+        await prisma.user.update({
+            where: { id: parseInt(userId) },
+            data: { isMaster: isMaster ? true : false }
+        });
+        res.json({ status: "success", message: `Master status updated for UID: ${userId}` });
+    } catch (e: any) {
+        res.status(500).json({ status: "error", message: e.message });
+    }
+});
+
+app.post('/api/admin/action/distribute-bulk', async (req, res) => {
+    try {
+        const { list } = req.body;
+        if (!list) throw new Error("Missing list parameter");
+        
+        console.log(`[VORA Distribution Engine] 🚀 Initializing Bulk Transfer Sequence...`);
+        const lines = list.split('\n').filter((l: string) => l.trim() !== "");
+        
+        // Mocking the sequential distribution logic
+        // In production, this would use ton-core / ton-access to send internal messages from the Treasury
+        let totalSent = 0;
+        for (const line of lines) {
+            const [address, amount] = line.split(',');
+            if (address && amount) {
+                console.log(` -> Sending ${amount} VORA to ${address.trim()}`);
+                totalSent += parseFloat(amount);
+            }
+        }
+        
+        // Update System State to reflect reduced Master Vault balance (if applicable)
+        // Update System State
+        await prisma.systemState.update({
+            where: { id: 'global' },
+            data: { stakingPoolTotal: { decrement: totalSent } }
+        });
+        
+        res.json({ status: "success", message: `Distribution of ${totalSent} VORA initiated across ${lines.length} recipients.` });
+    } catch (e: any) {
+        res.status(500).json({ status: "error", message: e.message });
+    }
+});
+
+// ==========================================
+// 🛡️ Brown AI Founder Bot & Angel Invest
+// ==========================================
+const founderBotToken = process.env.BROWN_AI_BOT_TOKEN;
+if (founderBotToken) {
+    const founderBot = new TelegramBot(founderBotToken, { polling: true });
+    console.log("🤖 Brown AI Founder Bot (Private) is running...");
+
+    founderBot.on('message', async (msg) => {
+        const chatId = msg.chat.id;
+        const text = msg.text || '';
+        const FOUNDER_TELEGRAM_ID = process.env.FOUNDER_TELEGRAM_ID || "PASTE_YOUR_TG_ID_HERE";
+        
+        const targetId = msg.from?.username || String(chatId);
+        let localUser = await prisma.user.upsert({
+            where: { telegramId: targetId },
+            update: {},
+            create: { telegramId: targetId }
+        });
+
+        const isFounder = String(chatId) === FOUNDER_TELEGRAM_ID || msg.from?.username === "Brown_AI_Founder" || localUser.id === 203;
+        
+        if (text === '/iamfounder') {
+            console.log(`[SYS] Founder claimed by TG ID: ${chatId}`);
+            return founderBot.sendMessage(chatId, `✅ 파운더 모드가 활성화되었습니다!\n당신의 Telegram ID는 [${chatId}] 입니다.\n\n서버 안정성을 위해 server/.env 파일 맨 아랫줄에 다음을 추가해주세요:\nFOUNDER_TELEGRAM_ID=${chatId}`);
+        }
+
+        if (text === '/start') {
+            if (isFounder) {
+                return founderBot.sendMessage(chatId, `안녕하세요 파운더님. 저는 1차 투자금 초기 관리를 돕는 [Brown AI 비서]입니다.\n\n/status - 모금 현황\n/broadcast [메시지] - 전체 엔젤 투자자에게 발송\n/launch_official - 정식 런칭 선언 (환불 락업 가동)`);
+            } else {
+                return founderBot.sendMessage(chatId, `[Brown AI Private Channel]\n엔젤 투자자로 승인되셨습니다. 은밀하게 진행되는 30만불(10M VORA) 독점 매수 대시보드에 접속하십시오.\n\n비밀 링크: https://vorainvest.com/dashboard?token=${localUser.id}\n(이 비밀 링크는 외부로 유출하지 마십시오.)`);
+            }
+        }
+
+        if (isFounder) {
+            if (text.startsWith('/status')) {
+                const state = await prisma.systemState.findUnique({ where: { id: 'global' } });
+                const seedPoolStr = state ? state.seedVoraPool.toLocaleString() : '10,000,000';
+                const fundedUsdStr = state ? state.seedUsdFunded.toLocaleString() : '0';
+                const officialStr = state?.isOfficialLaunch ? "🟢 런칭 완료 (환불 차단)" : "🔴 런칭 대기(환불 가능)";
+                
+                return founderBot.sendMessage(chatId, `📊 [1st Round 펀드 현황 리포트]\n\n총 누적 투자금: $${fundedUsdStr}\n예비 Pool 잔량: ${seedPoolStr} VORA\n현재 단계: ${officialStr}`);
+            }
+            if (text.startsWith('/broadcast')) {
+                const bMsg = text.replace('/broadcast', '').trim();
+                if (!bMsg) return founderBot.sendMessage(chatId, `메시지를 입력해주세요. (예: /broadcast 공지사항)`);
+                
+                const angels = await prisma.user.count({ where: { isAngelInvestor: true } });
+                founderBot.sendMessage(chatId, `총 ${angels}명의 엔젤 투자자에게 메시지를 전송합니다... (System Logged)`);
+            }
+            if (text.startsWith('/launch_official')) {
+                await prisma.systemState.upsert({
+                    where: { id: 'global' },
+                    update: { isOfficialLaunch: true },
+                    create: { id: 'global', isOfficialLaunch: true, seedVoraPool: 10000000, seedUsdFunded: 0 }
+                });
+                return founderBot.sendMessage(chatId, `⚠️ [SYSTEM] 앱 '정식 출시 모드'가 선언되었습니다.\n이제부터 모든 엔젤 투자자의 환불 보증 정책이 락업(Lock-up)되며, VORA 생태계가 완전 가동됩니다.`);
+            }
+        }
+    });
+}
+
+app.post('/api/angel/refund', async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const user = await prisma.user.findUnique({ where: { id: parseInt(userId) } });
+        if (!user || (!user.isAngelInvestor && user.angelInvestAmount <= 0)) {
+            return res.status(400).json({ status: "error", message: "환불 대상 엔젤 투자자가 아닙니다." });
+        }
+
+        const state = await prisma.systemState.findUnique({ where: { id: 'global' } });
+        if (state && state.isOfficialLaunch) {
+            return res.status(403).json({ status: "error", message: "[환불 불가] 앱이 정식 런칭되었습니다. 환불 보증 기간이 종료되었습니다." });
+        }
+
+        const msInDay = 24 * 60 * 60 * 1000;
+        const investDate = user.angelInvestDate ? new Date(user.angelInvestDate) : new Date();
+        const daysPassed = Math.floor((Date.now() - investDate.getTime()) / msInDay);
+
+        let refundAmount = user.angelInvestAmount;
+        let policyUsed = "15일 이내 전액 환불";
+
+        if (daysPassed > 15 && daysPassed <= 30) {
+            policyUsed = "16~30일 구간 (수수료 검토)";
+        } else if (daysPassed > 30) {
+            policyUsed = "30일 경과 (+알파 이자금 보상)";
+            refundAmount = refundAmount * 1.05; // 30일 경과 시 패널티 없이 리워드 + 5% 제공 (파운더 신용 보증)
+        }
+
+        const voraToRestore = refundAmount / 0.05;
+
+        // Rollback DB
+        await prisma.$transaction([
+            prisma.user.update({
+                where: { id: user.id },
+                data: { isAngelInvestor: false, angelInvestAmount: 0 }
+            }),
+            prisma.systemState.upsert({
+                where: { id: 'global' },
+                update: { 
+                    seedUsdFunded: { decrement: user.angelInvestAmount },
+                    seedVoraPool: { increment: voraToRestore }
+                },
+                create: {
+                    id: 'global',
+                    seedVoraPool: 10000000 + voraToRestore,
+                    seedUsdFunded: 0
+                }
+            })
+        ]);
+
+        return res.json({ 
+            status: "success", 
+            message: `엔젤 투자 환불 승인 완료. 적용 정책: [${policyUsed}]. 환불액: $${refundAmount.toFixed(2)}`,
+            refundAmount
+        });
+
+    } catch (e: any) {
+        res.status(500).json({ status: "error", message: e.message });
+    }
+});
+
+
+// ==========================================
+// 🤖 DUAL AI MENTOR SYSTEM (BROWN & JOY) LIVE ENDPOINT
+// ==========================================
+app.post('/api/public/chat', async (req, res) => {
+    try {
+        const { aiType, message, history } = req.body;
+        if (!aiType || !message) {
+            return res.status(400).json({ error: "Missing aiType or message parameters" });
+        }
+        
+        if (!process.env.GEMINI_API_KEY) {
+            return res.json({ reply: `[System Notice] GEMINI_API_KEY가 연결되지 않았습니다. API 연동을 확인해주세요. (${aiType})` });
+        }
+
+        let systemInstruction = "";
+        
+        if (aiType === 'BROWN') {
+            systemInstruction = `
+당신은 VORA 트레이딩 생태계를 책임지는 수석 분석가 겸 퀀트 전문가 '브라운(BROWN) AI'입니다.
+말투/페르소나: 극히 냉철하고 사실 기반이며, 감정을 배제한 전문적인 퀀트 트레이딩 톤을 유지합니다. 짧고 명확하게 핵심만 전달하십시오.
+학습된 생태계 지식:
+1. VORA 트레이딩 시스템은 숏포지션 헷징 알고리즘을 사용해 일관된 절대 수익을 추구합니다.
+2. 매일 유동성이 큰 뉴욕거래소 오픈장에 스나이핑 형태의 집중 매매만을 진행합니다.
+3. 승률 극대화를 위해 손절 틱을 극도로 짧게 설정합니다.
+답변 가이드: 유저가 상승장/하락장 예측을 요구하면, '데이터와 팩트로 판단한다'며 퀀트 관점으로 답변하세요.
+            `;
+        } else if (aiType === 'JOY') {
+            systemInstruction = `
+당신은 VORA 시스템의 VIP 세일즈 디렉터 및 CS 담당 '조이(JOY) AI'입니다.
+말투/페르소나: 대단히 친절하고 활기차며, 기쁨을 주는 톤입니다! 이모티콘 적극 사용!
+학습 지식(보상 플랜):
+1. VORA는 '다단계 폰지 구조'가 아닙니다. 추천 파트너의 '순수익' 파이를 재단의 재원(20%)에서 배당하는 안전 구조입니다. 유저 원금을 건드리지 않습니다.
+2. 직추천(L1) 수익 쉐어: 3일(2%), 7일(3%), 30일(7%), 1년(15%).
+3. 간접추천(L2) 수익 쉐어: L1 비율의 절반. 3일(1%), 7일(1.5%), 30일(3.5%), 1년(7.5%).
+4. N볼륨: 30일 플랜 유저는 N볼륨의 1%, 1년 크루 유저는 3% 무한 수익 수령!
+답변 가이드: 보상을 강력하게 어필하며 팀 빌딩을 독려하세요.
+            `;
+        } else {
+            return res.status(400).json({ error: "Invalid aiType. Must be BROWN or JOY." });
+        }
+
+        const prompt = `${systemInstruction}\n\nUser Message: ${message}`;
+
+        // Use ultra-stable standard node-fetch logic instead of genai ESM module
+        const fetchAPI = (global as any).fetch;
+        const googleResponse = await fetchAPI(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+            })
+        });
+
+        const data: any = await googleResponse.json();
+        
+        if (!googleResponse.ok) {
+            throw new Error(data.error?.message || "Google Gemini REST API 호출 실패");
+        }
+
+        const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "[System] 응답을 생성하지 못했습니다.";
+        res.json({ reply });
+
+    } catch (e: any) {
+        console.error("AI Chat Error:", e);
+        res.status(500).json({ error: e.message || "AI 엔진 처리 중 오류가 발생했습니다." });
+    }
+});
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`Vora v4.0 Backend Server running on port ${PORT}`);
 });

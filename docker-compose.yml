@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  vora-backend:
+    build: .
+    container_name: vora_ecosystem
+    ports:
+      - "3001:3001"
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      # IMPORTANT: Environment variables (like Telegram Tokens, Gemini API Key)
+      # should be passed dynamically in the GCP Cloud Configuration or through a mounted .env file.
+      # We recommend writing the real tokens to a .env file on the GCP host and uncommenting below.
+      # env_file:
+      #   - .env
+    volumes:
+      # Mount the sqlite database locally so user data persists across container restarts
+      - ./server/dev.db:/app/server/dev.db
+      - ./server/vora_ecosystem_manual.txt:/app/server/vora_ecosystem_manual.txt
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/admin/overview"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

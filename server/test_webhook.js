@@ -9,7 +9,7 @@ const payload = JSON.stringify({
 
 const options = {
     hostname: 'localhost',
-    port: 3001,
+    port: 80,
     path: '/api/webhook/tradingview-video',
     method: 'POST',
     headers: {

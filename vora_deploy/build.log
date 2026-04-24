@@ -1,0 +1,46 @@
+﻿?뮳 Compiling project VoraToken ...
+   > Treasury: tact compiler
+   > Treasury: func compiler
+   > VoraToken: tact compiler
+   > VoraToken: func compiler
+   > Packaging
+   > Treasury
+   > VoraToken
+   > Bindings
+   > Treasury
+   > VoraToken
+   > Reports
+   > Treasury
+   > VoraToken
+?뮳 Compiling project Treasury ...
+   > Treasury: tact compiler
+   > Treasury: func compiler
+   > Packaging
+   > Treasury
+   > Bindings
+   > Treasury
+   > Reports
+   > Treasury
+?뮳 Compiling project Escrow ...
+   > Treasury: tact compiler
+   > Treasury: func compiler
+   > Escrow: tact compiler
+   > Escrow: func compiler
+   > Packaging
+   > Treasury
+   > Escrow
+   > Bindings
+   > Treasury
+   > Escrow
+   > Reports
+   > Treasury
+   > Escrow
+?뮳 Compiling project VestingVault ...
+   > VestingVault: tact compiler
+   > VestingVault: func compiler
+   > Packaging
+   > VestingVault
+   > Bindings
+   > VestingVault
+   > Reports
+   > VestingVault

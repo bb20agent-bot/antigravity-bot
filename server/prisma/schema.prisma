@@ -10,21 +10,60 @@ datasource db {
 model User {
   id                    Int      @id @default(autoincrement())
   telegramId            String   @unique
+  appUid                String?  @unique        // 12-digit sequential UID (e.g. "260505001000")
+  email                 String?  @unique
   tonWalletAddress      String?  @unique
   totalTonStaked        Float    @default(0)
+  totalDeposit          Float    @default(0)    // 총 입금액
+  totalWithdrawal       Float    @default(0)    // 총 출금액
+  totalBurn             Float    @default(0)    // 총 소각액
   isFandomUser          Boolean  @default(false)
   t2eBonusMultiplier    Float    @default(1.0)
   
   // -- Fandom 8 Core Mechanics (Admin Control) --
   dnftLevel             Int      @default(1)    // 1: 스타트업 ~ 5: 로키의 지팡이
+  vehicleType           String   @default("NONE") // NONE, LIGHT, SUV, SPORTS
+  airdropBonus          Float    @default(0)      // 0.1, 0.2, 0.3
   nVolume               Float    @default(0)    // 1, 2레벨 직/간접 N추천 볼륨 추적
+  l1Count               Int      @default(0)    // 직추천(L1) 파트너 수
+  l2Count               Int      @default(0)    // 2대(L2) 파트너 수
   isCrew                Boolean  @default(false)// 브라운 AI 우수자 / 크루 발탁 여부
   accumulatedVora       Float    @default(0)    // T2E 에어드랍 누적 획득량 VORA
+  untradedP2pVora       Float    @default(0)    // P2P 거래 대기 중인 유휴 VORA (매일 0.1% 보상)
+  
+  // -- Angel Investor & Fund Metrics --
+  isAngelInvestor       Boolean  @default(false)
+  angelInvestAmount     Float    @default(0)    // $300k 라운드 초기 투자액금 (USD/TON)
+  angelInvestDate       DateTime?               // 15일/30일 환불 보증 정책 계산을 위한 시작일
   
   // -- Fandom Trader (VIP) Security Keys --
+  isMaster              Boolean  @default(false)
   binanceApiKey         String?
   binanceSecretKey      String?
+  
+  bybitApiKey           String?
+  bybitApiSecret        String?
+  
+  bitgetApiKey          String?
+  bitgetApiSecret       String?
+  bitgetApiPassphrase   String?
+  
+  mt5Account            String?
+  mt5Password           String?
+  mt5Server             String?
+  
   tvWebhookUrl          String?
+  
+  // -- Trading Performance & Governance --
+  daoVotingPower        Float    @default(0)
+  totalContribution     Float    @default(0)
+  isDaoMember           Boolean  @default(false)
+  
+  isRestricted          Boolean  @default(false)
+  lastSettlementDate    DateTime?
+  unpaidContributionUsdt Float   @default(0)
+  
+  trades                TradeLog[]
   // ---------------------------------------------
 
   referrerId            Int?
@@ -32,7 +71,24 @@ model User {
   referrals             User[]   @relation("UserToReferrer")
 
   createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  updatedAt             DateTime @default(now()) @updatedAt
+}
+
+model TradeLog {
+  id                    Int      @id @default(autoincrement())
+  userId                Int
+  user                  User     @relation(fields: [userId], references: [id])
+  symbol                String
+  side                  String   // buy | sell
+  entryPrice            Float?
+  exitPrice             Float?
+  contracts             Float?
+  pnlUsdt               Float?
+  status                String   @default("OPEN") // OPEN | CLOSED
+  exchange              String?  // bybit | bitget
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now()) @updatedAt
 }
 
 // Global System Configuration (Admin Control Variables)
@@ -43,8 +99,17 @@ model SystemState {
   joyCmoLiquidityUsdc   Float    @default(0)   // 조이 CMO 기반 구독 출금 풀 (USDC)
   p2pTaxAccumulated     Float    @default(0)   // 텔레그램 P2P 에스크로 운영 텍스 누적 (10%)
   p2pBurnAccumulated    Float    @default(0)   // 텔레그램 P2P 텍스 중 바이백 소각 누적 (15%)
+  
+  // -- 1st Round 300k Angel Sale State --
+  seedVoraPool          Float    @default(10000000) // 10M 초기 공급량
+  seedUsdFunded         Float    @default(0)        // 30만불(300K) 모금액 현황
+  isOfficialLaunch      Boolean  @default(false)    // 공식 출시 여부 (True 시 환불 불가)
+  
+  governancePoolUsdt    Float    @default(0)   // Accumulated 20% profit contributions
+  vorascanBannerUrl     String?  @default("")  // Vorascan 상단 배너 이미지
+  vorascanTelegramLink  String?  @default("https://t.me/joy_ai_bot") // 조이 AI 연결 링크
 
-  updatedAt             DateTime @updatedAt
+  updatedAt             DateTime @default(now()) @updatedAt
 }
 
 // DAO Governance Voting

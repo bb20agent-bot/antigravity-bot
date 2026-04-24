@@ -1,0 +1,389 @@
+// ─── ASSET CONFIG TABLE ───
+const ASSETS = {
+  BINANCE_ETH: {
+    label: 'ETH/USDT PERP', platform: 'BINANCE', unit: '포인트', unitEn: 'Points',
+    pipValue: (lot) => 1,           // 1 point = $1 per contract (qty-based, simplified)
+    defaultEntry: 3412, defaultSL: 50, defaultTP: 150,
+    leverMax: 20, leverDefault: 5,
+    badge: 'BINANCE PERP', badgeColor: 'var(--sky)',
+    formula: (sl, lot, pv) => `${sl}pt × $1/pt × ${lot} contracts`,
+    unitDesc: '1포인트 = $1 / 계약',
+    isMT5: false,
+  },
+  MT5_FOREX: {
+    label: 'Forex (EURUSD)', platform: 'MT5', unit: '핍', unitEn: 'Pips',
+    pipValue: (lot) => lot * 10,    // 0.0001 × lot × 100,000 = lot × 10
+    defaultEntry: 1.0850, defaultSL: 50, defaultTP: 150,
+    leverMax: 500, leverDefault: 100,
+    badge: 'MT5 FOREX', badgeColor: 'var(--gold)',
+    formula: (sl, lot, pv) => `${sl}pip × $${(lot*10).toFixed(1)}/pip (${lot} lot)`,
+    unitDesc: '1핍 = $10 × Lot (XXXUSD 기준)',
+    isMT5: true,
+  },
+  MT5_GOLD: {
+    label: 'XAUUSD (금)', platform: 'MT5', unit: '핍', unitEn: 'Pips',
+    pipValue: (lot) => lot * 1,     // 0.01 × lot × 100 = lot × 1
+    defaultEntry: 2340, defaultSL: 100, defaultTP: 300,
+    leverMax: 500, leverDefault: 100,
+    badge: 'MT5 GOLD', badgeColor: '#F59E0B',
+    formula: (sl, lot, pv) => `${sl}pip × $${(lot*1).toFixed(2)}/pip (${lot} lot)`,
+    unitDesc: '1핍 = $1 × Lot (XAUUSD)',
+    isMT5: true,
+  },
+  MT5_OIL: {
+    label: 'USOIL (원유)', platform: 'MT5', unit: '핍', unitEn: 'Pips',
+    pipValue: (lot) => lot * 1,     // 0.01 × lot × 100 = lot × 1
+    defaultEntry: 82.50, defaultSL: 50, defaultTP: 150,
+    leverMax: 500, leverDefault: 100,
+    badge: 'MT5 OIL', badgeColor: '#D97706',
+    formula: (sl, lot, pv) => `${sl}pip × $${(lot*1).toFixed(2)}/pip (${lot} lot)`,
+    unitDesc: '1핍 = $1 × Lot (USOIL)',
+    isMT5: true,
+  },
+  MT5_NAS: {
+    label: 'NAS100 (나스닥)', platform: 'MT5', unit: '포인트', unitEn: 'Points',
+    pipValue: (lot) => lot * 0.1,   // 0.1 × lot × 1 = lot × 0.1
+    defaultEntry: 17800, defaultSL: 50, defaultTP: 150,
+    leverMax: 500, leverDefault: 100,
+    badge: 'MT5 NAS100', badgeColor: '#A78BFA',
+    formula: (sl, lot, pv) => `${sl}pt × $${(lot*0.1).toFixed(2)}/pt (${lot} lot)`,
+    unitDesc: '1포인트 = $0.1 × Lot (NAS100)',
+    isMT5: true,
+  },
+};
+
+let currentAsset = 'BINANCE_ETH';
+
+// ─── STATE ───
+const state = {
+  name: '', seed: 0, stoploss: 0,
+  dreams: ['', '', ''], dreamTargets: [30000, 50000, 100000]
+};
+
+// ─── GEMINI API CONFIG ───
+const API_KEY = "YOUR_API_KEY"; // 여기에 실제 API 키를 입력하세요.
+const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+let chatHistory = [
+  {
+    role: "user",
+    parts: [{ text: `당신은 '브라운 AI'입니다. 친절하면서도 단호한 트레이딩 멘토입니다. 사용자와 대화하며 다음 4가지 정보를 순서대로 수집하세요: 1. 이름, 2. 거래 시드(USD), 3. 트레이딩으로 이루고 싶은 꿈 3가지, 4. 절대 원칙 손절가(USD, 시드의 1% 수준을 권장하며 유도할 것).
+
+정보 수집 가이드:
+- 시드와 손절가는 숫자로만 추출해야 합니다. 사용자가 '천불', '오백달러'라고 해도 숫자로 이해하세요.
+- 손절가는 시드의 1% 수준을 강력하게 권장하고 유도하세요.
+- 모든 정보(이름, 시드, 꿈 3개, 손절가)가 수집되었다고 판단되면, 다른 일상적인 대화는 일절 하지 말고 반드시 아래 형태의 순수 JSON 포맷으로만 응답하세요. (마크다운 기호 없이 순수 텍스트로만 줄 것)
+{"status": "complete", "name": "이름", "seed": 10000, "dreams": ["꿈1", "꿈2", "꿈3"], "stoploss": 100}
+
+첫 인사는 다음과 같이 시작하세요: "트레이더님 환영합니다! 🌟 저는 브라운 AI입니다. 거래 시작 전 명확한 목표 설정은 트레이더님의 미래를 좌우합니다. 먼저, 트레이더님의 이름을 알려주세요."` }]
+  }
+];
+
+// ─── ASSET SELECTION ───
+function selectAsset(btn) {
+  document.querySelectorAll('.asset-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentAsset = btn.dataset.asset;
+  const cfg = ASSETS[currentAsset];
+
+  document.getElementById('unitLabel').textContent = cfg.unitDesc;
+  document.getElementById('slUnitLabel').textContent = cfg.unit;
+  document.getElementById('tpUnitLabel').textContent = cfg.unit;
+  document.getElementById('entryUnit').textContent = 'USD';
+  document.getElementById('mt5Badge').style.display = cfg.isMT5 ? 'inline' : 'none';
+  document.getElementById('assetBadge').querySelector('span').textContent = cfg.badge;
+  document.getElementById('assetBadge').querySelector('span').style.color = cfg.badgeColor;
+
+  document.getElementById('marginModeRow').style.display = cfg.isMT5 ? 'none' : 'flex';
+  document.getElementById('mt5LotRow').style.display = cfg.isMT5 ? 'flex' : 'none';
+
+  const levRange = document.getElementById('leverageRange');
+  levRange.max = cfg.leverMax;
+  levRange.value = cfg.leverDefault;
+  document.getElementById('leverageVal').textContent = cfg.leverDefault + 'x';
+
+  document.getElementById('entryPrice').value = cfg.defaultEntry;
+  document.getElementById('slInput').value = cfg.defaultSL;
+  document.getElementById('tpInput').value = cfg.defaultTP;
+
+  calcRisk();
+}
+
+// ─── WELCOME FLOWS ───
+function startUserFlow() {
+  alert('팬덤 유저 멤버십: dNFT 자동 생성, VORA 토큰 에어드랍 등이 진행됩니다.');
+}
+function startTraderFlow() {
+  document.getElementById('welcomeScreen').style.display = 'none';
+  const os = document.getElementById('onboardingScreen');
+  os.style.display = 'flex';
+  initChat();
+}
+
+// ─── ONBOARDING CHAT (GEMINI) ───
+async function initChat() {
+  // 첫 인사 생성 (히스토리에 이미 시스템 프롬프트와 함께 포함되어 있음)
+  const initialMsg = "트레이더님 환영합니다! 🌟 저는 브라운 AI입니다. 거래 시작 전 명확한 목표 설정은 트레이더님의 미래를 좌우합니다. 먼저, 트레이더님의 이름을 알려주세요.";
+  addBrownMsg(initialMsg);
+  chatHistory.push({ role: "model", parts: [{ text: initialMsg }] });
+}
+
+async function sendUserMsg() {
+  const ci = document.getElementById('chatInput');
+  const userText = ci.value.trim();
+  if (!userText) return;
+
+  addUserMsg(userText);
+  ci.value = '';
+  chatHistory.push({ role: "user", parts: [{ text: userText }] });
+
+  // 타이핑 애니메이션 표시
+  const typingId = showTyping();
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ contents: chatHistory })
+    });
+
+    const data = await response.json();
+    removeTyping(typingId);
+
+    if (data.candidates && data.candidates[0].content.parts[0].text) {
+      let aiResponse = data.candidates[0].content.parts[0].text.trim();
+      
+      // JSON 완료 체크
+      if (aiResponse.includes('"status": "complete"')) {
+        try {
+          // 마크다운 코드 블록 제거 시도
+          const jsonStr = aiResponse.replace(/```json|```/g, "").trim();
+          const parsedData = JSON.parse(jsonStr);
+          
+          // 전역 state 업데이트
+          state.name = parsedData.name;
+          state.seed = parseInt(parsedData.seed);
+          state.dreams = parsedData.dreams;
+          state.stoploss = parseInt(parsedData.stoploss);
+
+          addBrownMsg("모든 정보가 수집되었습니다. 대시보드를 생성합니다! 🚀");
+          setTimeout(() => launchDashboard(), 1500);
+        } catch (e) {
+          console.error("JSON 파싱 에러:", e);
+          addBrownMsg("데이터 처리 중 오류가 발생했습니다. 다시 말씀해 주시겠어요?");
+        }
+      } else {
+        addBrownMsg(aiResponse);
+        chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+      }
+    }
+  } catch (error) {
+    removeTyping(typingId);
+    console.error("API 호출 에러:", error);
+    addBrownMsg("연결이 원활하지 않습니다. 잠시 후 다시 시도해 주세요.");
+  }
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  const id = 'typing-' + Date.now();
+  d.id = id;
+  d.className = 'msg brown';
+  d.innerHTML = `<div class="msg-avatar" style="background: linear-gradient(135deg, var(--vora-dark), var(--vora)); color: white; font-size: 0.65rem; font-family: 'Orbitron', sans-serif;">BR</div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+  return id;
+}
+
+function removeTyping(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function addBrownMsg(html) {
+  const msgs = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  d.className = 'msg brown';
+  d.innerHTML = `<div class="msg-avatar" style="background: linear-gradient(135deg, var(--vora-dark), var(--vora)); color: white; font-size: 0.65rem; font-family: 'Orbitron', sans-serif;">BR</div><div class="msg-bubble">${html}</div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addUserMsg(text) {
+  const msgs = document.getElementById('chatMessages');
+  const d = document.createElement('div');
+  d.className = 'msg user';
+  d.innerHTML = `<div class="msg-avatar" style="background: var(--vora-dark); color: var(--vora-light);">나</div><div class="msg-bubble">${text}</div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ─── LAUNCH DASHBOARD ───
+function launchDashboard() {
+  document.getElementById('onboardingScreen').style.display = 'none';
+  document.getElementById('dashboardScreen').style.display = 'block';
+  
+  // 데이터 바인딩 (NaN 방지를 위해 기본값 처리)
+  const seed = isNaN(state.seed) ? 0 : state.seed;
+  const stoploss = isNaN(state.stoploss) ? 0 : state.stoploss;
+
+  document.getElementById('mSeed').textContent = '$' + seed.toLocaleString();
+  document.getElementById('mStop').textContent = '-$' + stoploss.toLocaleString();
+  document.getElementById('dashUserName').textContent = state.name || '트레이더';
+  
+  document.getElementById('dream1text').textContent = state.dreams[0] || '-';
+  document.getElementById('dream2text').textContent = state.dreams[1] || '-';
+  document.getElementById('dream3text').textContent = state.dreams[2] || '-';
+
+  buildChart();
+  buildHistory();
+  updateTicker();
+  setInterval(updateTicker, 3000);
+  showBrownMsg();
+  calcRisk();
+}
+
+// ─── LEVERAGE / RISK% UPDATE ───
+function updateLeverage(v) { document.getElementById('leverageVal').textContent = v + 'x'; calcRisk(); }
+function updateRiskPct(v) { document.getElementById('riskPctVal').textContent = v + '%'; calcRisk(); }
+
+// ─── CORE RISK CALCULATOR ───
+function calcRisk() {
+  const seed = state.seed || 1000;
+  const cfg = ASSETS[currentAsset];
+  const lev = parseFloat(document.getElementById('leverageRange').value) || cfg.leverDefault;
+  const riskPct = parseFloat(document.getElementById('riskPctRange').value) || 1;
+  const entry = parseFloat(document.getElementById('entryPrice').value) || cfg.defaultEntry;
+  const slDist = parseFloat(document.getElementById('slInput').value) || cfg.defaultSL;
+  const tpDist = parseFloat(document.getElementById('tpInput').value) || cfg.defaultTP;
+  const lot = cfg.isMT5 ? (parseFloat(document.getElementById('lotInput').value) || 0.1) : 1;
+
+  const pipVal = cfg.pipValue(lot);
+
+  let slAmt, tpAmt;
+  if (cfg.isMT5) {
+    slAmt = slDist * pipVal;
+    tpAmt = tpDist * pipVal;
+  } else {
+    const qty = Math.max((seed * riskPct / 100) / Math.max(slDist, 0.01), 0.01);
+    slAmt = slDist * qty;
+    tpAmt = tpDist * qty;
+  }
+
+  const actualPos = cfg.isMT5 ? (lot * entry) : (seed * lev);
+  const effectiveExp = cfg.isMT5 ? (lot * entry * lev) : (seed * lev);
+
+  const slPrice = entry - slDist * (cfg.isMT5 ? (cfg === ASSETS.MT5_FOREX ? 0.0001 : 0.01) : 1);
+  const tpPrice = entry + tpDist * (cfg.isMT5 ? (cfg === ASSETS.MT5_FOREX ? 0.0001 : 0.01) : 1);
+
+  const slSeedPct = (slAmt / seed) * 100;
+  const tpSeedPct = (tpAmt / seed) * 100;
+  const rrr = (tpDist / Math.max(slDist, 0.01)).toFixed(1);
+
+  const liqThreshold = 100 / lev;
+  const slMoveNeeded = cfg.isMT5 ? ((slDist * (cfg === ASSETS.MT5_FOREX ? 0.0001 : 0.01)) / entry * 100) : (slDist / entry * 100);
+  const liqRiskPct = Math.min(Math.round((slMoveNeeded / liqThreshold) * 100), 100);
+
+  let grade = '🟢 안전';
+  if (slSeedPct > riskPct * 3 || lev >= (cfg.isMT5 ? 300 : 15)) grade = '🔴 고위험';
+  else if (slSeedPct > riskPct * 2 || lev >= (cfg.isMT5 ? 200 : 10)) grade = '🟡 주의';
+  else if (slSeedPct > riskPct * 1.5 || lev >= (cfg.isMT5 ? 100 : 7)) grade = '🟠 경계';
+
+  const warn = document.getElementById('riskWarning');
+  if (slSeedPct > riskPct) {
+    document.getElementById('warningTitle').textContent = `시드 ${riskPct}% 초과 경고! 현재 위험: ${slSeedPct.toFixed(1)}%`;
+    document.getElementById('warningBody').textContent = `손절 거리를 줄이거나 비중을 낮추세요. (손절 시 -$${slAmt.toFixed(0)} 손실)`;
+    warn.style.display = 'block';
+  } else { warn.style.display = 'none'; }
+
+  document.getElementById('posVal').textContent = '$' + Math.round(cfg.isMT5 ? lot * entry : seed * (riskPct/100) / Math.max(slMoveNeeded/100, 0.001)).toLocaleString();
+  document.getElementById('levUsage').textContent = Math.round(lev / (cfg.leverMax || lev) * 100) + '%';
+  document.getElementById('effectiveExp').textContent = '$' + Math.round(effectiveExp).toLocaleString();
+  
+  document.getElementById('slAmt').textContent = `-$${slAmt.toFixed(2)}`;
+  document.getElementById('slSeedPct').textContent = `-${slSeedPct.toFixed(2)}%`;
+  document.getElementById('slBar').style.width = Math.min(slSeedPct * (100 / Math.max(riskPct * 3, 1)), 100) + '%';
+  document.getElementById('slPriceLevel').textContent = `손절가: ${slPrice.toFixed(cfg === ASSETS.MT5_FOREX ? 5 : 2)}`;
+
+  document.getElementById('tpAmt').textContent = `+$${tpAmt.toFixed(2)}`;
+  document.getElementById('tpSeedPct').textContent = `+${tpSeedPct.toFixed(2)}%`;
+  document.getElementById('tpBar').style.width = Math.min(tpSeedPct * (100 / Math.max(riskPct * 10, 1)), 100) + '%';
+  document.getElementById('tpPriceLevel').textContent = `익절가: ${tpPrice.toFixed(cfg === ASSETS.MT5_FOREX ? 5 : 2)}`;
+
+  document.getElementById('rrrVal').textContent = '1 : ' + rrr;
+  document.getElementById('liqRisk').textContent = liqRiskPct + '%';
+  document.getElementById('riskGrade').textContent = grade;
+}
+
+// ─── CHART ───
+function buildChart() {
+  const ctx = document.getElementById('pnlChart').getContext('2d');
+  const labels = Array.from({length: 18}, (_, i) => `3/${i + 1}`);
+  const data = [0, 120, 80, 210, 340, 295, 480, 620, 580, 750, 900, 840, 1020, 1280, 1180, 1400, 1620, 1800];
+  new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{ data, borderColor: '#7C3AED', backgroundColor: 'rgba(124,58,237,0.1)', fill: true, tension: 0.4, pointRadius: 2, pointBackgroundColor: '#A78BFA', borderWidth: 2 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: 'rgba(124,58,237,0.1)' }, ticks: { color: '#475569', font: { size: 10 } } },
+        y: { grid: { color: 'rgba(124,58,237,0.08)' }, ticks: { color: '#475569', font: { size: 10 }, callback: v => '$' + v } }
+      }
+    }
+  });
+}
+
+// ─── TRADE HISTORY ───
+function buildHistory() {
+  const trades = [
+    { date: '03/18', asset: 'ETH', dir: 'LONG', entry: 3380, slAmt: -47, tpAmt: null, result: 284 },
+    { date: '03/17', asset: 'XAUUSD', dir: 'SHORT', entry: 2335, slAmt: -55, tpAmt: 312, result: 312 },
+    { date: '03/16', asset: 'ETH', dir: 'LONG', entry: 3360, slAmt: -180, tpAmt: null, result: -180 },
+  ];
+  const tbody = document.getElementById('tradeHistory');
+  tbody.innerHTML = '';
+  trades.forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td style="color: var(--text-muted); font-size: 0.75rem;">${t.date}</td>
+      <td style="font-size: 0.72rem; color: var(--vora-light);">${t.asset}</td>
+      <td class="${t.dir==='LONG'?'long':'short'}" style="font-family:'Orbitron',sans-serif;font-size:0.72rem;">${t.dir}</td>
+      <td style="font-size:0.75rem;">${t.entry}</td>
+      <td><span style="color: var(--rose); font-size: 0.75rem;">$${Math.abs(t.slAmt)}</span></td>
+      <td><span style="color: var(--emerald); font-size: 0.75rem;">+$${t.tpAmt || 0}</span></td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ─── LIVE TICKER ───
+let basePrice = 3412.50;
+function updateTicker() {
+  const change = (Math.random() - 0.48) * 8;
+  basePrice += change;
+  const pct = ((basePrice - 3350) / 3350 * 100);
+  document.getElementById('livePrice').textContent = '$' + basePrice.toFixed(2);
+  const el = document.getElementById('livePriceChange');
+  el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
+  el.className = 'ticker-change ' + (pct >= 0 ? 'up' : 'down');
+  document.getElementById('liveTime').textContent = new Date().toLocaleTimeString('ko-KR');
+}
+
+// ─── MODE TOGGLE ───
+function setMode(m) {
+  document.getElementById('modeCross').className = 'mode-btn' + (m==='cross' ? ' active' : '');
+  document.getElementById('modeIsolated').className = 'mode-btn' + (m==='isolated' ? ' active' : '');
+}
+
+// ─── BROWN DAILY MSG ───
+const dailyMsgs = [
+  '오늘도 절대 원칙을 지키며 시스템적으로 트레이딩하세요. 감정이 아닌 전략으로 움직이는 것이 진정한 트레이더입니다. 💜',
+  '손절은 실패가 아닙니다. 자본을 보호하는 가장 용감한 결정입니다. 오늘도 규칙을 지켜주세요. 🛡️',
+  '진입 전 반드시 손절 금액을 먼저 확인하세요. 리스크 관리가 생존의 핵심입니다. 📊',
+];
+function showBrownMsg() { document.getElementById('brownMsg').textContent = dailyMsgs[Math.floor(Math.random() * dailyMsgs.length)]; }
+
+// ─── COPY WEBHOOK ───
+function copyWebhook() {
+  navigator.clipboard.writeText('https://vora.io/webhook/user/a7f3k2x9').then(() => alert('웹훅 URL이 복사되었습니다!'));
+}
