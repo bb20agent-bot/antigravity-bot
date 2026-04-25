@@ -32,35 +32,43 @@ def send_to_telegram(message_text: str):
 @app.post("/api/webhook/tradingview")
 async def receive_tradingview_webhook(request: Request, background_tasks: BackgroundTasks):
     try:
-        # JSON 페이로드 파싱
-        payload = await request.json()
+        import json
+        # Read raw body since TradingView sends text/plain
+        body_bytes = await request.body()
+        body_str = body_bytes.decode('utf-8').strip()
         
         # 1. 데이터 수신 확인 및 로깅
-        print("트레이딩뷰 시그널 수신:", payload)
+        print("트레이딩뷰 시그널 수신:", body_str)
         
-        # 2. 메시지 포맷팅
-        symbol = payload.get("symbol", "N/A")
-        timeframe = payload.get("timeframe", "N/A")
-        position = payload.get("position", "N/A")
-        signal = payload.get("signal", "N/A")
-        entry = payload.get("entry", "N/A")
-        price_str = str(payload.get("price", "N/A"))
-        
-        # 수신가를 기준으로 진입가 레인지(-50 ~ +50) 자동 계산
-        try:
-            price_val = float(price_str)
-            # 불필요한 소수점 0을 제거하기 위해 문자열 변환 사용
-            min_price = f"{price_val - 50:g}"
-            max_price = f"{price_val + 50:g}"
-            entry_price = f"{min_price} ~ {max_price}"
-        except (ValueError, TypeError):
-            entry_price = "N/A"
-        
-        # 분봉 등 한글 표시를 위한 처리 (옵션)
-        if timeframe.isdigit():
-            timeframe = f"{timeframe}분봉"
+        if not body_str:
+            return {"status": "error", "message": "Empty payload"}
 
-        message = f"""🚨 <b>[VORA VIP 시그널] 진입 타점 포착!</b>
+        try:
+            # JSON 페이로드 파싱 시도
+            payload = json.loads(body_str)
+            
+            # 2. 메시지 포맷팅
+            symbol = payload.get("symbol", "N/A")
+            timeframe = str(payload.get("timeframe", "N/A"))
+            position = payload.get("position", "N/A")
+            signal = payload.get("signal", "N/A")
+            entry = payload.get("entry", "N/A")
+            price_str = str(payload.get("price", "N/A"))
+            
+            # 수신가를 기준으로 진입가 레인지(-50 ~ +50) 자동 계산
+            try:
+                price_val = float(price_str)
+                min_price = f"{price_val - 50:g}"
+                max_price = f"{price_val + 50:g}"
+                entry_price = f"{min_price} ~ {max_price}"
+            except (ValueError, TypeError):
+                entry_price = "N/A"
+            
+            # 분봉 등 한글 표시를 위한 처리 (옵션)
+            if timeframe.isdigit():
+                timeframe = f"{timeframe}분봉"
+
+            message = f"""🚨 <b>[VORA VIP 시그널] 진입 타점 포착!</b>
 
 📌 종목: {symbol}
 ⏱️ 기준: {timeframe}
@@ -69,6 +77,10 @@ async def receive_tradingview_webhook(request: Request, background_tasks: Backgr
 🎯 진입: {entry}
 💵 현재가: {price_str}
 💵 진입가: {entry_price}"""
+
+        except json.JSONDecodeError:
+            # JSON이 아니면 평문 텍스트로 간주하고 그대로 전송
+            message = body_str
 
         # 3. 텔레그램 봇 API로 메시지 전송 로직 (Background로 실행하여 빠른 응답 반환)
         background_tasks.add_task(send_to_telegram, message)
