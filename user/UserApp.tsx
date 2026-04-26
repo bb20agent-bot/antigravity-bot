@@ -218,6 +218,44 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const [profileImg, setProfileImg] = useState<string | null>(null);
     const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+    // UX State
+    const [isLinkCopied, setIsLinkCopied] = useState(false);
+    const copyTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleCopyLink = () => {
+        const linkToCopy = `t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
+
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(linkToCopy);
+            } else {
+                // Fallback for Telegram Mini Apps / insecure contexts
+                const textArea = document.createElement("textarea");
+                textArea.value = linkToCopy;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Fallback copy failed', err);
+                }
+                document.body.removeChild(textArea);
+            }
+        } catch (error) {
+            console.error('Copy failed', error);
+        }
+
+        setIsLinkCopied(true);
+        if (copyTimerRef.current) {
+            clearTimeout(copyTimerRef.current);
+        }
+        copyTimerRef.current = setTimeout(() => setIsLinkCopied(false), 2000);
+    };
+
     // Protocol State
     const [protocolConfig, setProtocolConfig] = useState({ t2eTimerEnd: 0 });
     const [isTimerActive, setIsTimerActive] = useState(false);
@@ -1374,8 +1412,12 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    onClick={handleCopyLink}
+                                    aria-label={isLinkCopied ? "Link copied to clipboard" : "Copy referral link"}
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors flex items-center justify-center focus-visible:ring-2 focus-visible:ring-cyan-400 outline-none"
+                                >
+                                    {isLinkCopied ? <CheckCircle size={16} className="text-green-400" /> : <Copy size={16} className="text-white" />}
                                 </button>
                             </div>
                         </div>
