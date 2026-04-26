@@ -1,0 +1,3 @@
+## 2024-06-25 - [Telegram Mini Apps limitations with toast notifications and the necessity of inline visual feedback]
+**Learning:** Telegram Mini Apps have limitations where system-level toast notifications are unreliable. For critical actions like copying a referral link, relying on standard toasts might result in users not realizing the action succeeded.
+**Action:** Implement fallback mechanisms using `document.execCommand('copy')` with a temporary dynamically created `textarea` element for clipboard operations. Furthermore, always provide explicit inline visual feedback (such as swapping a Copy icon to a Check icon) and update the `aria-label` dynamically to communicate success accurately.
