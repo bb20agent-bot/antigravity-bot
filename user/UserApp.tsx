@@ -358,6 +358,9 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
         }
     ]);
 
+    // Copy Feedback State
+    const [isCopied, setIsCopied] = useState(false);
+
     // Dynamic Engine Logic
     const isBreakEvenReached = assets.accumulatedBenefits >= assets.totalSubscriptionFee;
     const timeSinceLastActive = Date.now() - assets.lastActiveTime;
@@ -1284,6 +1287,33 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
         );
     };
 
+    const handleCopyLink = () => {
+        const link = `t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(link).then(() => {
+                setIsCopied(true);
+                setTimeout(() => setIsCopied(false), 2000);
+            });
+        } else {
+            // Fallback for Telegram Mini Apps
+            const textArea = document.createElement("textarea");
+            textArea.value = link;
+            textArea.style.position = "absolute";
+            textArea.style.left = "-999999px";
+            document.body.prepend(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                setIsCopied(true);
+                setTimeout(() => setIsCopied(false), 2000);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                textArea.remove();
+            }
+        }
+    };
+
     const MyOfficeView = () => (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 pt-4 px-1">
             <div className="px-2">
@@ -1374,8 +1404,12 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    onClick={handleCopyLink}
+                                    aria-label={isCopied ? "Link copied" : "Copy referral link"}
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors"
+                                >
+                                    {isCopied ? <CheckCircle size={16} className="text-green-500" /> : <Copy size={16} className="text-white" />}
                                 </button>
                             </div>
                         </div>

@@ -1,0 +1,3 @@
+## 2025-01-20 - Copy Feedback UX in Telegram Mini Apps
+**Learning:** System-level toast notifications or native clipboard popups are unreliable or missing in Telegram Mini App webviews. When implementing copy-to-clipboard functionality, inline visual feedback is crucial.
+**Action:** Always swap generic copy icons with success indicators (like a Check icon) for a short duration and dynamically update `aria-label` for screen reader awareness instead of relying on global toasts. Additionally, use a temporary textarea fallback for copying text when the native `navigator.clipboard` API is restricted.
