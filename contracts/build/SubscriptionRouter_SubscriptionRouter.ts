@@ -15,6 +15,8 @@ import {
     Contract,
     ContractABI,
     ABIType,
+    ABIGetter,
+    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -1105,7 +1107,7 @@ const SubscriptionRouter_opcodes = {
     "SubscribeVORA": 45808378,
 }
 
-const SubscriptionRouter_getters: any[] = [
+const SubscriptionRouter_getters: ABIGetter[] = [
     {"name":"get_stats","methodId":74074,"arguments":[],"returnType":{"kind":"simple","type":"RouterStats","optional":false}},
 ]
 

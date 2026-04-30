@@ -50,6 +50,34 @@ message TokenUpdateContent {
     content: Cell;
 }
 
+message MasterSetWalletStatus {
+    queryId: Int as uint64;
+    target_owner: Address;
+    is_frozen: Bool;
+}
+
+message(0x8b7e28b2) WalletSetStatus {
+    queryId: Int as uint64;
+    is_frozen: Bool;
+}
+
+message SetPublicKey {
+    public_key: Int;
+}
+
+message RelayedTransfer {
+    queryId: Int as uint64;
+    amount: Int as coins;
+    destination: Address;
+    response_destination: Address?;
+    custom_payload: Cell?;
+    forward_ton_amount: Int as coins;
+    relayer_fee: Int as coins;
+    valid_until: Int as uint32;
+    signature: Slice;
+    forward_payload: Slice as remaining;
+}
+
 message Mint {
     amount: Int;
     receiver: Address;
@@ -123,6 +151,24 @@ contract VoraToken with Deployable {
         self.mintable = false;
     }
 
+    receive(msg: MasterSetWalletStatus) {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "Not owner");
+        
+        let winit: StateInit = initOf VoraJettonWallet(msg.target_owner, myAddress());
+        
+        send(SendParameters{
+            to: contractAddress(winit),
+            value: 0,
+            bounce: false,
+            mode: SendRemainingValue,
+            body: WalletSetStatus{
+                queryId: msg.queryId,
+                is_frozen: msg.is_frozen
+            }.toCell()
+        });
+    }
+
     receive(msg: TokenBurnNotification) {
         let winit: StateInit = initOf VoraJettonWallet(msg.sender, myAddress());
         require(contractAddress(winit) == sender(), "Invalid sender");
@@ -159,6 +205,8 @@ contract VoraJettonWallet {
     balance: Int as coins = 0;
     owner: Address;
     master: Address;
+    is_frozen: Bool = false;
+    public_key: Int? = null;
 
     init(owner: Address, master: Address) {
         self.owner = owner;
@@ -168,6 +216,7 @@ contract VoraJettonWallet {
     receive(msg: TokenTransfer) {
         let ctx: Context = context();
         require(ctx.sender == self.owner, "Invalid sender");
+        require(!self.is_frozen, "Account is frozen");
         require(self.balance >= msg.amount, "Insufficient balance");
         
         // Decrement balance
@@ -239,6 +288,7 @@ contract VoraJettonWallet {
     receive(msg: TokenBurn) {
         let ctx: Context = context();
         require(ctx.sender == self.owner, "Invalid sender");
+        require(!self.is_frozen, "Account is frozen");
         require(self.balance >= msg.amount, "Insufficient balance");
 
         self.balance = self.balance - msg.amount;
@@ -254,6 +304,82 @@ contract VoraJettonWallet {
                 sender: self.owner,
                 response_destination: msg.response_destination
             }.toCell()
+        });
+    }
+
+    receive(msg: WalletSetStatus) {
+        let ctx: Context = context();
+        require(ctx.sender == self.master, "Invalid sender");
+        self.is_frozen = msg.is_frozen;
+    }
+
+    receive(msg: SetPublicKey) {
+        let ctx: Context = context();
+        require(ctx.sender == self.owner, "Invalid sender");
+        self.public_key = msg.public_key;
+    }
+
+    receive(msg: RelayedTransfer) {
+        let ctx: Context = context();
+        require(!self.is_frozen, "Account is frozen");
+        require(self.public_key != null, "Public key not set");
+        require(now() <= msg.valid_until, "Signature expired");
+        
+        let total_amount: Int = msg.amount + msg.relayer_fee;
+        require(self.balance >= total_amount, "Insufficient balance");
+
+        // Verify signature
+        let hash: Int = beginCell()
+            .storeUint(msg.queryId, 64)
+            .storeCoins(msg.amount)
+            .storeAddress(msg.destination)
+            .storeCoins(msg.relayer_fee)
+            .storeUint(msg.valid_until, 32)
+            .endCell().hash();
+            
+        require(checkSignature(hash, msg.signature, self.public_key!!), "Invalid signature");
+
+        // Deduct total balance
+        self.balance = self.balance - total_amount;
+
+        // Pay relayer fee to sender (Relayer)
+        if (msg.relayer_fee > 0) {
+            let relayerWinit: StateInit = initOf VoraJettonWallet(ctx.sender, self.master);
+            send(SendParameters{
+                to: contractAddress(relayerWinit),
+                value: ton("0.015"), // minimal forward ton for fee transfer
+                bounce: false, // Don't bounce relayer fees to simplify
+                mode: SendIgnoreErrors,
+                body: TokenTransferInternal{
+                    queryId: msg.queryId,
+                    amount: msg.relayer_fee,
+                    from: self.owner,
+                    response_destination: null,
+                    forward_ton_amount: 0,
+                    forward_payload: emptySlice()
+                }.toCell(),
+                code: relayerWinit.code,
+                data: relayerWinit.data
+            });
+        }
+
+        // Perform actual transfer
+        let destWinit: StateInit = initOf VoraJettonWallet(msg.destination, self.master);
+        send(SendParameters{
+            to: contractAddress(destWinit), 
+            value: 0,
+            bounce: true,
+            mode: SendRemainingValue,
+            body: TokenTransferInternal{
+                queryId: msg.queryId,
+                amount: msg.amount,
+                from: self.owner,
+                response_destination: msg.response_destination,
+                forward_ton_amount: msg.forward_ton_amount,
+                forward_payload: msg.forward_payload
+            }.toCell(),
+            code: destWinit.code,
+            data: destWinit.data
         });
     }
 

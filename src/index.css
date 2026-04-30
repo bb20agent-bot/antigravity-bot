@@ -21,3 +21,8 @@ body {
     0 0 30px rgba(52, 211, 153, 0.4),  /* 넓게 퍼지는 에메랄드 빛 */
     0 0 50px rgba(250, 204, 21, 0.2);  /* 끝부분의 노란빛 번짐 */
 }
+
+/* Fix for TonConnect Modals hiding behind app modals */
+#tc-widget-root, [id^="tc-widget-root"], ton-connect-ui {
+    z-index: 999999 !important;
+}

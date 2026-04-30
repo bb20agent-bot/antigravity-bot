@@ -18,6 +18,17 @@ module.exports = {
       cwd: "/opt/vora-ecosystem",
       watch: false,
       restart_delay: 5000
+    },
+    {
+      name: "signal-server",
+      script: "main.py",
+      interpreter: "/opt/vora-ecosystem/bot_env/bin/python3",
+      cwd: "/opt/vora-ecosystem/signal_server",
+      watch: false,
+      restart_delay: 5000,
+      env: {
+        PORT: 8000
+      }
     }
   ]
 };

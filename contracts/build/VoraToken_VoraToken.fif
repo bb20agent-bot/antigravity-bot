@@ -10,6 +10,8 @@ PROGRAM{
   DECLPROC $TokenTransferInternal$_store_cell
   DECLPROC $TokenExcesses$_store
   DECLPROC $TokenExcesses$_store_cell
+  DECLPROC $WalletSetStatus$_store
+  DECLPROC $WalletSetStatus$_store_cell
   DECLPROC $VoraToken$_store
   DECLPROC $VoraToken$_load
   DECLPROC $StateInit$_get_code
@@ -33,6 +35,7 @@ PROGRAM{
   DECLPROC $SendParameters$_constructor_to_value_bounce_mode_body_code_data
   DECLPROC $TokenTransferInternal$_constructor_queryId_amount_from_response_destination_forward_ton_amount_forward_payload
   DECLPROC $SendParameters$_constructor_to_value_bounce_mode_body
+  DECLPROC $WalletSetStatus$_constructor_queryId_is_frozen
   DECLPROC $TokenExcesses$_constructor_queryId
   DECLPROC $DeployOk$_constructor_queryId
   106029 DECLMETHOD %get_jetton_data
@@ -106,6 +109,18 @@ PROGRAM{
   $TokenExcesses$_store_cell PROCINLINE:<{
     SWAP
     $TokenExcesses$_store INLINECALLDICT
+    ENDC
+  }>
+  $WalletSetStatus$_store PROCINLINE:<{
+    2340300978 PUSHINT
+    s0 s3 XCHG2
+    32 STU
+    64 STU
+    1 STI
+  }>
+  $WalletSetStatus$_store_cell PROCINLINE:<{
+    -ROT
+    $WalletSetStatus$_store INLINECALLDICT
     ENDC
   }>
   $VoraToken$_store PROCINLINE:<{
@@ -214,7 +229,7 @@ PROGRAM{
   $JettonData$_constructor_totalSupply_mintable_owner_content_walletCode PROCINLINE:<{
   }>
   $VoraJettonWallet$_init_child PROCREF:<{
-        B{b5ee9c720102100100041300022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d901020149a65ec0bb513434800066be803e903e9015481b04e6be903e901640b4405c1678b6cf1b0d200304b401d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019afa00fa40fa4055206c139afa40fa405902d1017059e204e30202d70d1ff2e0822182100f8a7ea5bae302218210178d4519bae302018210595f07bcba0405060701125cdb3c3054633052300900b6028020d7217021d749c21f9430d31f01de208210178d4519ba8e1a30d33ffa00596c21a002c87f01ca0055205afa0212cecec9ed54e082107bdd97deba8e19d33ffa00596c21a002c87f01ca0055205afa0212cecec9ed54e05f0402de31d33ffa00fa40d72c01916d93fa4001e201f40431fa00f8416f245b81114d3229c705f2f48200d5575375bef2f45164a15138db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076707f80402c4813507cc8090804f831d33ffa00fa40d72c01916d93fa4001e201fa00f8416f24532cc705b38ebb537cdb3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d024c705f2f4de51a8a054414b4330fa40fa0071d721fa00fa00306c6170f83a23c200e30f216eb3090a0b0c010ee3025f04f2c0820d00e855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec91056105710344013071036453304c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205afa0212cecec9ed540018f82ac87001ca005a02cecec900c25183a15008a172702848135074c8553082107362d09c5005cb1f13cb3f01fa02cecec9284614505510246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb005003000a3010356c4100e29303c200923370e28e53206ef2d0807080427004c8018210d53276db58cb1fcb3fc91034413010246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00915be202c87f01ca0055205afa0212cecec9ed5402fed33ffa00d72c01916d93fa4001e231f8416f245b81114d3226c705f2f48200d5575342bef2f45131a17080405414367f07c8553082107bdd97de5005cb1f13cb3f01fa02ce01206e9430cf84809201cee2c926044313505510246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf818ae2f400c90e0f001a58cf8680cf8480f400f400cf81002801fb0002c87f01ca0055205afa0212cecec9ed54} B>boc PUSHREF
+        B{b5ee9c7201021a0100074a00022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d90102016da65ec0bb513434800063867e803e903e9034803480006560404075c0249b407895501b05673e903e901640b4405c165c1b78b6cf1b15200304d801d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e19fa00fa40fa40d200d2000195810101d700926d01e255406c159cfa40fa405902d1017059706de206e30204d70d1ff2e0822182100f8a7ea5bae302218210178d4519bae302218210595f07bcba0405060701125ddb3c3054655052501801b4048020d7217021d749c21f9430d31f01de208210178d4519ba8e3330d33ffa00596c2113a05034c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed54e082107bdd97debae3025f060802ec31d33ffa00fa40d72c01916d93fa4001e201f40431fa00f8416f245b81114d3229c705f2f4814f862ab3f2f48200d5575395bef2f45184a15136db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076707f80402c4813507ec8180904f831d33ffa00fa40d72c01916d93fa4001e201fa00f8416f24532ac705b38ebb537adb3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d024c705f2f4de51c8a054414d4330fa40fa0071d721fa00fa00306c6170f83a23c200e30f216eb3180a0b0c03cee3022182108b7e28b2ba8e41313403d33f31d20030f8416f245b81114d3225c705f2f4440302c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed54e021821057529e8dbae3020182108dc15c87bae3025f06f2c0820e0f100064d33ffa00596c2113a05034c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed5401ca55508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec91056105910344013091036453304c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0040340d00c251a3a1500aa172702848135074c8553082107362d09c5005cb1f13cb3f01fa02cecec9284614505510246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb005005000a3010356c4101c49305c200923570e28e53206ef2d0807080427004c8018210d53276db58cb1fcb3fc91034413010246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00915be240340d004ec87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed5402fe31d33ffa00d72c01916d93fa4001e231f8416f245b81114d3226c705f2f4814f8627b3f2f48200d5575362bef2f45151a17080405414367f09c8553082107bdd97de5005cb1f13cb3f01fa02ce01206e9430cf84809201cee2c924044313507710246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb08a11120080313504810101d70030f8416f245b81114d3223c705f2f44430c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed5402fcd33ffa00fa40d72c01916d93fa4001e201f40431fa00fa00d430d0d31fd401d0f8416f2410235f03814f862eb3f2f48200cb032f6eb3f2f48200a088f82325bbf2f45384a08200d55753e1bef2f4c852b0cb3f2afa0229cf1626fa0215cb1fc9f9008200bd115610206ef2d08014f91012f2f450b2a122c200926c21e30d141500065bcf8101628ae2f400c901fb004034c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed5413001a58cf8680cf8480f400f400cf8103fe5118db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d08208e4e1c070726d708b082f04103b56124c330cc855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec9103645401037591036453304c8cf8580ca008918161702fc5136db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076707f80402c4813507ec855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec91056105910344013091036453304c8cf8580ca00cf8440ce01fa0218190001100052cf16ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb000018f82ac87001ca005a02cecec900988069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004034c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed54} B>boc PUSHREF
     NEWC
     FALSE
     SWAP
@@ -280,6 +295,8 @@ PROGRAM{
     s4 s3 XCHG2
     PUSHNULL
     s3 s3 XCHG2
+  }>
+  $WalletSetStatus$_constructor_queryId_is_frozen PROCINLINE:<{
   }>
   $TokenExcesses$_constructor_queryId PROCINLINE:<{
   }>
@@ -454,6 +471,106 @@ PROGRAM{
         SDEQ
         THROWANYIFNOT
         s0 s3 XCHG2
+        $VoraToken$_contract_store INLINECALLDICT
+        RETALT
+      }>
+      OVER
+      1604426956 PUSHINT
+      EQUAL
+      IFJMP:<{
+        NIP
+        64 LDU
+        LDMSGADDR
+        1 LDI
+        DROP
+        __tact_context_get INLINECALLDICT
+        2DROP
+        14534 PUSHINT
+        s2 POP
+        s5 PUSH
+        SDEQ
+        THROWANYIFNOT
+            MYADDR
+        s1 s2 XCHG
+        $VoraJettonWallet$_init_child INLINECALLDICT
+        $global_contractAddress INLINECALLDICT
+        0 PUSHINT
+        FALSE
+        s0 s4 XCHG
+        64 PUSHINT
+        s0 s4 XCHG
+        $WalletSetStatus$_constructor_queryId_is_frozen INLINECALLDICT
+        NEWC
+        $WalletSetStatus$_store_cell INLINECALLDICT
+        s4 s3 s0 XCHG3
+        $SendParameters$_constructor_to_value_bounce_mode_body INLINECALLDICT
+            NEWC
+            b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+            1 STI               // store `bounce`
+            b{000} STSLICECONST // store bounced = false and src = addr_none
+            STSLICE             // store `to`
+            SWAP
+            STGRAMS             // store `value`
+            105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+            STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+            // → Stack state
+            // s0: Builder
+            // s1: `data`
+            // s2: `code`
+            // s3: `body`
+            // s4: `mode`
+            // Group 2: Placing the Builder after code and data, then checking those for nullability
+            s2 XCHG0
+            DUP2
+            ISNULL
+            SWAP
+            ISNULL
+            AND
+            // → Stack state
+            // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+            // s1: `code`
+            // s2: `data`
+            // s3: Builder
+            // s4: `body`
+            // s5: `mode`
+            // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+            <{
+                DROP2 // drop `data` and `code`, since either of those is null
+                b{0} STSLICECONST
+            }> PUSHCONT
+            // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+            <{
+                // _ split_depth:(Maybe (## 5))
+                //   special:(Maybe TickTock)
+                //   code:(Maybe ^Cell)
+                //   data:(Maybe ^Cell)
+                //   library:(Maybe ^Cell)
+                // = StateInit;
+                ROT                // place message Builder on top
+                b{10} STSLICECONST // store Maybe = true, Either = false
+                // Start composing inlined StateInit
+                b{00} STSLICECONST // store split_depth and special first
+                STDICT             // store code
+                STDICT             // store data
+                b{0} STSLICECONST  // store library
+            }> PUSHCONT
+            // Group 3: IFELSE that does the branching shown above
+            IFELSE
+            // → Stack state
+            // s0: Builder
+            // s1: null or StateInit
+            // s2: `body`
+            // s3: `mode`
+            // Group 4: Finalizing the message
+            STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
+            ENDC
+            // → Stack state
+            // s0: Cell
+            // s1: `mode`
+            // Group 5: Sending the message, with `mode` on top
+            SWAP
+            SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
+        s0 s0 s3 XCHG3
         $VoraToken$_contract_store INLINECALLDICT
         RETALT
       }>

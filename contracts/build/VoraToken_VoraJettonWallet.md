@@ -1,9 +1,9 @@
 # Tact compilation report
 Contract: VoraJettonWallet
-BoC Size: 1055 bytes
+BoC Size: 1878 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 25
+Total structures: 29
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -85,6 +85,22 @@ Signature: `TokenExcesses{queryId:uint64}`
 TL-B: `token_update_content#af1ca26a content:^cell = TokenUpdateContent`
 Signature: `TokenUpdateContent{content:^cell}`
 
+### MasterSetWalletStatus
+TL-B: `master_set_wallet_status#5fa19ccc queryId:uint64 target_owner:address is_frozen:bool = MasterSetWalletStatus`
+Signature: `MasterSetWalletStatus{queryId:uint64,target_owner:address,is_frozen:bool}`
+
+### WalletSetStatus
+TL-B: `wallet_set_status#8b7e28b2 queryId:uint64 is_frozen:bool = WalletSetStatus`
+Signature: `WalletSetStatus{queryId:uint64,is_frozen:bool}`
+
+### SetPublicKey
+TL-B: `set_public_key#57529e8d public_key:int257 = SetPublicKey`
+Signature: `SetPublicKey{public_key:int257}`
+
+### RelayedTransfer
+TL-B: `relayed_transfer#8dc15c87 queryId:uint64 amount:coins destination:address response_destination:address custom_payload:Maybe ^cell forward_ton_amount:coins relayer_fee:coins valid_until:uint32 signature:^slice forward_payload:remainder<slice> = RelayedTransfer`
+Signature: `RelayedTransfer{queryId:uint64,amount:coins,destination:address,response_destination:address,custom_payload:Maybe ^cell,forward_ton_amount:coins,relayer_fee:coins,valid_until:uint32,signature:^slice,forward_payload:remainder<slice>}`
+
 ### Mint
 TL-B: `mint#fc708bd2 amount:int257 receiver:address = Mint`
 Signature: `Mint{amount:int257,receiver:address}`
@@ -102,8 +118,8 @@ TL-B: `_ totalSupply:coins owner:address content:Maybe ^cell mintable:bool = Vor
 Signature: `VoraToken{totalSupply:coins,owner:address,content:Maybe ^cell,mintable:bool}`
 
 ### VoraJettonWallet$Data
-TL-B: `_ balance:coins owner:address master:address = VoraJettonWallet`
-Signature: `VoraJettonWallet{balance:coins,owner:address,master:address}`
+TL-B: `_ balance:coins owner:address master:address is_frozen:bool public_key:Maybe int257 = VoraJettonWallet`
+Signature: `VoraJettonWallet{balance:coins,owner:address,master:address,is_frozen:bool,public_key:Maybe int257}`
 
 ## Get methods
 Total get methods: 1
@@ -151,6 +167,10 @@ No arguments
 * 3688: Not mintable
 * 4429: Invalid sender
 * 14534: Not owner
+* 20358: Account is frozen
+* 41096: Signature expired
+* 48401: Invalid signature
+* 51971: Public key not set
 * 54615: Insufficient balance
 
 ## Trait inheritance diagram

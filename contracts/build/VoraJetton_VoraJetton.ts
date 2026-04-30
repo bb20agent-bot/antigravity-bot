@@ -15,6 +15,8 @@ import {
     Contract,
     ContractABI,
     ABIType,
+    ABIGetter,
+    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -1115,7 +1117,7 @@ const VoraJetton_opcodes = {
     "Burn": 1016126195,
 }
 
-const VoraJetton_getters: any[] = [
+const VoraJetton_getters: ABIGetter[] = [
     {"name":"get_jetton_data","methodId":106029,"arguments":[],"returnType":{"kind":"simple","type":"JettonData","optional":false}},
 ]
 

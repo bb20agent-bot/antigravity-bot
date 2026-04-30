@@ -15,6 +15,8 @@ import {
     Contract,
     ContractABI,
     ABIType,
+    ABIGetter,
+    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -1167,7 +1169,7 @@ const SubscriptionRouter_opcodes = {
     "JettonTransferNotification": 1935855772,
 }
 
-const SubscriptionRouter_getters: any[] = [
+const SubscriptionRouter_getters: ABIGetter[] = [
     {"name":"is_p2p_authorized","methodId":130868,"arguments":[{"name":"user","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"bool","optional":false}},
     {"name":"owner","methodId":83229,"arguments":[],"returnType":{"kind":"simple","type":"address","optional":false}},
 ]

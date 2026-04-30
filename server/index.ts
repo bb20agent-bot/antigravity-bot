@@ -466,7 +466,9 @@ app.post('/api/user/auth', async (req, res) => {
                 nVolume: user.nVolume,
                 totalDeposit: user.totalDeposit,
                 totalWithdrawal: user.totalWithdrawal,
-                totalBurn: user.totalBurn
+                totalBurn: user.totalBurn,
+                isLinkSuspended: user.isLinkSuspended || false,
+                suspensionReason: user.suspensionReason || null
             }
         });
 
@@ -625,41 +627,108 @@ const processNVolumeRollup = (purchaserId: string, amount: number) => {
 };
 
 // ==========================================
-// 💱 P2P Market Interface
+// 💱 P2P Market Escrow Interface (Prisma)
 // ==========================================
-let p2pOrders: any[] = [
-    { id: '1', sellerId: '@hunter99', amount: 500, price: 0.1, totalUsd: 50, status: 'open' }
-];
 
-app.post('/api/p2p/create-order', (req, res) => {
-    const { sellerId, amount } = req.body;
-    const newOrder = {
-        id: Math.random().toString(36).substr(2, 9),
-        sellerId: sellerId || 'Anonymous_Seller',
-        amount: Number(amount),
-        price: 0.1, // Mock fixed price
-        totalUsd: Number(amount) * 0.1,
-        status: 'open'
-    };
-    p2pOrders.push(newOrder);
-    res.json({ success: true, message: "Order listed on P2P Market", order: newOrder });
+app.get('/api/p2p/orders', async (req, res) => {
+    try {
+        const orders = await prisma.p2PTrade.findMany({ where: { status: 'PENDING' } });
+        res.json({ success: true, data: orders });
+    } catch (e) {
+        res.status(500).json({ error: "Failed to fetch orders" });
+    }
 });
 
-app.post('/api/p2p/fill-order', (req, res) => {
-    const { orderId, buyerId, buyerTier } = req.body;
-    
-    // Server-side verification of Gold/Crew tier for Market Making
-    if (buyerTier === 'bronze' || buyerTier === 'silver') {
-        return res.status(403).json({ error: "Bronze/Silver tiers cannot execute buy orders." });
+app.post('/api/p2p/create-order', async (req, res) => {
+    try {
+        const { sellerId, amount, priceTon } = req.body;
+        // In real system, verify seller has balance
+        const newOrder = await prisma.p2PTrade.create({
+            data: {
+                sellerId: Number(sellerId),
+                buyerId: 0,
+                amount: Number(amount),
+                priceTon: priceTon || 0.1,
+                status: 'PENDING'
+            }
+        });
+        res.json({ success: true, message: "Order placed in Escrow", order: newOrder });
+    } catch (e) {
+        res.status(500).json({ error: "Failed to create order" });
     }
+});
 
-    const orderIndex = p2pOrders.findIndex(o => o.id === orderId);
-    if (orderIndex === -1) return res.status(404).json({ error: "Order not found" });
+app.post('/api/p2p/fill-order', async (req, res) => {
+    try {
+        const { orderId, buyerId } = req.body;
+        // Move to Escrow / Awaiting Admin Approval
+        const order = await prisma.p2PTrade.update({
+            where: { id: Number(orderId) },
+            data: { buyerId: Number(buyerId), status: 'PENDING' } // Stays pending until Admin approves
+        });
+        res.json({ success: true, message: "Smart Contract Escrow: Awaiting Admin Approval" });
+    } catch (e) {
+        res.status(500).json({ error: "Failed to fill order" });
+    }
+});
 
-    p2pOrders[orderIndex].status = 'filled';
-    p2pOrders.splice(orderIndex, 1);
-    
-    res.json({ success: true, message: "Smart Contract Executed: Order Filled" });
+// ==========================================
+// 🛡️ ADMIN MANAGEMENT APIs
+// ==========================================
+
+app.get('/api/admin/users', async (req, res) => {
+    try {
+        const users = await prisma.user.findMany({
+            orderBy: { createdAt: 'desc' }
+        });
+        res.json({ success: true, data: users });
+    } catch (e) {
+        res.status(500).json({ error: "DB Error" });
+    }
+});
+
+app.post('/api/admin/users/suspend', async (req, res) => {
+    try {
+        const { userId, isSuspended, reason } = req.body;
+        await prisma.user.update({
+            where: { id: Number(userId) },
+            data: { isLinkSuspended: isSuspended, suspensionReason: reason || null }
+        });
+        res.json({ success: true, message: `User ${userId} suspension set to ${isSuspended}` });
+    } catch (e) {
+        res.status(500).json({ error: "Failed to update suspension" });
+    }
+});
+
+app.post('/api/admin/users/kyc', async (req, res) => {
+    try {
+        const { userId, status } = req.body; // PENDING, APPROVED, REJECTED
+        await prisma.user.update({
+            where: { id: Number(userId) },
+            data: { kycStatus: status }
+        });
+        res.json({ success: true, message: `KYC status updated to ${status}` });
+    } catch (e) {
+        res.status(500).json({ error: "Failed to update KYC" });
+    }
+});
+
+app.post('/api/admin/p2p/approve', async (req, res) => {
+    try {
+        const { orderId, action } = req.body; // action: 'APPROVE' or 'CANCEL'
+        const newStatus = action === 'APPROVE' ? 'COMPLETED' : 'CANCELED';
+        
+        const order = await prisma.p2PTrade.update({
+            where: { id: Number(orderId) },
+            data: { status: newStatus }
+        });
+        
+        // If APPROVED, logic to swap balances would go here
+        
+        res.json({ success: true, message: `P2P Order ${newStatus}` });
+    } catch (e) {
+        res.status(500).json({ error: "Failed to process P2P action" });
+    }
 });
 
 // ==========================================

@@ -15,6 +15,8 @@ import {
     Contract,
     ContractABI,
     ABIType,
+    ABIGetter,
+    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -1203,6 +1205,269 @@ export function dictValueParserTokenUpdateContent(): DictionaryValue<TokenUpdate
     }
 }
 
+export type MasterSetWalletStatus = {
+    $$type: 'MasterSetWalletStatus';
+    queryId: bigint;
+    target_owner: Address;
+    is_frozen: boolean;
+}
+
+export function storeMasterSetWalletStatus(src: MasterSetWalletStatus) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(1604426956, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeAddress(src.target_owner);
+        b_0.storeBit(src.is_frozen);
+    };
+}
+
+export function loadMasterSetWalletStatus(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 1604426956) { throw Error('Invalid prefix'); }
+    const _queryId = sc_0.loadUintBig(64);
+    const _target_owner = sc_0.loadAddress();
+    const _is_frozen = sc_0.loadBit();
+    return { $$type: 'MasterSetWalletStatus' as const, queryId: _queryId, target_owner: _target_owner, is_frozen: _is_frozen };
+}
+
+export function loadTupleMasterSetWalletStatus(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _target_owner = source.readAddress();
+    const _is_frozen = source.readBoolean();
+    return { $$type: 'MasterSetWalletStatus' as const, queryId: _queryId, target_owner: _target_owner, is_frozen: _is_frozen };
+}
+
+export function loadGetterTupleMasterSetWalletStatus(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _target_owner = source.readAddress();
+    const _is_frozen = source.readBoolean();
+    return { $$type: 'MasterSetWalletStatus' as const, queryId: _queryId, target_owner: _target_owner, is_frozen: _is_frozen };
+}
+
+export function storeTupleMasterSetWalletStatus(source: MasterSetWalletStatus) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.queryId);
+    builder.writeAddress(source.target_owner);
+    builder.writeBoolean(source.is_frozen);
+    return builder.build();
+}
+
+export function dictValueParserMasterSetWalletStatus(): DictionaryValue<MasterSetWalletStatus> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeMasterSetWalletStatus(src)).endCell());
+        },
+        parse: (src) => {
+            return loadMasterSetWalletStatus(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type WalletSetStatus = {
+    $$type: 'WalletSetStatus';
+    queryId: bigint;
+    is_frozen: boolean;
+}
+
+export function storeWalletSetStatus(src: WalletSetStatus) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(2340300978, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeBit(src.is_frozen);
+    };
+}
+
+export function loadWalletSetStatus(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 2340300978) { throw Error('Invalid prefix'); }
+    const _queryId = sc_0.loadUintBig(64);
+    const _is_frozen = sc_0.loadBit();
+    return { $$type: 'WalletSetStatus' as const, queryId: _queryId, is_frozen: _is_frozen };
+}
+
+export function loadTupleWalletSetStatus(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _is_frozen = source.readBoolean();
+    return { $$type: 'WalletSetStatus' as const, queryId: _queryId, is_frozen: _is_frozen };
+}
+
+export function loadGetterTupleWalletSetStatus(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _is_frozen = source.readBoolean();
+    return { $$type: 'WalletSetStatus' as const, queryId: _queryId, is_frozen: _is_frozen };
+}
+
+export function storeTupleWalletSetStatus(source: WalletSetStatus) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.queryId);
+    builder.writeBoolean(source.is_frozen);
+    return builder.build();
+}
+
+export function dictValueParserWalletSetStatus(): DictionaryValue<WalletSetStatus> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeWalletSetStatus(src)).endCell());
+        },
+        parse: (src) => {
+            return loadWalletSetStatus(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type SetPublicKey = {
+    $$type: 'SetPublicKey';
+    public_key: bigint;
+}
+
+export function storeSetPublicKey(src: SetPublicKey) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(1465032333, 32);
+        b_0.storeInt(src.public_key, 257);
+    };
+}
+
+export function loadSetPublicKey(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 1465032333) { throw Error('Invalid prefix'); }
+    const _public_key = sc_0.loadIntBig(257);
+    return { $$type: 'SetPublicKey' as const, public_key: _public_key };
+}
+
+export function loadTupleSetPublicKey(source: TupleReader) {
+    const _public_key = source.readBigNumber();
+    return { $$type: 'SetPublicKey' as const, public_key: _public_key };
+}
+
+export function loadGetterTupleSetPublicKey(source: TupleReader) {
+    const _public_key = source.readBigNumber();
+    return { $$type: 'SetPublicKey' as const, public_key: _public_key };
+}
+
+export function storeTupleSetPublicKey(source: SetPublicKey) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.public_key);
+    return builder.build();
+}
+
+export function dictValueParserSetPublicKey(): DictionaryValue<SetPublicKey> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeSetPublicKey(src)).endCell());
+        },
+        parse: (src) => {
+            return loadSetPublicKey(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type RelayedTransfer = {
+    $$type: 'RelayedTransfer';
+    queryId: bigint;
+    amount: bigint;
+    destination: Address;
+    response_destination: Address | null;
+    custom_payload: Cell | null;
+    forward_ton_amount: bigint;
+    relayer_fee: bigint;
+    valid_until: bigint;
+    signature: Slice;
+    forward_payload: Slice;
+}
+
+export function storeRelayedTransfer(src: RelayedTransfer) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(2378259591, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeCoins(src.amount);
+        b_0.storeAddress(src.destination);
+        b_0.storeAddress(src.response_destination);
+        if (src.custom_payload !== null && src.custom_payload !== undefined) { b_0.storeBit(true).storeRef(src.custom_payload); } else { b_0.storeBit(false); }
+        b_0.storeCoins(src.forward_ton_amount);
+        b_0.storeCoins(src.relayer_fee);
+        const b_1 = new Builder();
+        b_1.storeUint(src.valid_until, 32);
+        b_1.storeRef(src.signature.asCell());
+        b_1.storeBuilder(src.forward_payload.asBuilder());
+        b_0.storeRef(b_1.endCell());
+    };
+}
+
+export function loadRelayedTransfer(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 2378259591) { throw Error('Invalid prefix'); }
+    const _queryId = sc_0.loadUintBig(64);
+    const _amount = sc_0.loadCoins();
+    const _destination = sc_0.loadAddress();
+    const _response_destination = sc_0.loadMaybeAddress();
+    const _custom_payload = sc_0.loadBit() ? sc_0.loadRef() : null;
+    const _forward_ton_amount = sc_0.loadCoins();
+    const _relayer_fee = sc_0.loadCoins();
+    const sc_1 = sc_0.loadRef().beginParse();
+    const _valid_until = sc_1.loadUintBig(32);
+    const _signature = sc_1.loadRef().asSlice();
+    const _forward_payload = sc_1;
+    return { $$type: 'RelayedTransfer' as const, queryId: _queryId, amount: _amount, destination: _destination, response_destination: _response_destination, custom_payload: _custom_payload, forward_ton_amount: _forward_ton_amount, relayer_fee: _relayer_fee, valid_until: _valid_until, signature: _signature, forward_payload: _forward_payload };
+}
+
+export function loadTupleRelayedTransfer(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _destination = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    const _forward_ton_amount = source.readBigNumber();
+    const _relayer_fee = source.readBigNumber();
+    const _valid_until = source.readBigNumber();
+    const _signature = source.readCell().asSlice();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'RelayedTransfer' as const, queryId: _queryId, amount: _amount, destination: _destination, response_destination: _response_destination, custom_payload: _custom_payload, forward_ton_amount: _forward_ton_amount, relayer_fee: _relayer_fee, valid_until: _valid_until, signature: _signature, forward_payload: _forward_payload };
+}
+
+export function loadGetterTupleRelayedTransfer(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _destination = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    const _forward_ton_amount = source.readBigNumber();
+    const _relayer_fee = source.readBigNumber();
+    const _valid_until = source.readBigNumber();
+    const _signature = source.readCell().asSlice();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'RelayedTransfer' as const, queryId: _queryId, amount: _amount, destination: _destination, response_destination: _response_destination, custom_payload: _custom_payload, forward_ton_amount: _forward_ton_amount, relayer_fee: _relayer_fee, valid_until: _valid_until, signature: _signature, forward_payload: _forward_payload };
+}
+
+export function storeTupleRelayedTransfer(source: RelayedTransfer) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.queryId);
+    builder.writeNumber(source.amount);
+    builder.writeAddress(source.destination);
+    builder.writeAddress(source.response_destination);
+    builder.writeCell(source.custom_payload);
+    builder.writeNumber(source.forward_ton_amount);
+    builder.writeNumber(source.relayer_fee);
+    builder.writeNumber(source.valid_until);
+    builder.writeSlice(source.signature.asCell());
+    builder.writeSlice(source.forward_payload.asCell());
+    return builder.build();
+}
+
+export function dictValueParserRelayedTransfer(): DictionaryValue<RelayedTransfer> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeRelayedTransfer(src)).endCell());
+        },
+        parse: (src) => {
+            return loadRelayedTransfer(src.loadRef().beginParse());
+        }
+    }
+}
+
 export type Mint = {
     $$type: 'Mint';
     amount: bigint;
@@ -1456,6 +1721,8 @@ export type VoraJettonWallet$Data = {
     balance: bigint;
     owner: Address;
     master: Address;
+    is_frozen: boolean;
+    public_key: bigint | null;
 }
 
 export function storeVoraJettonWallet$Data(src: VoraJettonWallet$Data) {
@@ -1464,6 +1731,8 @@ export function storeVoraJettonWallet$Data(src: VoraJettonWallet$Data) {
         b_0.storeCoins(src.balance);
         b_0.storeAddress(src.owner);
         b_0.storeAddress(src.master);
+        b_0.storeBit(src.is_frozen);
+        if (src.public_key !== null && src.public_key !== undefined) { b_0.storeBit(true).storeInt(src.public_key, 257); } else { b_0.storeBit(false); }
     };
 }
 
@@ -1472,21 +1741,27 @@ export function loadVoraJettonWallet$Data(slice: Slice) {
     const _balance = sc_0.loadCoins();
     const _owner = sc_0.loadAddress();
     const _master = sc_0.loadAddress();
-    return { $$type: 'VoraJettonWallet$Data' as const, balance: _balance, owner: _owner, master: _master };
+    const _is_frozen = sc_0.loadBit();
+    const _public_key = sc_0.loadBit() ? sc_0.loadIntBig(257) : null;
+    return { $$type: 'VoraJettonWallet$Data' as const, balance: _balance, owner: _owner, master: _master, is_frozen: _is_frozen, public_key: _public_key };
 }
 
 export function loadTupleVoraJettonWallet$Data(source: TupleReader) {
     const _balance = source.readBigNumber();
     const _owner = source.readAddress();
     const _master = source.readAddress();
-    return { $$type: 'VoraJettonWallet$Data' as const, balance: _balance, owner: _owner, master: _master };
+    const _is_frozen = source.readBoolean();
+    const _public_key = source.readBigNumberOpt();
+    return { $$type: 'VoraJettonWallet$Data' as const, balance: _balance, owner: _owner, master: _master, is_frozen: _is_frozen, public_key: _public_key };
 }
 
 export function loadGetterTupleVoraJettonWallet$Data(source: TupleReader) {
     const _balance = source.readBigNumber();
     const _owner = source.readAddress();
     const _master = source.readAddress();
-    return { $$type: 'VoraJettonWallet$Data' as const, balance: _balance, owner: _owner, master: _master };
+    const _is_frozen = source.readBoolean();
+    const _public_key = source.readBigNumberOpt();
+    return { $$type: 'VoraJettonWallet$Data' as const, balance: _balance, owner: _owner, master: _master, is_frozen: _is_frozen, public_key: _public_key };
 }
 
 export function storeTupleVoraJettonWallet$Data(source: VoraJettonWallet$Data) {
@@ -1494,6 +1769,8 @@ export function storeTupleVoraJettonWallet$Data(source: VoraJettonWallet$Data) {
     builder.writeNumber(source.balance);
     builder.writeAddress(source.owner);
     builder.writeAddress(source.master);
+    builder.writeBoolean(source.is_frozen);
+    builder.writeNumber(source.public_key);
     return builder.build();
 }
 
@@ -1523,7 +1800,7 @@ function initVoraToken_init_args(src: VoraToken_init_args) {
 }
 
 async function VoraToken_init(owner: Address, content: Cell | null) {
-    const __code = Cell.fromHex('b5ee9c7241021f010007d7000228ff008e88f4a413f4bcf2c80bed5320e303ed43d9010602038e6602040151adbcf6a268690000ce7d007d207a0269002a98360a4dfd207a022c816880b82cbff12a81ed9e3620c0030162f828db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d00b014daf16f6a268690000ce7d007d207a0269002a98360a4dfd207a022c816880b82cbff16d9e3622c005011af8285230db3c305464205465500b02ee30eda2edfb01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019cfa00fa40f404d20055306c149bfa40f4045902d10170597fe205925f05e023d749c21f9134e30d02f90182f0fecddb47ca07c20310b95b33924e9a9492497c67c42678fcbf8c464effdc4772bae3025f03f2c082071e04fa03d31f218210fc708bd2ba8f6431810101d700fa4030f8416f245b8138c63224c705f2f4810e6826f2f45131a0f82814db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0707f804053228b082a1034103a544b30c8e0218210af1ca26abae302210b08090a00ee55508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec910364055041036453304c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004003c87f01ca0055305043fa02ce12f400ca00c9ed54db310056313302d430f8416f245b8138c63224c705f2f45003c87f01ca0055305043fa02ce12f400ca00c9ed54db3103fa82107bdd97deba8f7231d33ffa00fa40d72c01916d93fa4001e231f82812db3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0f842c705f2f45044a1236eb3923330e30d4003c87f01ca0055305043fa02ce12f400ca00c9ed54db31e0010b1c1d011688c87001ca005a02cecec90c022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d90d0f0149a65ec0bb513434800066be803e903e9015481b04e6be903e901640b4405c1678b6cf1b0d200e01125cdb3c3054633052301404b401d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019afa00fa40fa4055206c139afa40fa405902d1017059e204e30202d70d1ff2e0822182100f8a7ea5bae302218210178d4519bae302018210595f07bcba1011131800b6028020d7217021d749c21f9430d31f01de208210178d4519ba8e1a30d33ffa00596c21a002c87f01ca0055205afa0212cecec9ed54e082107bdd97deba8e19d33ffa00596c21a002c87f01ca0055205afa0212cecec9ed54e05f0402de31d33ffa00fa40d72c01916d93fa4001e201f40431fa00f8416f245b81114d3229c705f2f48200d5575375bef2f45164a15138db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076707f80402c4813507cc8141200e855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec91056105710344013071036453304c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002c87f01ca0055205afa0212cecec9ed5404f831d33ffa00fa40d72c01916d93fa4001e201fa00f8416f24532cc705b38ebb537cdb3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d024c705f2f4de51a8a054414b4330fa40fa0071d721fa00fa00306c6170f83a23c200e30f216eb3141516170018f82ac87001ca005a02cecec900c25183a15008a172702848135074c8553082107362d09c5005cb1f13cb3f01fa02cecec9284614505510246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb005003000a3010356c4100e29303c200923370e28e53206ef2d0807080427004c8018210d53276db58cb1fcb3fc91034413010246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00915be202c87f01ca0055205afa0212cecec9ed54010ee3025f04f2c0821902fed33ffa00d72c01916d93fa4001e231f8416f245b81114d3226c705f2f48200d5575342bef2f45131a17080405414367f07c8553082107bdd97de5005cb1f13cb3f01fa02ce01206e9430cf84809201cee2c926044313505510246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf818ae2f400c91a1b001a58cf8680cf8480f400f400cf81002801fb0002c87f01ca0055205afa0212cecec9ed5400a803206ef2d0807070804204c8018210d53276db58cb1fcb3fc910344130146d50436d5033c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0000b48210946a98b6ba8e4dd33f30c8018210aff90f5758cb1fcb3fc9443012f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055305043fa02ce12f400ca00c9ed54db31e03410230048f8416f245b8138c63223c705f2f40270c87f01ca0055305043fa02ce12f400ca00c9ed54b32c0f12');
+    const __code = Cell.fromHex('b5ee9c7241022b01000bcc000228ff008e88f4a413f4bcf2c80bed5320e303ed43d9010602038e6602040151adbcf6a268690000ce7d007d207a0269002a98360a4dfd207a022c816880b82cbff12a81ed9e3620c0030162f828db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d00e014daf16f6a268690000ce7d007d207a0269002a98360a4dfd207a022c816880b82cbff16d9e3622c005011af8285230db3c305464205465500e02ee30eda2edfb01d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019cfa00fa40f404d20055306c149bfa40f4045902d10170597fe205925f05e023d749c21f9134e30d02f90182f0fecddb47ca07c20310b95b33924e9a9492497c67c42678fcbf8c464effdc4772bae3025f03f2c082072a04fa03d31f218210fc708bd2ba8f6431810101d700fa4030f8416f245b8138c63224c705f2f4810e6826f2f45131a0f82814db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0707f804053228b082a1034103a544b30c8e0218210af1ca26abae302210e08090a00ee55508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec910364055041036453304c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004003c87f01ca0055305043fa02ce12f400ca00c9ed54db310056313302d430f8416f245b8138c63224c705f2f45003c87f01ca0055305043fa02ce12f400ca00c9ed54db3102dc82105fa19cccbae3022182107bdd97debae302018210946a98b6ba8e4dd33f30c8018210aff90f5758cb1fcb3fc9443012f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055305043fa02ce12f400ca00c9ed54db31e03410230b0d02fe31d33ffa40d20030f8416f245b8138c63225c705f2f4f82812db3c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0707004804004c85982108b7e28b25003cb1fcb3fca00c94430146d50436d5033c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb00e0c015c8a9d58cf8680cf8480f400f400cf81e2f400c901fb004003c87f01ca0055305043fa02ce12f400ca00c9ed54db311e02e431d33ffa00fa40d72c01916d93fa4001e231f82812db3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d0f842c705f2f45044a1236eb3923330e30d4003c87f01ca0055305043fa02ce12f400ca00c9ed54db310e29011688c87001ca005a02cecec90f022cff008e88f4a413f4bcf2c80bed53208e8130e1ed43d91012016da65ec0bb513434800063867e803e903e9034803480006560404075c0249b407895501b05673e903e901640b4405c165c1b78b6cf1b15201101125ddb3c3054655052502704d801d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e19fa00fa40fa40d200d2000195810101d700926d01e255406c159cfa40fa405902d1017059706de206e30204d70d1ff2e0822182100f8a7ea5bae302218210178d4519bae302218210595f07bcba1315171c01b4048020d7217021d749c21f9430d31f01de208210178d4519ba8e3330d33ffa00596c2113a05034c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed54e082107bdd97debae3025f06140064d33ffa00596c2113a05034c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed5402ec31d33ffa00fa40d72c01916d93fa4001e201f40431fa00f8416f245b81114d3229c705f2f4814f862ab3f2f48200d5575395bef2f45184a15136db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076707f80402c4813507ec8271601ca55508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec91056105910344013091036453304c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0040341b04f831d33ffa00fa40d72c01916d93fa4001e201fa00f8416f24532ac705b38ebb537adb3c0181114d02705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d024c705f2f4de51c8a054414d4330fa40fa0071d721fa00fa00306c6170f83a23c200e30f216eb32718191a00c251a3a1500aa172702848135074c8553082107362d09c5005cb1f13cb3f01fa02cecec9284614505510246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb005005000a3010356c4101c49305c200923570e28e53206ef2d0807080427004c8018210d53276db58cb1fcb3fc91034413010246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00915be240341b004ec87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed5403cee3022182108b7e28b2ba8e41313403d33f31d20030f8416f245b81114d3225c705f2f4440302c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed54e021821057529e8dbae3020182108dc15c87bae3025f06f2c0821d212202fe31d33ffa00d72c01916d93fa4001e231f8416f245b81114d3226c705f2f4814f8627b3f2f48200d5575362bef2f45151a17080405414367f09c8553082107bdd97de5005cb1f13cb3f01fa02ce01206e9430cf84809201cee2c924044313507710246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb08a1e1f00065bcf8101628ae2f400c901fb004034c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed5420001a58cf8680cf8480f400f400cf810080313504810101d70030f8416f245b81114d3223c705f2f44430c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed5402fcd33ffa00fa40d72c01916d93fa4001e201f40431fa00fa00d430d0d31fd401d0f8416f2410235f03814f862eb3f2f48200cb032f6eb3f2f48200a088f82325bbf2f45384a08200d55753e1bef2f4c852b0cb3f2afa0229cf1626fa0215cb1fc9f9008200bd115610206ef2d08014f91012f2f450b2a122c200926c21e30d232603fe5118db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d08208e4e1c070726d708b082f04103b56124c330cc855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec9103645401037591036453304c8cf8580ca00892724250001100052cf16ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb0002fc5136db3c5c705920f90022f9005ad76501d76582020134c8cb17cb0fcb0fcbffcbff71f90400c87401cb0212ca07cbffc9d05076707f80402c4813507ec855508210178d45195007cb1f15cb3f5003fa02ce01206e9430cf84809201cee201fa02cec91056105910344013091036453304c8cf8580ca00cf8440ce01fa0227280018f82ac87001ca005a02cecec900988069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb004034c87f01ca0055405054fa0212cece12ca00216eb3997f01ca00810101cf00947032ca00e2c9ed5400a803206ef2d0807070804204c8018210d53276db58cb1fcb3fc910344130146d50436d5033c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb000048f8416f245b8138c63223c705f2f40270c87f01ca0055305043fa02ce12f400ca00c9ed54ff93ee5b');
     const builder = beginCell();
     builder.storeUint(0, 1);
     initVoraToken_init_args({ $$type: 'VoraToken_init_args', owner, content })(builder);
@@ -1571,6 +1848,10 @@ export const VoraToken_errors = {
     3688: { message: "Not mintable" },
     4429: { message: "Invalid sender" },
     14534: { message: "Not owner" },
+    20358: { message: "Account is frozen" },
+    41096: { message: "Signature expired" },
+    48401: { message: "Invalid signature" },
+    51971: { message: "Public key not set" },
     54615: { message: "Insufficient balance" },
 } as const
 
@@ -1614,6 +1895,10 @@ export const VoraToken_errors_backward = {
     "Not mintable": 3688,
     "Invalid sender": 4429,
     "Not owner": 14534,
+    "Account is frozen": 20358,
+    "Signature expired": 41096,
+    "Invalid signature": 48401,
+    "Public key not set": 51971,
     "Insufficient balance": 54615,
 } as const
 
@@ -1638,11 +1923,15 @@ const VoraToken_types: ABIType[] = [
     {"name":"TokenBurnNotification","header":2078119902,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"sender","type":{"kind":"simple","type":"address","optional":false}},{"name":"response_destination","type":{"kind":"simple","type":"address","optional":true}}]},
     {"name":"TokenExcesses","header":3576854235,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"TokenUpdateContent","header":2937889386,"fields":[{"name":"content","type":{"kind":"simple","type":"cell","optional":false}}]},
+    {"name":"MasterSetWalletStatus","header":1604426956,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"target_owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"is_frozen","type":{"kind":"simple","type":"bool","optional":false}}]},
+    {"name":"WalletSetStatus","header":2340300978,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"is_frozen","type":{"kind":"simple","type":"bool","optional":false}}]},
+    {"name":"SetPublicKey","header":1465032333,"fields":[{"name":"public_key","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
+    {"name":"RelayedTransfer","header":2378259591,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"destination","type":{"kind":"simple","type":"address","optional":false}},{"name":"response_destination","type":{"kind":"simple","type":"address","optional":true}},{"name":"custom_payload","type":{"kind":"simple","type":"cell","optional":true}},{"name":"forward_ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"relayer_fee","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"valid_until","type":{"kind":"simple","type":"uint","optional":false,"format":32}},{"name":"signature","type":{"kind":"simple","type":"slice","optional":false}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
     {"name":"Mint","header":4235234258,"fields":[{"name":"amount","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"receiver","type":{"kind":"simple","type":"address","optional":false}}]},
     {"name":"JettonData","header":null,"fields":[{"name":"totalSupply","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"mintable","type":{"kind":"simple","type":"bool","optional":false}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":true}},{"name":"walletCode","type":{"kind":"simple","type":"cell","optional":false}}]},
     {"name":"JettonWalletData","header":null,"fields":[{"name":"balance","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"master","type":{"kind":"simple","type":"address","optional":false}},{"name":"walletCode","type":{"kind":"simple","type":"cell","optional":false}}]},
     {"name":"VoraToken$Data","header":null,"fields":[{"name":"totalSupply","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"content","type":{"kind":"simple","type":"cell","optional":true}},{"name":"mintable","type":{"kind":"simple","type":"bool","optional":false}}]},
-    {"name":"VoraJettonWallet$Data","header":null,"fields":[{"name":"balance","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"master","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"VoraJettonWallet$Data","header":null,"fields":[{"name":"balance","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"master","type":{"kind":"simple","type":"address","optional":false}},{"name":"is_frozen","type":{"kind":"simple","type":"bool","optional":false}},{"name":"public_key","type":{"kind":"simple","type":"int","optional":true,"format":257}}]},
 ]
 
 const VoraToken_opcodes = {
@@ -1656,10 +1945,14 @@ const VoraToken_opcodes = {
     "TokenBurnNotification": 2078119902,
     "TokenExcesses": 3576854235,
     "TokenUpdateContent": 2937889386,
+    "MasterSetWalletStatus": 1604426956,
+    "WalletSetStatus": 2340300978,
+    "SetPublicKey": 1465032333,
+    "RelayedTransfer": 2378259591,
     "Mint": 4235234258,
 }
 
-const VoraToken_getters: any[] = [
+const VoraToken_getters: ABIGetter[] = [
     {"name":"get_jetton_data","methodId":106029,"arguments":[],"returnType":{"kind":"simple","type":"JettonData","optional":false}},
     {"name":"get_wallet_address","methodId":103289,"arguments":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"address","optional":false}},
 ]
@@ -1673,6 +1966,7 @@ const VoraToken_receivers: ABIReceiver[] = [
     {"receiver":"internal","message":{"kind":"typed","type":"Mint"}},
     {"receiver":"internal","message":{"kind":"typed","type":"TokenUpdateContent"}},
     {"receiver":"internal","message":{"kind":"text","text":"Stop Mint"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"MasterSetWalletStatus"}},
     {"receiver":"internal","message":{"kind":"typed","type":"TokenBurnNotification"}},
     {"receiver":"internal","message":{"kind":"typed","type":"Deploy"}},
 ]
@@ -1712,7 +2006,7 @@ export class VoraToken implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: Mint | TokenUpdateContent | "Stop Mint" | TokenBurnNotification | Deploy) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: Mint | TokenUpdateContent | "Stop Mint" | MasterSetWalletStatus | TokenBurnNotification | Deploy) {
         
         let body: Cell | null = null;
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Mint') {
@@ -1723,6 +2017,9 @@ export class VoraToken implements Contract {
         }
         if (message === "Stop Mint") {
             body = beginCell().storeUint(0, 32).storeStringTail(message).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'MasterSetWalletStatus') {
+            body = beginCell().store(storeMasterSetWalletStatus(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'TokenBurnNotification') {
             body = beginCell().store(storeTokenBurnNotification(message)).endCell();

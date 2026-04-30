@@ -12,7 +12,7 @@ $tempDir = "deploy_temp"
 If (Test-Path $tempDir) { Remove-Item -Recurse -Force $tempDir }
 New-Item -ItemType Directory -Path $tempDir | Out-Null
 
-foreach ($dir in @("src", "public", "pages", "user", "true_legacy_vora", "services", "components", "assets", "server")) {
+foreach ($dir in @("src", "public", "pages", "user", "true_legacy_vora", "services", "components", "assets", "server", "signal_server")) {
     if (Test-Path $dir) {
         robocopy $dir "$tempDir\$dir" /E /XD node_modules /NJH /NJS /NDL /NC /NS
     }
@@ -65,7 +65,7 @@ echo "Installing Python dependencies for Brown AI via venv..."
 sudo apt-get update || true
 sudo apt-get install -y python3-venv python3-pip || true
 python3 -m venv /opt/vora-ecosystem/bot_env || true
-/opt/vora-ecosystem/bot_env/bin/pip install flask python-telegram-bot flask-cors requests python-dotenv || true
+/opt/vora-ecosystem/bot_env/bin/pip install flask python-telegram-bot flask-cors requests python-dotenv fastapi uvicorn pydantic || true
 
 # This is the ultimate fix. We don't restart, we kill the entire PM2 background engine.
 sudo pm2 kill || true

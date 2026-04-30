@@ -15,6 +15,8 @@ import {
     Contract,
     ContractABI,
     ABIType,
+    ABIGetter,
+    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -1683,7 +1685,7 @@ const Escrow_opcodes = {
     "CancelTrade": 3059028097,
 }
 
-const Escrow_getters: any[] = [
+const Escrow_getters: ABIGetter[] = [
 ]
 
 export const Escrow_getterMapping: { [key: string]: string } = {

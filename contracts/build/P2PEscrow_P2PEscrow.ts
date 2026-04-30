@@ -15,6 +15,8 @@ import {
     Contract,
     ContractABI,
     ABIType,
+    ABIGetter,
+    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -754,61 +756,244 @@ export function dictValueParserFactoryDeploy(): DictionaryValue<FactoryDeploy> {
     }
 }
 
-export type ListOrder = {
-    $$type: 'ListOrder';
-    amountVora: bigint;
-    priceTon: bigint;
-    backendSignature: Slice;
+export type TokenNotification = {
+    $$type: 'TokenNotification';
+    queryId: bigint;
+    amount: bigint;
+    from: Address;
+    forward_payload: Slice;
 }
 
-export function storeListOrder(src: ListOrder) {
+export function storeTokenNotification(src: TokenNotification) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeUint(4222358337, 32);
-        b_0.storeInt(src.amountVora, 257);
-        b_0.storeInt(src.priceTon, 257);
-        b_0.storeRef(src.backendSignature.asCell());
+        b_0.storeUint(1935855772, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeCoins(src.amount);
+        b_0.storeAddress(src.from);
+        b_0.storeBuilder(src.forward_payload.asBuilder());
     };
 }
 
-export function loadListOrder(slice: Slice) {
+export function loadTokenNotification(slice: Slice) {
     const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 4222358337) { throw Error('Invalid prefix'); }
-    const _amountVora = sc_0.loadIntBig(257);
-    const _priceTon = sc_0.loadIntBig(257);
-    const _backendSignature = sc_0.loadRef().asSlice();
-    return { $$type: 'ListOrder' as const, amountVora: _amountVora, priceTon: _priceTon, backendSignature: _backendSignature };
+    if (sc_0.loadUint(32) !== 1935855772) { throw Error('Invalid prefix'); }
+    const _queryId = sc_0.loadUintBig(64);
+    const _amount = sc_0.loadCoins();
+    const _from = sc_0.loadAddress();
+    const _forward_payload = sc_0;
+    return { $$type: 'TokenNotification' as const, queryId: _queryId, amount: _amount, from: _from, forward_payload: _forward_payload };
 }
 
-export function loadTupleListOrder(source: TupleReader) {
-    const _amountVora = source.readBigNumber();
-    const _priceTon = source.readBigNumber();
-    const _backendSignature = source.readCell().asSlice();
-    return { $$type: 'ListOrder' as const, amountVora: _amountVora, priceTon: _priceTon, backendSignature: _backendSignature };
+export function loadTupleTokenNotification(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _from = source.readAddress();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'TokenNotification' as const, queryId: _queryId, amount: _amount, from: _from, forward_payload: _forward_payload };
 }
 
-export function loadGetterTupleListOrder(source: TupleReader) {
-    const _amountVora = source.readBigNumber();
-    const _priceTon = source.readBigNumber();
-    const _backendSignature = source.readCell().asSlice();
-    return { $$type: 'ListOrder' as const, amountVora: _amountVora, priceTon: _priceTon, backendSignature: _backendSignature };
+export function loadGetterTupleTokenNotification(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _from = source.readAddress();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'TokenNotification' as const, queryId: _queryId, amount: _amount, from: _from, forward_payload: _forward_payload };
 }
 
-export function storeTupleListOrder(source: ListOrder) {
+export function storeTupleTokenNotification(source: TokenNotification) {
     const builder = new TupleBuilder();
-    builder.writeNumber(source.amountVora);
-    builder.writeNumber(source.priceTon);
-    builder.writeSlice(source.backendSignature.asCell());
+    builder.writeNumber(source.queryId);
+    builder.writeNumber(source.amount);
+    builder.writeAddress(source.from);
+    builder.writeSlice(source.forward_payload.asCell());
     return builder.build();
 }
 
-export function dictValueParserListOrder(): DictionaryValue<ListOrder> {
+export function dictValueParserTokenNotification(): DictionaryValue<TokenNotification> {
     return {
         serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeListOrder(src)).endCell());
+            builder.storeRef(beginCell().store(storeTokenNotification(src)).endCell());
         },
         parse: (src) => {
-            return loadListOrder(src.loadRef().beginParse());
+            return loadTokenNotification(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type TokenTransfer = {
+    $$type: 'TokenTransfer';
+    queryId: bigint;
+    amount: bigint;
+    destination: Address;
+    response_destination: Address | null;
+    custom_payload: Cell | null;
+    forward_ton_amount: bigint;
+    forward_payload: Slice;
+}
+
+export function storeTokenTransfer(src: TokenTransfer) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(260734629, 32);
+        b_0.storeUint(src.queryId, 64);
+        b_0.storeCoins(src.amount);
+        b_0.storeAddress(src.destination);
+        b_0.storeAddress(src.response_destination);
+        if (src.custom_payload !== null && src.custom_payload !== undefined) { b_0.storeBit(true).storeRef(src.custom_payload); } else { b_0.storeBit(false); }
+        b_0.storeCoins(src.forward_ton_amount);
+        b_0.storeBuilder(src.forward_payload.asBuilder());
+    };
+}
+
+export function loadTokenTransfer(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 260734629) { throw Error('Invalid prefix'); }
+    const _queryId = sc_0.loadUintBig(64);
+    const _amount = sc_0.loadCoins();
+    const _destination = sc_0.loadAddress();
+    const _response_destination = sc_0.loadMaybeAddress();
+    const _custom_payload = sc_0.loadBit() ? sc_0.loadRef() : null;
+    const _forward_ton_amount = sc_0.loadCoins();
+    const _forward_payload = sc_0;
+    return { $$type: 'TokenTransfer' as const, queryId: _queryId, amount: _amount, destination: _destination, response_destination: _response_destination, custom_payload: _custom_payload, forward_ton_amount: _forward_ton_amount, forward_payload: _forward_payload };
+}
+
+export function loadTupleTokenTransfer(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _destination = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    const _forward_ton_amount = source.readBigNumber();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'TokenTransfer' as const, queryId: _queryId, amount: _amount, destination: _destination, response_destination: _response_destination, custom_payload: _custom_payload, forward_ton_amount: _forward_ton_amount, forward_payload: _forward_payload };
+}
+
+export function loadGetterTupleTokenTransfer(source: TupleReader) {
+    const _queryId = source.readBigNumber();
+    const _amount = source.readBigNumber();
+    const _destination = source.readAddress();
+    const _response_destination = source.readAddressOpt();
+    const _custom_payload = source.readCellOpt();
+    const _forward_ton_amount = source.readBigNumber();
+    const _forward_payload = source.readCell().asSlice();
+    return { $$type: 'TokenTransfer' as const, queryId: _queryId, amount: _amount, destination: _destination, response_destination: _response_destination, custom_payload: _custom_payload, forward_ton_amount: _forward_ton_amount, forward_payload: _forward_payload };
+}
+
+export function storeTupleTokenTransfer(source: TokenTransfer) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.queryId);
+    builder.writeNumber(source.amount);
+    builder.writeAddress(source.destination);
+    builder.writeAddress(source.response_destination);
+    builder.writeCell(source.custom_payload);
+    builder.writeNumber(source.forward_ton_amount);
+    builder.writeSlice(source.forward_payload.asCell());
+    return builder.build();
+}
+
+export function dictValueParserTokenTransfer(): DictionaryValue<TokenTransfer> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeTokenTransfer(src)).endCell());
+        },
+        parse: (src) => {
+            return loadTokenTransfer(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type SetWallet = {
+    $$type: 'SetWallet';
+    wallet: Address;
+}
+
+export function storeSetWallet(src: SetWallet) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(1558246425, 32);
+        b_0.storeAddress(src.wallet);
+    };
+}
+
+export function loadSetWallet(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 1558246425) { throw Error('Invalid prefix'); }
+    const _wallet = sc_0.loadAddress();
+    return { $$type: 'SetWallet' as const, wallet: _wallet };
+}
+
+export function loadTupleSetWallet(source: TupleReader) {
+    const _wallet = source.readAddress();
+    return { $$type: 'SetWallet' as const, wallet: _wallet };
+}
+
+export function loadGetterTupleSetWallet(source: TupleReader) {
+    const _wallet = source.readAddress();
+    return { $$type: 'SetWallet' as const, wallet: _wallet };
+}
+
+export function storeTupleSetWallet(source: SetWallet) {
+    const builder = new TupleBuilder();
+    builder.writeAddress(source.wallet);
+    return builder.build();
+}
+
+export function dictValueParserSetWallet(): DictionaryValue<SetWallet> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeSetWallet(src)).endCell());
+        },
+        parse: (src) => {
+            return loadSetWallet(src.loadRef().beginParse());
+        }
+    }
+}
+
+export type CancelOrder = {
+    $$type: 'CancelOrder';
+    orderId: bigint;
+}
+
+export function storeCancelOrder(src: CancelOrder) {
+    return (builder: Builder) => {
+        const b_0 = builder;
+        b_0.storeUint(2170307283, 32);
+        b_0.storeInt(src.orderId, 257);
+    };
+}
+
+export function loadCancelOrder(slice: Slice) {
+    const sc_0 = slice;
+    if (sc_0.loadUint(32) !== 2170307283) { throw Error('Invalid prefix'); }
+    const _orderId = sc_0.loadIntBig(257);
+    return { $$type: 'CancelOrder' as const, orderId: _orderId };
+}
+
+export function loadTupleCancelOrder(source: TupleReader) {
+    const _orderId = source.readBigNumber();
+    return { $$type: 'CancelOrder' as const, orderId: _orderId };
+}
+
+export function loadGetterTupleCancelOrder(source: TupleReader) {
+    const _orderId = source.readBigNumber();
+    return { $$type: 'CancelOrder' as const, orderId: _orderId };
+}
+
+export function storeTupleCancelOrder(source: CancelOrder) {
+    const builder = new TupleBuilder();
+    builder.writeNumber(source.orderId);
+    return builder.build();
+}
+
+export function dictValueParserCancelOrder(): DictionaryValue<CancelOrder> {
+    return {
+        serialize: (src, builder) => {
+            builder.storeRef(beginCell().store(storeCancelOrder(src)).endCell());
+        },
+        parse: (src) => {
+            return loadCancelOrder(src.loadRef().beginParse());
         }
     }
 }
@@ -860,49 +1045,65 @@ export function dictValueParserFillOrder(): DictionaryValue<FillOrder> {
     }
 }
 
-export type FinalizeWithdrawal = {
-    $$type: 'FinalizeWithdrawal';
-    orderId: bigint;
+export type Order = {
+    $$type: 'Order';
+    seller: Address;
+    amountVora: bigint;
+    priceTon: bigint;
+    isActive: boolean;
 }
 
-export function storeFinalizeWithdrawal(src: FinalizeWithdrawal) {
+export function storeOrder(src: Order) {
     return (builder: Builder) => {
         const b_0 = builder;
-        b_0.storeUint(2159817007, 32);
-        b_0.storeInt(src.orderId, 257);
+        b_0.storeAddress(src.seller);
+        b_0.storeInt(src.amountVora, 257);
+        b_0.storeInt(src.priceTon, 257);
+        b_0.storeBit(src.isActive);
     };
 }
 
-export function loadFinalizeWithdrawal(slice: Slice) {
+export function loadOrder(slice: Slice) {
     const sc_0 = slice;
-    if (sc_0.loadUint(32) !== 2159817007) { throw Error('Invalid prefix'); }
-    const _orderId = sc_0.loadIntBig(257);
-    return { $$type: 'FinalizeWithdrawal' as const, orderId: _orderId };
+    const _seller = sc_0.loadAddress();
+    const _amountVora = sc_0.loadIntBig(257);
+    const _priceTon = sc_0.loadIntBig(257);
+    const _isActive = sc_0.loadBit();
+    return { $$type: 'Order' as const, seller: _seller, amountVora: _amountVora, priceTon: _priceTon, isActive: _isActive };
 }
 
-export function loadTupleFinalizeWithdrawal(source: TupleReader) {
-    const _orderId = source.readBigNumber();
-    return { $$type: 'FinalizeWithdrawal' as const, orderId: _orderId };
+export function loadTupleOrder(source: TupleReader) {
+    const _seller = source.readAddress();
+    const _amountVora = source.readBigNumber();
+    const _priceTon = source.readBigNumber();
+    const _isActive = source.readBoolean();
+    return { $$type: 'Order' as const, seller: _seller, amountVora: _amountVora, priceTon: _priceTon, isActive: _isActive };
 }
 
-export function loadGetterTupleFinalizeWithdrawal(source: TupleReader) {
-    const _orderId = source.readBigNumber();
-    return { $$type: 'FinalizeWithdrawal' as const, orderId: _orderId };
+export function loadGetterTupleOrder(source: TupleReader) {
+    const _seller = source.readAddress();
+    const _amountVora = source.readBigNumber();
+    const _priceTon = source.readBigNumber();
+    const _isActive = source.readBoolean();
+    return { $$type: 'Order' as const, seller: _seller, amountVora: _amountVora, priceTon: _priceTon, isActive: _isActive };
 }
 
-export function storeTupleFinalizeWithdrawal(source: FinalizeWithdrawal) {
+export function storeTupleOrder(source: Order) {
     const builder = new TupleBuilder();
-    builder.writeNumber(source.orderId);
+    builder.writeAddress(source.seller);
+    builder.writeNumber(source.amountVora);
+    builder.writeNumber(source.priceTon);
+    builder.writeBoolean(source.isActive);
     return builder.build();
 }
 
-export function dictValueParserFinalizeWithdrawal(): DictionaryValue<FinalizeWithdrawal> {
+export function dictValueParserOrder(): DictionaryValue<Order> {
     return {
         serialize: (src, builder) => {
-            builder.storeRef(beginCell().store(storeFinalizeWithdrawal(src)).endCell());
+            builder.storeRef(beginCell().store(storeOrder(src)).endCell());
         },
         parse: (src) => {
-            return loadFinalizeWithdrawal(src.loadRef().beginParse());
+            return loadOrder(src.loadRef().beginParse());
         }
     }
 }
@@ -910,6 +1111,8 @@ export function dictValueParserFinalizeWithdrawal(): DictionaryValue<FinalizeWit
 export type P2PEscrow$Data = {
     $$type: 'P2PEscrow$Data';
     owner: Address;
+    vora_jetton_wallet: Address | null;
+    orders: Dictionary<bigint, Order>;
     orderCounter: bigint;
 }
 
@@ -917,6 +1120,8 @@ export function storeP2PEscrow$Data(src: P2PEscrow$Data) {
     return (builder: Builder) => {
         const b_0 = builder;
         b_0.storeAddress(src.owner);
+        b_0.storeAddress(src.vora_jetton_wallet);
+        b_0.storeDict(src.orders, Dictionary.Keys.BigInt(257), dictValueParserOrder());
         b_0.storeInt(src.orderCounter, 257);
     };
 }
@@ -924,25 +1129,33 @@ export function storeP2PEscrow$Data(src: P2PEscrow$Data) {
 export function loadP2PEscrow$Data(slice: Slice) {
     const sc_0 = slice;
     const _owner = sc_0.loadAddress();
+    const _vora_jetton_wallet = sc_0.loadMaybeAddress();
+    const _orders = Dictionary.load(Dictionary.Keys.BigInt(257), dictValueParserOrder(), sc_0);
     const _orderCounter = sc_0.loadIntBig(257);
-    return { $$type: 'P2PEscrow$Data' as const, owner: _owner, orderCounter: _orderCounter };
+    return { $$type: 'P2PEscrow$Data' as const, owner: _owner, vora_jetton_wallet: _vora_jetton_wallet, orders: _orders, orderCounter: _orderCounter };
 }
 
 export function loadTupleP2PEscrow$Data(source: TupleReader) {
     const _owner = source.readAddress();
+    const _vora_jetton_wallet = source.readAddressOpt();
+    const _orders = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserOrder(), source.readCellOpt());
     const _orderCounter = source.readBigNumber();
-    return { $$type: 'P2PEscrow$Data' as const, owner: _owner, orderCounter: _orderCounter };
+    return { $$type: 'P2PEscrow$Data' as const, owner: _owner, vora_jetton_wallet: _vora_jetton_wallet, orders: _orders, orderCounter: _orderCounter };
 }
 
 export function loadGetterTupleP2PEscrow$Data(source: TupleReader) {
     const _owner = source.readAddress();
+    const _vora_jetton_wallet = source.readAddressOpt();
+    const _orders = Dictionary.loadDirect(Dictionary.Keys.BigInt(257), dictValueParserOrder(), source.readCellOpt());
     const _orderCounter = source.readBigNumber();
-    return { $$type: 'P2PEscrow$Data' as const, owner: _owner, orderCounter: _orderCounter };
+    return { $$type: 'P2PEscrow$Data' as const, owner: _owner, vora_jetton_wallet: _vora_jetton_wallet, orders: _orders, orderCounter: _orderCounter };
 }
 
 export function storeTupleP2PEscrow$Data(source: P2PEscrow$Data) {
     const builder = new TupleBuilder();
     builder.writeAddress(source.owner);
+    builder.writeAddress(source.vora_jetton_wallet);
+    builder.writeCell(source.orders.size > 0 ? beginCell().storeDictDirect(source.orders, Dictionary.Keys.BigInt(257), dictValueParserOrder()).endCell() : null);
     builder.writeNumber(source.orderCounter);
     return builder.build();
 }
@@ -971,7 +1184,7 @@ function initP2PEscrow_init_args(src: P2PEscrow_init_args) {
 }
 
 async function P2PEscrow_init(owner: Address) {
-    const __code = Cell.fromHex('b5ee9c72410208010001a9000110ff0020e303f2c80b0103f83001d072d721d200d200fa4021103450666f04f86102f862ed44d0d200019afa40810101d700596c1296fa400101d170e203925f03e001d70d1ff2e082218210fbac1341bae3022182108195581bba8eab5b88c88258c000000000000000000000000101cb67ccc970fb0001c87f01ca005902ce810101cf00c9ed54020405017231810101d70030a70a812710bc3001a488c88258c000000000000000000000000101cb67ccc970fb00c87f01ca005902ce810101cf00c9ed5403003a00000000503250204f72646572204c69737465642026204c6f636b6564002a000000005032502053776170204578656375746564028ce021821080bc312fba8eab5b88c88258c000000000000000000000000101cb67ccc970fb0001c87f01ca005902ce810101cf00c9ed54e0018210946a98b6bae3025f03f2c0820607003000000000503250204c697374696e6720556e6c6f636b6564008ad33f30c8018210aff90f5758cb1fcb3fc912f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca005902ce810101cf00c9ed54d4fccd5d');
+    const __code = Cell.fromHex('b5ee9c7241020e01000404000114ff00208e8130e1f2c80b0104e601d072d721d200d200fa4021103450666f04f86102f862ed44d0d200018e18fa40d72c01916d93fa4001e201f404810101d70055306c1498fa400101d16d6d70e205925f05e003d70d1ff2e0822182105ce0f419bae3022182107362d09cbae3022182108195581bbae302218210815c42d3ba0203050a006a6c21fa4030f8416f245b8138c63223c705f2f44003c87f01ca0055305034ce01206e9430cf84809201cee2f400810101cf00c9ed5402dc31d33f31fa00fa40f8416f2410235f038200e67f256eb39925206ef2d08012c705923170e2f2f4d31f01c0018e30fa003006a481010150377fc855305034ce810101cf00810101cf00ca00c95e315250206e953059f45a30944133f415e28e8b30103510244300db3c5033e250030b040040c87f01ca0055305034ce01206e9430cf84809201cee2f400810101cf00c9ed5403fe31810101d70030f8416f243032258101012459f40d6fa192306ddf206e92306d8e15d0fa40810101d700810101d700d20055306c146f04e2814856216eb3f2f4206ef2d0806f248200f4c201f2f48200bcd55151be15f2f4727088245137413310246d50436d03c8cf8580ca00cf8440ce01fa028069cf40025c6e016eb08a060708001e00000000503250205061796d656e7400065bcf8102bc8ae2f400c901fb0010461035478727db3c17810101507570c855305034ce810101cf00810101cf00ca00c910364640206e953059f45a30944133f415e258c87f01ca0055305034ce01206e9430cf84809201cee2f400810101cf00c9ed54090b001a58cf8680cf8480f400f400cf8103fe8f7431810101d70030f8416f2410235f03248101012359f40d6fa192306ddf206e92306d8e15d0fa40810101d700810101d700d20055306c146f04e2814856216eb3f2f4206ef2d0806f248200f4c201f2f48200a5c35343c70592347f945147c705e214f2f4103544675367db3c16810101508570c8e0018210946a98b6ba0b0c0d00f224206ef2d080820afaf08072706d6d228b08104610581049c8556082100f8a7ea55008cb1f16cb3f5004fa0212ce01206e9430cf84809201cee2f40001fa02cec943305a6d6d40037fc8cf8580ca00cf8440ce01fa028069cf40025c6e016eb0935bcf819d58cf8680cf8480f400f400cf81e2f400c901fb00008c55305034ce810101cf00810101cf00ca00c910354540206e953059f45a30944133f415e25502c87f01ca0055305034ce01206e9430cf84809201cee2f400810101cf00c9ed5400be8e57d33f30c8018210aff90f5758cb1fcb3fc9443012f84270705003804201503304c8cf8580ca00cf8440ce01fa02806acf40f400c901fb00c87f01ca0055305034ce01206e9430cf84809201cee2f400810101cf00c9ed54e05f05f2c08256324547');
     const builder = beginCell();
     builder.storeUint(0, 1);
     initP2PEscrow_init_args({ $$type: 'P2PEscrow_init_args', owner })(builder);
@@ -1016,6 +1229,12 @@ export const P2PEscrow_errors = {
     135: { message: "Code of a contract was not found" },
     136: { message: "Invalid standard address" },
     138: { message: "Not a basechain address" },
+    14534: { message: "Not owner" },
+    18518: { message: "Order not found" },
+    42435: { message: "Not authorized" },
+    48341: { message: "Insufficient TON sent" },
+    59007: { message: "Invalid token sender" },
+    62658: { message: "Order not active" },
 } as const
 
 export const P2PEscrow_errors_backward = {
@@ -1055,6 +1274,12 @@ export const P2PEscrow_errors_backward = {
     "Code of a contract was not found": 135,
     "Invalid standard address": 136,
     "Not a basechain address": 138,
+    "Not owner": 14534,
+    "Order not found": 18518,
+    "Not authorized": 42435,
+    "Insufficient TON sent": 48341,
+    "Invalid token sender": 59007,
+    "Order not active": 62658,
 } as const
 
 const P2PEscrow_types: ABIType[] = [
@@ -1071,31 +1296,37 @@ const P2PEscrow_types: ABIType[] = [
     {"name":"Deploy","header":2490013878,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"DeployOk","header":2952335191,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}}]},
     {"name":"FactoryDeploy","header":1829761339,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"cashback","type":{"kind":"simple","type":"address","optional":false}}]},
-    {"name":"ListOrder","header":4222358337,"fields":[{"name":"amountVora","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"priceTon","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"backendSignature","type":{"kind":"simple","type":"slice","optional":false}}]},
+    {"name":"TokenNotification","header":1935855772,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"from","type":{"kind":"simple","type":"address","optional":false}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"TokenTransfer","header":260734629,"fields":[{"name":"queryId","type":{"kind":"simple","type":"uint","optional":false,"format":64}},{"name":"amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"destination","type":{"kind":"simple","type":"address","optional":false}},{"name":"response_destination","type":{"kind":"simple","type":"address","optional":true}},{"name":"custom_payload","type":{"kind":"simple","type":"cell","optional":true}},{"name":"forward_ton_amount","type":{"kind":"simple","type":"uint","optional":false,"format":"coins"}},{"name":"forward_payload","type":{"kind":"simple","type":"slice","optional":false,"format":"remainder"}}]},
+    {"name":"SetWallet","header":1558246425,"fields":[{"name":"wallet","type":{"kind":"simple","type":"address","optional":false}}]},
+    {"name":"CancelOrder","header":2170307283,"fields":[{"name":"orderId","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
     {"name":"FillOrder","header":2174048283,"fields":[{"name":"orderId","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
-    {"name":"FinalizeWithdrawal","header":2159817007,"fields":[{"name":"orderId","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
-    {"name":"P2PEscrow$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"orderCounter","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
+    {"name":"Order","header":null,"fields":[{"name":"seller","type":{"kind":"simple","type":"address","optional":false}},{"name":"amountVora","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"priceTon","type":{"kind":"simple","type":"int","optional":false,"format":257}},{"name":"isActive","type":{"kind":"simple","type":"bool","optional":false}}]},
+    {"name":"P2PEscrow$Data","header":null,"fields":[{"name":"owner","type":{"kind":"simple","type":"address","optional":false}},{"name":"vora_jetton_wallet","type":{"kind":"simple","type":"address","optional":true}},{"name":"orders","type":{"kind":"dict","key":"int","value":"Order","valueFormat":"ref"}},{"name":"orderCounter","type":{"kind":"simple","type":"int","optional":false,"format":257}}]},
 ]
 
 const P2PEscrow_opcodes = {
     "Deploy": 2490013878,
     "DeployOk": 2952335191,
     "FactoryDeploy": 1829761339,
-    "ListOrder": 4222358337,
+    "TokenNotification": 1935855772,
+    "TokenTransfer": 260734629,
+    "SetWallet": 1558246425,
+    "CancelOrder": 2170307283,
     "FillOrder": 2174048283,
-    "FinalizeWithdrawal": 2159817007,
 }
 
-const P2PEscrow_getters: any[] = [
+const P2PEscrow_getters: ABIGetter[] = [
 ]
 
 export const P2PEscrow_getterMapping: { [key: string]: string } = {
 }
 
 const P2PEscrow_receivers: ABIReceiver[] = [
-    {"receiver":"internal","message":{"kind":"typed","type":"ListOrder"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"SetWallet"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"TokenNotification"}},
     {"receiver":"internal","message":{"kind":"typed","type":"FillOrder"}},
-    {"receiver":"internal","message":{"kind":"typed","type":"FinalizeWithdrawal"}},
+    {"receiver":"internal","message":{"kind":"typed","type":"CancelOrder"}},
     {"receiver":"internal","message":{"kind":"typed","type":"Deploy"}},
 ]
 
@@ -1134,17 +1365,20 @@ export class P2PEscrow implements Contract {
         this.init = init;
     }
     
-    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: ListOrder | FillOrder | FinalizeWithdrawal | Deploy) {
+    async send(provider: ContractProvider, via: Sender, args: { value: bigint, bounce?: boolean| null | undefined }, message: SetWallet | TokenNotification | FillOrder | CancelOrder | Deploy) {
         
         let body: Cell | null = null;
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'ListOrder') {
-            body = beginCell().store(storeListOrder(message)).endCell();
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'SetWallet') {
+            body = beginCell().store(storeSetWallet(message)).endCell();
+        }
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'TokenNotification') {
+            body = beginCell().store(storeTokenNotification(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'FillOrder') {
             body = beginCell().store(storeFillOrder(message)).endCell();
         }
-        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'FinalizeWithdrawal') {
-            body = beginCell().store(storeFinalizeWithdrawal(message)).endCell();
+        if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'CancelOrder') {
+            body = beginCell().store(storeCancelOrder(message)).endCell();
         }
         if (message && typeof message === 'object' && !(message instanceof Slice) && message.$$type === 'Deploy') {
             body = beginCell().store(storeDeploy(message)).endCell();

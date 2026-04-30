@@ -1,9 +1,9 @@
 # Tact compilation report
 Contract: P2PEscrow
-BoC Size: 437 bytes
+BoC Size: 1040 bytes
 
 ## Structures (Structs and Messages)
-Total structures: 17
+Total structures: 20
 
 ### DataSize
 TL-B: `_ cells:int257 bits:int257 refs:int257 = DataSize`
@@ -57,21 +57,33 @@ Signature: `DeployOk{queryId:uint64}`
 TL-B: `factory_deploy#6d0ff13b queryId:uint64 cashback:address = FactoryDeploy`
 Signature: `FactoryDeploy{queryId:uint64,cashback:address}`
 
-### ListOrder
-TL-B: `list_order#fbac1341 amountVora:int257 priceTon:int257 backendSignature:^slice = ListOrder`
-Signature: `ListOrder{amountVora:int257,priceTon:int257,backendSignature:^slice}`
+### TokenNotification
+TL-B: `token_notification#7362d09c queryId:uint64 amount:coins from:address forward_payload:remainder<slice> = TokenNotification`
+Signature: `TokenNotification{queryId:uint64,amount:coins,from:address,forward_payload:remainder<slice>}`
+
+### TokenTransfer
+TL-B: `token_transfer#0f8a7ea5 queryId:uint64 amount:coins destination:address response_destination:address custom_payload:Maybe ^cell forward_ton_amount:coins forward_payload:remainder<slice> = TokenTransfer`
+Signature: `TokenTransfer{queryId:uint64,amount:coins,destination:address,response_destination:address,custom_payload:Maybe ^cell,forward_ton_amount:coins,forward_payload:remainder<slice>}`
+
+### SetWallet
+TL-B: `set_wallet#5ce0f419 wallet:address = SetWallet`
+Signature: `SetWallet{wallet:address}`
+
+### CancelOrder
+TL-B: `cancel_order#815c42d3 orderId:int257 = CancelOrder`
+Signature: `CancelOrder{orderId:int257}`
 
 ### FillOrder
 TL-B: `fill_order#8195581b orderId:int257 = FillOrder`
 Signature: `FillOrder{orderId:int257}`
 
-### FinalizeWithdrawal
-TL-B: `finalize_withdrawal#80bc312f orderId:int257 = FinalizeWithdrawal`
-Signature: `FinalizeWithdrawal{orderId:int257}`
+### Order
+TL-B: `_ seller:address amountVora:int257 priceTon:int257 isActive:bool = Order`
+Signature: `Order{seller:address,amountVora:int257,priceTon:int257,isActive:bool}`
 
 ### P2PEscrow$Data
-TL-B: `_ owner:address orderCounter:int257 = P2PEscrow`
-Signature: `P2PEscrow{owner:address,orderCounter:int257}`
+TL-B: `_ owner:address vora_jetton_wallet:address orders:dict<int, ^Order{seller:address,amountVora:int257,priceTon:int257,isActive:bool}> orderCounter:int257 = P2PEscrow`
+Signature: `P2PEscrow{owner:address,vora_jetton_wallet:address,orders:dict<int, ^Order{seller:address,amountVora:int257,priceTon:int257,isActive:bool}>,orderCounter:int257}`
 
 ## Get methods
 Total get methods: 0
@@ -113,6 +125,12 @@ Total get methods: 0
 * 135: Code of a contract was not found
 * 136: Invalid standard address
 * 138: Not a basechain address
+* 14534: Not owner
+* 18518: Order not found
+* 42435: Not authorized
+* 48341: Insufficient TON sent
+* 59007: Invalid token sender
+* 62658: Order not active
 
 ## Trait inheritance diagram
 

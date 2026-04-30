@@ -95,6 +95,14 @@
             "options": {
                 "debug": true
             }
+        },
+        {
+            "name": "UnilevelDistributor",
+            "path": "./contracts/tact/UnilevelDistributor.tact",
+            "output": "./contracts/build",
+            "options": {
+                "debug": true
+            }
         }
     ]
 }

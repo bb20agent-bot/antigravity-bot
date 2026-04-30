@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Video, Crown, Flame, CheckCircle, Bot, X, Star, Send, Wallet, RefreshCcw, QrCode, Copy, Settings, Globe, Key, FileText, Github, MessageCircle, DollarSign } from 'lucide-react';
-import { TonConnectButton } from '@tonconnect/ui-react';
+import { TonConnectButton, useTonConnectUI, useTonAddress } from '@tonconnect/ui-react';
+import { beginCell, toNano, Address } from '@ton/core';
 
 enum Page { LIVE = 'LIVE', OFFICE = 'OFFICE', RANK = 'RANK' }
 type Tier = 'STARTER' | 'CREW' | 'FANDOM' | 'VIP';
@@ -9,7 +10,7 @@ type Tier = 'STARTER' | 'CREW' | 'FANDOM' | 'VIP';
 // --- SUB-COMPONENTS --- //
 
 const LiveView = ({ 
-    stakes, stakeAmount, setStakeAmount, stakePeriod, setStakePeriod, handleStake, openAiChat, autoRenew, setAutoRenew 
+    stakes, stakeAmount, setStakeAmount, stakePeriod, setStakePeriod, handleStake, openAiChat, autoRenew, setAutoRenew, stakingMode, setStakingMode 
 }: any) => {
     const [liveType, setLiveType] = useState<'TRADING' | 'COMMUNITY'>('TRADING');
     const [liveSrcTrading, setLiveSrcTrading] = useState("https://www.youtube-nocookie.com/embed/nxQPaFtStgI?autoplay=0&controls=1&rel=0&modestbranding=1&fs=1");
@@ -119,6 +120,11 @@ const LiveView = ({
                 </h3>
                 <p className="text-[11px] text-slate-300 font-bold mb-3 tracking-widest">1 VORA = 0.2 TON</p>
                 
+                <div className="w-full flex bg-[#0a111a] p-1 rounded-xl border border-slate-800 mb-3">
+                    <button onClick={() => setStakingMode('DIRECT')} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${stakingMode === 'DIRECT' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'text-slate-500 hover:text-slate-300'}`}>직접 스테이킹</button>
+                    <button onClick={() => setStakingMode('ENTRUSTED')} className={`flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all ${stakingMode === 'ENTRUSTED' ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30' : 'text-slate-500 hover:text-slate-300'}`}>위탁 스테이킹 (하부 계정)</button>
+                </div>
+                
                 <div className="w-full bg-black/60 border border-slate-700/50 rounded-xl p-3 mb-3">
                     <div className="flex justify-between text-[11px] font-bold text-slate-400 mb-2 px-1">
                         <span>예치 기간 선택</span>
@@ -200,7 +206,7 @@ const LiveView = ({
     );
 };
 
-const OfficeView = ({ assets, appUid, referrerUid, copySuccess, handleCopyLink }: any) => {
+const OfficeView = ({ assets, appUid, referrerUid, copySuccess, handleCopyLink, setDownlineModal }: any) => {
     return (
         <motion.div key="office" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="w-full space-y-4">
             
@@ -211,8 +217,8 @@ const OfficeView = ({ assets, appUid, referrerUid, copySuccess, handleCopyLink }
                 <div className="text-center relative z-10 mb-8">
                     <h2 className="text-[17px] font-black text-slate-100 tracking-wide mb-1 drop-shadow-md">누적 에어드랍</h2>
                     <div className="flex flex-row justify-center items-end gap-2 mb-1.5 mt-[-4px]">
-                        <div className="text-[44px] font-extrabold tracking-tight leading-none text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-                            {assets.vora.toLocaleString()}
+                        <div className="text-[40px] font-extrabold tracking-tight leading-none text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
+                            {assets.vora.toLocaleString(undefined, {minimumFractionDigits: 3, maximumFractionDigits: 3})}
                         </div>
                         <span className="text-[20px] font-bold text-yellow-300 drop-shadow-[0_0_12px_rgba(250,204,21,0.8)] pb-1.5">VORA</span>
                     </div>
@@ -226,10 +232,10 @@ const OfficeView = ({ assets, appUid, referrerUid, copySuccess, handleCopyLink }
                    </div>
                    
                    <div className="space-y-3">
-                      <div className="flex justify-between items-center bg-[#101620] p-3 rounded-lg border border-slate-800">
+                      <div onClick={() => setDownlineModal('L1')} className="flex justify-between items-center bg-[#101620] p-3 rounded-lg border border-slate-800 hover:border-emerald-500/50 cursor-pointer group transition-colors">
                           <div>
-                              <span className="text-[11px] font-black text-emerald-400 flex items-center gap-1.5 uppercase">L1 직접 추천</span>
-                              <span className="text-[9px] font-bold text-slate-500">{assets.l1}명 조직원</span>
+                              <span className="text-[11px] font-black text-emerald-400 flex items-center gap-1.5 uppercase group-hover:underline">L1 직접 추천 하부 유저</span>
+                              <span className="text-[9px] font-bold text-slate-500">{assets.l1}명 조직원 모니터링</span>
                           </div>
                           <div className="text-right">
                               <span className="text-[12px] font-black text-white">{assets.l1 * 1250} VORA</span>
@@ -237,10 +243,10 @@ const OfficeView = ({ assets, appUid, referrerUid, copySuccess, handleCopyLink }
                           </div>
                       </div>
 
-                      <div className="flex justify-between items-center bg-[#101620] p-3 rounded-lg border border-slate-800">
+                      <div onClick={() => setDownlineModal('L2')} className="flex justify-between items-center bg-[#101620] p-3 rounded-lg border border-slate-800 hover:border-emerald-500/50 cursor-pointer group transition-colors">
                           <div>
-                              <span className="text-[11px] font-black text-slate-300 flex items-center gap-1.5 uppercase">L2 간접 추천</span>
-                              <span className="text-[9px] font-bold text-slate-500">{assets.l2}명 조직원</span>
+                              <span className="text-[11px] font-black text-slate-300 flex items-center gap-1.5 uppercase group-hover:underline">L2 간접 추천 하부 유저</span>
+                              <span className="text-[9px] font-bold text-slate-500">{assets.l2}명 조직원 모니터링</span>
                           </div>
                           <div className="text-right">
                               <span className="text-[12px] font-black text-slate-200">{assets.l2 * 250} VORA</span>
@@ -259,7 +265,7 @@ const OfficeView = ({ assets, appUid, referrerUid, copySuccess, handleCopyLink }
                     <p className="text-[11px] text-slate-400 font-bold mb-2 tracking-widest uppercase">나의 레퍼럴 초대 링크</p>
                     <div className="flex items-center gap-2">
                         <div className="flex-1 bg-black/60 border border-slate-700 rounded-lg py-2 px-3 text-slate-300 text-[11px] font-black truncate select-all">
-                            https://t.me/Fandom_Meetup_Bot/app?startapp={appUid}
+                            https://t.me/Crew_Meetup_Bot/app?startapp={appUid}
                         </div>
                         <button onClick={handleCopyLink} className={`px-4 py-2 rounded-lg text-[12px] font-black transition-all shrink-0 ${copySuccess ? 'bg-emerald-500 text-black' : 'bg-[#1e2636] text-emerald-400 border border-emerald-500/50 hover:bg-[#2a3449]'}`}>
                             {copySuccess ? 'Copied!' : 'Copy'}
@@ -278,38 +284,54 @@ const OfficeView = ({ assets, appUid, referrerUid, copySuccess, handleCopyLink }
                     </div>
                 </div>
 
-                <motion.button whileTap={{ scale: 0.95 }} className="relative w-full py-4 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-[15px] font-black text-[#040811] shadow-[0_5px_15px_rgba(16,185,129,0.4),_inset_0_2px_4px_rgba(255,255,255,0.4)]">
-                    <span className="relative z-10 tracking-widest">소각 기여 (준비중)</span>
+                <motion.button onClick={() => window.dispatchEvent(new Event('triggerBurn'))} whileTap={{ scale: 0.95 }} className="relative w-full py-4 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-[15px] font-black text-[#040811] shadow-[0_5px_15px_rgba(16,185,129,0.4),_inset_0_2px_4px_rgba(255,255,255,0.4)]">
+                    <span className="relative z-10 tracking-widest">소각 기여 참여</span>
                 </motion.button>
             </div>
         </motion.div>
     );
 };
 
-const RankView = () => {
+const RankView = ({ openAiChat }: any) => {
+    const [rankTab, setRankTab] = useState<'LEADERBOARD' | 'EVENT'>('LEADERBOARD');
+
     return (
         <motion.div key="rank" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-4 w-full">
             <div className="bg-[#0b1016] rounded-[2rem] border border-cyan-500/20 shadow-[0_0_30px_rgba(6,182,212,0.1)] p-5 mb-4">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-sm font-black uppercase text-slate-200 flex items-center gap-2">
-                        <Flame size={18} className="text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" /> 소각 기여 리더보드
-                    </h3>
+                <div className="flex w-full mb-6 bg-[#101620] p-1 rounded-xl border border-slate-800">
+                    <button onClick={() => setRankTab('LEADERBOARD')} className={`flex-1 py-2 text-[11px] font-black uppercase rounded-lg transition-all ${rankTab === 'LEADERBOARD' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : 'text-slate-500'}`}>소각 랭킹 보드</button>
+                    <button onClick={() => setRankTab('EVENT')} className={`flex-1 py-2 text-[11px] font-black uppercase rounded-lg transition-all ${rankTab === 'EVENT' ? 'bg-pink-500/20 text-pink-400 border border-pink-500/30' : 'text-slate-500'}`}>이벤트 보드</button>
                 </div>
                 
-                <div className="space-y-3 mb-6">
-                    {[1, 2, 3].map((r, idx) => (
-                        <div key={idx} className={`p-4 rounded-2xl flex items-center justify-between ${idx === 0 ? 'bg-cyan-500/10 border border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]' : 'bg-[#101620] border border-slate-800'}`}>
-                            <div className="flex items-center gap-3">
-                                <span className={`text-sm font-black ${idx === 0 ? 'text-cyan-400' : 'text-slate-500'}`}>#{r}</span>
-                                <div>
-                                    <p className="text-xs font-black text-slate-200 uppercase italic">UID 26050500100{r}</p>
-                                    <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Total Burned</p>
+                {rankTab === 'LEADERBOARD' ? (
+                    <div className="space-y-3 mb-6">
+                        {[1, 2, 3].map((r, idx) => (
+                            <div key={idx} className={`p-4 rounded-2xl flex items-center justify-between ${idx === 0 ? 'bg-cyan-500/10 border border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]' : 'bg-[#101620] border border-slate-800'}`}>
+                                <div className="flex items-center gap-3">
+                                    <span className={`text-sm font-black ${idx === 0 ? 'text-cyan-400' : 'text-slate-500'}`}>#{r}</span>
+                                    <div>
+                                        <p className="text-xs font-black text-slate-200 uppercase italic">UID 26050500100{r}</p>
+                                        <p className="text-[9px] text-slate-500 uppercase tracking-widest font-bold">Total Burned</p>
+                                    </div>
                                 </div>
+                                <span className="text-sm font-black text-emerald-400">{((4 - r) * 12000).toLocaleString()} <span className="text-[10px] text-slate-400">VO</span></span>
                             </div>
-                            <span className="text-sm font-black text-emerald-400">{((4 - r) * 12000).toLocaleString()} <span className="text-[10px] text-slate-400">VO</span></span>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="space-y-4 mb-2 animate-fade-in text-center flex flex-col items-center">
+                        <div className="w-16 h-16 bg-pink-500/20 rounded-full flex justify-center items-center border border-pink-500/40 mb-2">
+                            <Star className="text-pink-400 w-8 h-8" />
                         </div>
-                    ))}
-                </div>
+                        <h3 className="text-[15px] font-black text-white">소각 기여 1위 달성 이벤트</h3>
+                        <p className="text-[11px] text-slate-400 font-bold leading-relaxed px-2">
+                            재단 주최 소각 이벤트! 소각 횟수, 내 소각 볼륨, 하부 소각 볼륨을 종합 집계하여 1위 기여자에게 엄청난 혜택을 드립니다.
+                        </p>
+                        <button onClick={() => openAiChat('JOY')} className="w-full mt-2 bg-gradient-to-r from-yellow-500 to-pink-500 text-black font-black uppercase text-[12px] py-3 rounded-xl shadow-[0_0_15px_rgba(236,72,153,0.5)] flex items-center justify-center gap-2 transition-transform active:scale-95">
+                            <Bot size={16} /> JOY AI 이벤트 안내 및 초대장 받기
+                        </button>
+                    </div>
+                )}
             </div>
         </motion.div>
     );
@@ -321,22 +343,30 @@ export default function UserApp() {
     const [page, setPage] = useState<Page>(Page.LIVE); 
     const [tier, setTier] = useState<Tier>('VIP');
     
+    // Web3 TonConnect
+    const [tonConnectUI] = useTonConnectUI();
+    const userAddress = useTonAddress();
+    
     // Staking & Withdrawal State
-    const [stakes, setStakes] = useState<{ amount: number, period: number, share: string, unlockTime: number, autoRenew: boolean }[]>([]);
+    const [stakingMode, setStakingMode] = useState<'DIRECT' | 'ENTRUSTED'>('DIRECT');
+    const [stakes, setStakes] = useState<{ amount: number, period: number, share: string, unlockTime: number, autoRenew: boolean, mode: string, beneficiary?: string }[]>([]);
     const [stakeAmount, setStakeAmount] = useState<string>('');
     const [stakePeriod, setStakePeriod] = useState<number>(3);
-    const [autoRenew, setAutoRenew] = useState<boolean>(true); // NEW STATE
+    const [autoRenew, setAutoRenew] = useState<boolean>(true);
     const [stakeSuccessObj, setStakeSuccessObj] = useState<any>(null);
     const [withdrawModal, setWithdrawModal] = useState(false);
     const [withdrawInputAmount, setWithdrawInputAmount] = useState<string>('');
     
     // Wallet State
-    const [isWalletConnected, setIsWalletConnected] = useState(false);
     const [walletModal, setWalletModal] = useState(false);
     const [settingsModal, setSettingsModal] = useState(false);
+    const [burnModal, setBurnModal] = useState(false);
+    const [downlineModal, setDownlineModal] = useState<'L1' | 'L2' | null>(null);
+    const [suspensionData, setSuspensionData] = useState<{isSuspended: boolean, reason: string | null}>({isSuspended: false, reason: null});
     const [language, setLanguage] = useState('한국어');
     const [currency, setCurrency] = useState('USD');
     const voraAddress = "UQxJ_aXr9oP2pM_A8c9iJqLx-B7fQh2Tz1";
+    const burnAddress = "EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c";
 
     
     // AI Modal & Chat State
@@ -416,38 +446,65 @@ export default function UserApp() {
             }
         }
 
-        // Silent Auto-Login / Register to VORA Backend
+        // Generate consistent UID across all apps using Telegram ID
+        const generateMockUid = (tgId: string) => {
+            if (!tgId || tgId === 'test_user') return '260505001000';
+            const hash = Array.from(String(tgId)).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            return `2605${String(hash).padStart(4, '0')}00`;
+        };
+        
+        const unifiedUid = generateMockUid(tgUserId);
+        setTelegramId(tgUserId);
+        setAppUid(unifiedUid);
+
+        // Silent Auto-Login / Register to VORA Backend (Optional Data Fetch)
+        const fallbackTimer = setTimeout(() => {
+            setIsInitializing(false);
+            console.warn('[Vora Auth] Fallback timeout triggered. Bypassing infinite load.');
+        }, 1500); // 1.5 second max wait time
+
         fetch('/api/user/auth', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ telegramId: tgUserId, referrerUid: startParam })
         }).then(res => res.json()).then(data => {
             if (data.success && data.user) {
-                setTelegramId(data.user.telegramId);
-                setAppUid(data.user.appUid);
-                setAssets({
-                    vora: 0,
-                    usdEq: 0,
-                    l1: data.user.l1Count || 0,
-                    l2: data.user.l2Count || 0,
-                    nVolume: data.user.nVolume || 0,
-                    unclaimedRewards: (data.user.l1Count * 1250) + (data.user.l2Count * 250), // Dynamic T2E Reward estimation
-                    totalDeposit: data.user.totalDeposit || 0,
-                    totalWithdrawal: data.user.totalWithdrawal || 0,
-                    totalBurn: data.user.totalBurn || 0
-                });
+                // If backend provides a real UID, overwrite the fallback mock
+                if (data.user.appUid) setAppUid(data.user.appUid);
+                
+                // Handle Suspension State
+                if (data.user.isLinkSuspended) {
+                    setSuspensionData({ isSuspended: true, reason: data.user.suspensionReason });
+                }
+
+                setAssets(prev => ({
+                    ...prev,
+                    l1: data.user.l1Count || prev.l1,
+                    l2: data.user.l2Count || prev.l2,
+                    nVolume: data.user.nVolume || prev.nVolume,
+                    unclaimedRewards: (data.user.l1Count * 1250) + (data.user.l2Count * 250),
+                    totalDeposit: data.user.totalDeposit || prev.totalDeposit,
+                    totalWithdrawal: data.user.totalWithdrawal || prev.totalWithdrawal,
+                    totalBurn: data.user.totalBurn || prev.totalBurn
+                }));
             }
         }).catch(err => {
-            console.error('[Vora] Init error:', err);
+            console.warn('[Vora Auth] Using Unified UID Mock mode. (Backend not reached)', err);
         }).finally(() => {
+            clearTimeout(fallbackTimer);
             setIsInitializing(false);
         });
     }, []);
 
     useEffect(() => {
-        const handleTrigger = () => setWithdrawModal(true);
-        window.addEventListener('triggerWithdraw', handleTrigger);
-        return () => window.removeEventListener('triggerWithdraw', handleTrigger);
+        const handleTriggerWithdraw = () => setWithdrawModal(true);
+        const handleTriggerBurn = () => setBurnModal(true);
+        window.addEventListener('triggerWithdraw', handleTriggerWithdraw);
+        window.addEventListener('triggerBurn', handleTriggerBurn);
+        return () => {
+            window.removeEventListener('triggerWithdraw', handleTriggerWithdraw);
+            window.removeEventListener('triggerBurn', handleTriggerBurn);
+        };
     }, []);
 
     if (isInitializing) {
@@ -466,7 +523,7 @@ export default function UserApp() {
     }
 
     const handleCopyLink = () => {
-        const link = `https://t.me/Fandom_Meetup_Bot/app?startapp=${appUid}`;
+        const link = `https://t.me/Crew_Meetup_Bot/app?startapp=${appUid}`;
         if (navigator.clipboard) {
             navigator.clipboard.writeText(link).then(() => {
                 setCopySuccess(true);
@@ -475,22 +532,87 @@ export default function UserApp() {
         }
     };
     
-    const handleStake = () => {
+    const handleStake = async () => {
         const amt = parseFloat(stakeAmount);
-        if (isNaN(amt) || amt <= 0) return;
+        if (isNaN(amt) || amt <= 0) {
+            alert("스테이킹할 VORA 수량을 먼저 입력해주세요.");
+            return;
+        }
         
-        const periodToShare: Record<number, string> = { 3: '10%', 7: '15%', 30: '25%', 365: '50%' };
-        const newStake = { 
-            amount: amt, 
-            period: stakePeriod, 
-            share: periodToShare[stakePeriod], 
-            unlockTime: Date.now() + stakePeriod * 24 * 60 * 60 * 1000,
-            autoRenew: autoRenew
-        };
+        if (!userAddress) {
+            alert("블록체인 통신을 위해 먼저 TON 지갑을 연동해주세요.");
+            tonConnectUI.openModal();
+            return;
+        }
+
+        let beneficiary = undefined;
+        if (stakingMode === 'ENTRUSTED') {
+            const downlineUid = prompt("위탁 스테이킹을 진행할 하부 유저(수혜자)의 UID를 입력하세요:");
+            if (!downlineUid) return;
+            beneficiary = downlineUid;
+        }
+
+        const confirmMsg = confirm(`[스마트 컨트랙트 서명]\n\n${amt.toLocaleString()} VORA를 ${stakingMode} 모드로 스테이킹 하시겠습니까?\n확인을 누르면 지갑 앱이 열립니다.`);
+        if (!confirmMsg) return;
         
-        setStakes(prev => [...prev, newStake]);
-        setStakeAmount('');
-        setStakeSuccessObj(newStake);
+        try {
+            // Fetch User's Jetton Wallet Address via Toncenter API
+            const minterAddr = import.meta.env.VITE_VORA_TOKEN_ADDRESS || 'EQD-cVRC3YKEiNuh7u9eWpbGQiPg0tKKH-dgToQgmhIL9WQh';
+            const distributorAddr = import.meta.env.VITE_UNILEVEL_DISTRIBUTOR || 'EQBT1gz1SYDrbgjC7-SpI5_zLHlaFPGMNq_O4mE_C1YdNH2W';
+            
+            let jettonWalletAddr = distributorAddr; // fallback to sending TON if jetton wallet not found
+            try {
+                const res = await fetch(`https://testnet.toncenter.com/api/v3/jettonWallets?owner_address=${userAddress}&jetton_master_address=${minterAddr}`);
+                const data = await res.json();
+                if (data.jetton_wallets && data.jetton_wallets.length > 0) {
+                    jettonWalletAddr = data.jetton_wallets[0].address;
+                }
+            } catch(e) {
+                console.error("Failed to fetch Jetton Wallet:", e);
+            }
+
+            // Construct TokenTransfer Payload
+            const payload = beginCell()
+                .storeUint(0x0f8a7ea5, 32) // opcode for Jetton Transfer
+                .storeUint(0, 64) // query_id
+                .storeCoins(toNano(amt.toString())) // amount to send
+                .storeAddress(Address.parse(distributorAddr)) // destination (UnilevelDistributor)
+                .storeAddress(Address.parse(userAddress)) // response_destination (refunds)
+                .storeBit(0) // no custom payload
+                .storeCoins(toNano('0.05')) // forward_ton_amount (for distributor internal routing)
+                .storeBit(0) // forward_payload in this slice
+                .endCell();
+
+            await tonConnectUI.sendTransaction({
+                validUntil: Math.floor(Date.now() / 1000) + 360,
+                messages: [
+                    {
+                        address: jettonWalletAddr,
+                        amount: toNano('0.1').toString(), // gas fee
+                        payload: payload.toBoc().toString('base64')
+                    }
+                ]
+            });
+            
+            const periodToShare: Record<number, string> = { 3: '10%', 7: '15%', 30: '25%', 365: '50%' };
+            const newStake = { 
+                amount: amt, 
+                period: stakePeriod, 
+                share: periodToShare[stakePeriod], 
+                unlockTime: Date.now() + stakePeriod * 24 * 60 * 60 * 1000,
+                autoRenew: autoRenew,
+                mode: stakingMode,
+                beneficiary: beneficiary
+            };
+            
+            setStakes(prev => [...prev, newStake]);
+            setStakeAmount('');
+            setStakeSuccessObj(newStake);
+            
+        } catch (e) {
+            console.error("TonConnect Error:", e);
+            alert("트랜잭션 서명이 취소되었거나 오류가 발생했습니다.");
+        }
     };
 
     return (
@@ -508,23 +630,37 @@ export default function UserApp() {
                 {/* Embedded VORA Custom Wallet Button representing Dual-Currency Support */}
                 <div className="flex items-center gap-2">
                     <div 
-                        onClick={() => !isWalletConnected && setIsWalletConnected(true)} 
-                        className={`transition-all flex flex-col gap-2 px-3 py-1.5 rounded-2xl border ${isWalletConnected ? 'bg-gradient-to-br from-[#061411] to-[#0a111a] border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.3)] min-w-[160px]' : 'bg-[#0a111a]/80 border-[#2dd4bf]/20 hover:bg-[#101622] cursor-pointer flex-row items-center justify-between gap-1.5'}`}
+                        onClick={async () => {
+                            console.log("Wallet button clicked! userAddress:", userAddress);
+                            if (!userAddress) {
+                                try {
+                                    console.log("Attempting to open TonConnect Modal...");
+                                    await tonConnectUI.openModal();
+                                    console.log("TonConnect Modal opened successfully.");
+                                } catch (e: any) {
+                                    console.error("TonConnect Error:", e);
+                                    alert("지갑 모달을 여는 중 오류가 발생했습니다: " + (e?.message || JSON.stringify(e)));
+                                }
+                            } else {
+                                setWalletModal(true);
+                            }
+                        }} 
+                        className={`transition-all flex flex-col gap-2 px-3 py-1.5 rounded-2xl border ${userAddress ? 'bg-gradient-to-br from-[#061411] to-[#0a111a] border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.3)] min-w-[160px]' : 'bg-[#0a111a]/80 border-[#2dd4bf]/20 hover:bg-[#101622] cursor-pointer flex-row items-center justify-between gap-1.5'}`}
                     >
-                        {isWalletConnected ? (
+                        {userAddress ? (
                             <>
                                 <div className="flex justify-between items-center w-full">
                                     <div className="flex flex-col gap-0.5">
                                         <span className="text-[9px] font-black tracking-widest text-[#0098EA] flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-[#0098EA]"></div> 2.45 TON</span>
                                         <span className="text-[9px] font-black tracking-widest text-emerald-400 flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_5px_rgba(52,211,153,0.8)]"></div> 12,050 VORA</span>
                                     </div>
-                                    <div onClick={(e) => { e.stopPropagation(); setIsWalletConnected(false); }} className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30 cursor-pointer hover:bg-emerald-500/20">
+                                    <div onClick={(e) => { e.stopPropagation(); tonConnectUI.disconnect(); }} className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30 cursor-pointer hover:bg-emerald-500/20">
                                         <Wallet size={12} className="text-emerald-400" />
                                     </div>
                                 </div>
                                 <div className="border-t border-emerald-900/40 pt-1.5 pb-0.5 flex justify-between items-center w-full">
-                                    <span className="font-mono text-[8px] text-emerald-500">UQx...Tz1</span>
-                                    <div onClick={(e) => { e.stopPropagation(); setWalletModal(true); }} className="flex items-center gap-1 bg-emerald-500/20 hover:bg-emerald-500/30 transition-colors px-1.5 py-0.5 rounded text-[8px] font-black text-emerald-400 uppercase tracking-widest cursor-pointer">
+                                    <span className="font-mono text-[8px] text-emerald-500">{userAddress.slice(0,4)}...{userAddress.slice(-4)}</span>
+                                    <div className="flex items-center gap-1 bg-emerald-500/20 hover:bg-emerald-500/30 transition-colors px-1.5 py-0.5 rounded text-[8px] font-black text-emerald-400 uppercase tracking-widest cursor-pointer">
                                         <QrCode size={10} /> QR
                                     </div>
                                 </div>
@@ -574,6 +710,8 @@ export default function UserApp() {
                             openAiChat={openAiChat}
                             autoRenew={autoRenew}
                             setAutoRenew={setAutoRenew}
+                            stakingMode={stakingMode}
+                            setStakingMode={setStakingMode}
                         />
                     )}
                     {page === Page.OFFICE && (
@@ -584,9 +722,10 @@ export default function UserApp() {
                             referrerUid={referrerUid} 
                             copySuccess={copySuccess} 
                             handleCopyLink={handleCopyLink} 
+                            setDownlineModal={setDownlineModal}
                         />
                     )}
-                    {page === Page.RANK && <RankView key="rank" />}
+                    {page === Page.RANK && <RankView key="rank" openAiChat={openAiChat} />}
                 </AnimatePresence>
             </div>
 
@@ -690,7 +829,7 @@ export default function UserApp() {
                                             });
                                             const data = await res.json();
                                             if (data.success) {
-                                                alert(`[TX Hash: ${data.txHash}]\n보안 및 해킹 방지 정책에 따라 출금 지연이 가동되었습니다.\n\n- 출금 요청액: ${targetAmount.toLocaleString()} VORA\n- 출금 지연 시간: ${delayHours}시간\n\n지연 시간이 종료되면 5% 수수료 차감 후 VORA 지갑으로 안전하게 입금됩니다.`);
+                                                alert(`[TX Hash: ${data.txHash}]\n관리자 확인 및 트래블 룰 정책에 따라 24시간 내에 출금 승인이 진행됩니다.\n\n- 출금 요청액: ${targetAmount.toLocaleString()} VORA\n- 출금 승인 대기: 24시간\n\n승인이 완료되면 5% 수수료 차감 후 VORA 지갑으로 안전하게 인출됩니다.`);
                                                 
                                                 // Deduct from unclaimed rewards, but don't add to main Wallet VORA balance yet (pending)
                                                 setAssets(prev => ({ ...prev, unclaimedRewards: prev.unclaimedRewards - targetAmount }));
@@ -777,9 +916,51 @@ export default function UserApp() {
                 )}
             </AnimatePresence>
             
+            {/* Downline Details Modal */}
+            <AnimatePresence>
+                {downlineModal && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="relative bg-[#0a111a] border border-emerald-500/30 rounded-3xl p-5 w-full max-w-sm flex flex-col shadow-[0_0_50px_rgba(16,185,129,0.2)] max-h-[80vh] overflow-hidden">
+                            <button onClick={() => setDownlineModal(null)} className="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-slate-400 hover:text-white transition-colors border border-slate-700 z-10">
+                                <X size={16} />
+                            </button>
+                            
+                            <h2 className="text-lg font-black text-white mb-2 uppercase tracking-wide border-b border-slate-800 pb-3">{downlineModal} 하부 유저 목록</h2>
+                            
+                            <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pt-2">
+                                {[1,2,3].map((u) => {
+                                    const mockStaking = Math.floor(Math.random() * 50000) + 10000;
+                                    const mockCarSales = Math.floor(Math.random() * 2000) + 500;
+                                    const mockProfit = (mockStaking * 0.05) + (mockCarSales * 0.1); 
+                                    
+                                    return (
+                                        <div key={u} className="bg-[#101620] p-3 rounded-xl border border-slate-800 flex flex-col gap-2 relative">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-[11px] font-black text-cyan-400">UID: 2605...0{u}</span>
+                                                <span className="text-[9px] bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 px-2 py-0.5 rounded uppercase font-black">Active</span>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-400 font-bold">
+                                                <div>스테이킹 볼륨: <span className="text-white">{mockStaking.toLocaleString()} V</span></div>
+                                                <div>차량판매 볼륨: <span className="text-white">{mockCarSales.toLocaleString()} V</span></div>
+                                            </div>
+                                            <div className="border-t border-slate-800 pt-2 flex justify-between items-center mt-1">
+                                                <span className="text-[10px] text-yellow-400 font-bold">수익 쉐어 배분율 적용 예상</span>
+                                                <span className="text-[12px] font-black text-yellow-300">+{mockProfit.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} TON</span>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+
+
             {/* Wallet Address & QR Modal */}
             <AnimatePresence>
-                {walletModal && (
+                {walletModal && userAddress && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
                         <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="relative bg-[#081017] border border-emerald-500/30 rounded-3xl p-6 w-full max-w-sm flex flex-col items-center shadow-[0_0_50px_rgba(16,185,129,0.15)] overflow-hidden">
                             
@@ -795,9 +976,9 @@ export default function UserApp() {
                             
                             <div className="w-full aspect-square bg-white rounded-2xl p-4 mb-6 shadow-inner flex items-center justify-center relative overflow-hidden">
                                 <img 
-                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${voraAddress}&color=000000&bgcolor=ffffff`} 
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${userAddress}&color=000000&bgcolor=ffffff`} 
                                     alt="Wallet QR Code" 
-                                    className="w-full h-full object-contain"
+                                    className="w-full h-full object-contain max-h-[250px]"
                                 />
                                 <div className="absolute inset-0 border-4 border-white/20 rounded-2xl pointer-events-none mix-blend-overlay"></div>
                             </div>
@@ -805,13 +986,13 @@ export default function UserApp() {
                             <div className="w-full bg-[#03060a] p-4 rounded-xl border border-slate-800 mb-6 flex flex-col items-center justify-center relative group cursor-pointer"
                                  onClick={() => {
                                      if(navigator.clipboard) {
-                                         navigator.clipboard.writeText(voraAddress);
+                                         navigator.clipboard.writeText(userAddress);
                                          alert("지갑 주소가 복사되었습니다.");
                                      }
                                  }}
                             >
                                 <span className="text-[10px] text-slate-500 font-bold uppercase mb-2">지갑 주소 (TON / VORA)</span>
-                                <span className="text-xs font-mono text-emerald-400 font-bold tracking-tight text-center break-all px-2">{voraAddress}</span>
+                                <span className="text-xs font-mono text-emerald-400 font-bold tracking-tight text-center break-all px-2">{userAddress}</span>
                                 <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl flex items-center justify-center backdrop-blur-[1px]">
                                      <div className="flex items-center gap-1.5 bg-[#03060a] px-3 py-1.5 rounded-lg border border-emerald-500/50">
                                          <Copy size={12} className="text-emerald-400" />
@@ -870,15 +1051,15 @@ export default function UserApp() {
                                 
                                 <div className="flex flex-col gap-3 py-2 text-slate-300">
                                     <span className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Community & Docs</span>
-                                    <a href="#" className="flex items-center justify-between hover:text-white transition-colors bg-white/5 p-3 rounded-xl border border-white/5 group">
+                                    <a href="https://vora.gitbook.io/" target="_blank" rel="noreferrer" className="flex items-center justify-between hover:text-white transition-colors bg-white/5 p-3 rounded-xl border border-white/5 group">
                                         <div className="flex items-center gap-2"><FileText size={16} className="text-cyan-400" /> Whitepaper</div>
-                                        <span className="text-[10px] bg-cyan-900/40 text-cyan-400 px-1.5 py-0.5 rounded">PDF</span>
+                                        <span className="text-[10px] bg-cyan-900/40 text-cyan-400 px-1.5 py-0.5 rounded">View</span>
                                     </a>
-                                    <a href="#" className="flex items-center justify-between hover:text-white transition-colors bg-white/5 p-3 rounded-xl border border-white/5 group">
+                                    <a href="https://github.com/VoraEcosystem" target="_blank" rel="noreferrer" className="flex items-center justify-between hover:text-white transition-colors bg-white/5 p-3 rounded-xl border border-white/5 group">
                                         <div className="flex items-center gap-2"><Github size={16} /> GitHub Config</div>
                                         <span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded group-hover:bg-slate-700">Link</span>
                                     </a>
-                                    <a href="#" className="flex items-center justify-between hover:text-white transition-colors bg-white/5 p-3 rounded-xl border border-white/5 group">
+                                    <a href="https://t.me/vora_official" target="_blank" rel="noreferrer" className="flex items-center justify-between hover:text-white transition-colors bg-white/5 p-3 rounded-xl border border-white/5 group">
                                         <div className="flex items-center gap-2"><MessageCircle size={16} className="text-blue-400" /> Telegram Channel</div>
                                         <span className="text-[10px] bg-blue-900/40 text-blue-400 px-1.5 py-0.5 rounded">Join</span>
                                     </a>
@@ -886,6 +1067,73 @@ export default function UserApp() {
                             </div>
                             
                             <p className="text-center text-[10px] text-slate-500 font-black tracking-widest uppercase mt-4">Vora Network v1.0.0</p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Burn Modal */}
+            <AnimatePresence>
+                {burnModal && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="relative bg-[#081017] border border-red-500/30 rounded-3xl p-6 w-full max-w-sm flex flex-col items-center shadow-[0_0_50px_rgba(239,68,68,0.15)] overflow-hidden">
+                            <button onClick={() => setBurnModal(false)} className="absolute top-4 right-4 p-2 bg-black/50 rounded-full text-slate-400 hover:text-white transition-colors">
+                                <X size={20} />
+                            </button>
+
+                            <div className="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-center mb-4">
+                                <Flame className="text-red-400 w-8 h-8" />
+                            </div>
+                            <h2 className="text-xl font-black text-white mb-1 uppercase tracking-wide">VORA 소각 참여</h2>
+                            <p className="text-[10px] text-red-500/80 font-bold mb-6 tracking-widest uppercase border border-red-500/20 px-2 py-0.5 rounded-md bg-red-500/5">Burn Address (Null)</p>
+                            
+                            <div className="w-full aspect-square bg-white rounded-2xl p-4 mb-6 shadow-inner flex items-center justify-center relative overflow-hidden">
+                                <img 
+                                    src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${burnAddress}&color=000000&bgcolor=ffffff`} 
+                                    alt="Burn QR Code" 
+                                    className="w-full h-full object-contain"
+                                />
+                            </div>
+                            
+                            <div className="w-full bg-[#03060a] p-4 rounded-xl border border-slate-800 mb-6 flex flex-col items-center justify-center relative group cursor-pointer"
+                                 onClick={() => {
+                                     if(navigator.clipboard) {
+                                         navigator.clipboard.writeText(burnAddress);
+                                         alert("소각 주소가 복사되었습니다.");
+                                     }
+                                 }}
+                            >
+                                <span className="text-[10px] text-slate-500 font-bold uppercase mb-2">소각 전용 주소 복사</span>
+                                <span className="text-xs font-mono text-red-400 font-bold tracking-tight text-center break-all px-2">{burnAddress}</span>
+                            </div>
+                            
+                            <p className="text-[11px] text-slate-300 text-center font-bold px-4 leading-relaxed bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                                위 주소로 소각할 토큰을 전송하신 후, <strong>공식 텔레그램 그룹에 트랜잭션 스크린샷</strong>을 인증하시면 <span className="text-emerald-400">VIP 그룹에 초대</span>됩니다!
+                            </p>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Suspension Modal */}
+            <AnimatePresence>
+                {suspensionData.isSuspended && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+                        <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="relative bg-[#1a0f12] border border-red-500/50 rounded-3xl p-6 w-full max-w-sm flex flex-col items-center shadow-[0_0_50px_rgba(239,68,68,0.3)]">
+                            <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
+                                <X size={32} className="text-red-500" />
+                            </div>
+                            <h2 className="text-xl font-black text-white mb-4 uppercase tracking-wide">계정 정지 알림</h2>
+                            <p className="text-sm text-slate-300 text-center mb-4 leading-relaxed">
+                                귀하의 레퍼럴 활동 및 출금 기능이 일시 정지되었습니다.
+                            </p>
+                            <div className="bg-red-500/10 border border-red-500/20 w-full p-4 rounded-xl text-center mb-6">
+                                <p className="text-[10px] text-red-400 font-black uppercase tracking-widest mb-1">정지 사유</p>
+                                <p className="text-sm text-white font-bold">{suspensionData.reason || "관리자 판단에 의한 계정 정지"}</p>
+                            </div>
+                            <button onClick={() => setSuspensionData({isSuspended: false, reason: null})} className="w-full py-3 bg-slate-800 text-slate-300 rounded-xl font-bold uppercase tracking-widest text-sm hover:bg-slate-700 transition-colors">
+                                닫기 (읽기 전용 모드)
+                            </button>
                         </motion.div>
                     </motion.div>
                 )}

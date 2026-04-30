@@ -15,6 +15,8 @@ import {
     Contract,
     ContractABI,
     ABIType,
+    ABIGetter,
+    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -1312,7 +1314,7 @@ const VoraTreasury_opcodes = {
     "WithdrawSubscription": 833932536,
 }
 
-const VoraTreasury_getters: any[] = [
+const VoraTreasury_getters: ABIGetter[] = [
     {"name":"owner","methodId":83229,"arguments":[],"returnType":{"kind":"simple","type":"address","optional":false}},
 ]
 

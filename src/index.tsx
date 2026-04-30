@@ -10,6 +10,7 @@ import VoraScanPage from '../pages/VoraScanPage';
 import TradingDashboard from '../pages/TradingDashboard';
 import VoraSwapApp from './pages/VoraSwapApp'; // <- Added Bromotion P2P Hub
 import AngelInvestDashboard from '../pages/AngelInvestDashboard'; // <- Added Founder Private Dashboard
+import AdminHub from './pages/AdminHub'; // <- New Admin Hub for Escrow/KYC
 import { TonConnectUIProvider } from '@tonconnect/ui-react';
 
 const rootElement = document.getElementById('root');
@@ -44,23 +45,27 @@ const RootRouter = () => {
 
    if (!isReady) return null; // Pre-render shield
 
-   // 0. Angel Invest Dashboard (vorainvest.com) - Private Access
-   if (forceInvest || hostname.includes('vorainvest.com') || searchParams.has('token') || hostname.includes('localhost') || hostname === '127.0.0.1') {
+   // 1. Explicit URL Overrides (for local testing & Telegram links)
+   if (forceSwap) return <VoraSwapApp />;
+   if (forceInvest) return <AngelInvestDashboard />;
+   if (searchParams.get('app') === 'mini') return <VoraminiApp />;
+
+   // 2. Domain-based Routing
+   if (hostname.includes('vorainvest.com') || searchParams.has('token')) {
        return <AngelInvestDashboard />;
    }
-
-   // 1. Scan Domain (VoraScan)
    if (hostname.includes('vorascan.com')) {
        return <VoraScanPage />;
    }
-   
-   // 3. Bromotion Hub (voraswap.com) - P2P dNFT Market (Checks forceSwap first)
-   if (forceSwap || hostname.includes('voraswap.com')) {
+   if (hostname.includes('voraswap.com')) {
        return <VoraSwapApp />;
    }
-
-   // 2. Flywheel Mini App (voramini.com)
    if (hostname.includes('voramini.com')) {
+       return <VoraminiApp />;
+   }
+
+   // 3. Localhost Default (Test Mode)
+   if (hostname.includes('localhost') || hostname === '127.0.0.1') {
        return <VoraminiApp />;
    }
 
@@ -69,8 +74,8 @@ const RootRouter = () => {
        return <VoraminiApp />;
    }
 
-   // 5. Ultimate fallback
-   return <TradingDashboard />;
+   // 5. Ultimate fallback (If ngrok is opened outside Telegram)
+   return <VoraminiApp />;
 };
 
 const manifestUrl = window.location.origin + '/tonconnect-manifest.json';
@@ -87,6 +92,7 @@ root.render(
           <Route path="/dashboard" element={<TradingDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/voraadmin" element={<AdminDashboard />} />
+          <Route path="/admin/vorahub" element={<AdminHub />} />
           <Route path="/ido" element={<IdoLaunchpad />} />
         </Routes>
       </BrowserRouter>

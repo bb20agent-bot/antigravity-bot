@@ -15,6 +15,8 @@ import {
     Contract,
     ContractABI,
     ABIType,
+    ABIGetter,
+    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -1108,7 +1110,7 @@ const Escrow_v2_opcodes = {
     "CreateTrade": 2154762979,
 }
 
-const Escrow_v2_getters: any[] = [
+const Escrow_v2_getters: ABIGetter[] = [
     {"name":"owner","methodId":83229,"arguments":[],"returnType":{"kind":"simple","type":"address","optional":false}},
 ]
 

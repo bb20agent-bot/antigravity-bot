@@ -8,11 +8,23 @@
 ;; NOTE: declarations are sorted for optimal order
 ;;
 
+;; __tact_store_address_opt
+builder __tact_store_address_opt(builder b, slice address) inline;
+
+;; __tact_not_null
+forall X -> X __tact_not_null(X x) impure inline;
+
 ;; __tact_context_get
 (int, slice, int, slice) __tact_context_get() inline;
 
 ;; __tact_context_get_sender
 slice __tact_context_get_sender() inline;
+
+;; __tact_dict_get_int_cell
+cell __tact_dict_get_int_cell(cell d, int kl, int k) inline;
+
+;; __tact_dict_set_int_cell
+(cell, ()) __tact_dict_set_int_cell(cell d, int kl, int k, cell v) inline;
 
 ;; $DeployOk$_store
 builder $DeployOk$_store(builder build_0, (int) v) inline;
@@ -20,35 +32,71 @@ builder $DeployOk$_store(builder build_0, (int) v) inline;
 ;; $DeployOk$_store_cell
 cell $DeployOk$_store_cell((int) v, builder b) inline;
 
+;; $TokenTransfer$_store
+builder $TokenTransfer$_store(builder build_0, (int, int, slice, slice, cell, int, slice) v) inline;
+
+;; $TokenTransfer$_store_cell
+cell $TokenTransfer$_store_cell((int, int, slice, slice, cell, int, slice) v, builder b) inline;
+
+;; $Order$_store
+builder $Order$_store(builder build_0, (slice, int, int, int) v) inline;
+
+;; $Order$_store_cell
+cell $Order$_store_cell((slice, int, int, int) v, builder b) inline;
+
+;; $Order$_load
+(slice, ((slice, int, int, int))) $Order$_load(slice sc_0) inline;
+
+;; $Order$_as_optional
+tuple $Order$_as_optional((slice, int, int, int) v) inline;
+
+;; $Order$_load_opt
+tuple $Order$_load_opt(cell cl) inline;
+
 ;; $P2PEscrow$_store
-builder $P2PEscrow$_store(builder build_0, (slice, int) v) inline;
+builder $P2PEscrow$_store(builder build_0, (slice, slice, cell, int) v) inline;
 
 ;; $P2PEscrow$_load
-(slice, ((slice, int))) $P2PEscrow$_load(slice sc_0) inline;
+(slice, ((slice, slice, cell, int))) $P2PEscrow$_load(slice sc_0) inline;
 
 ;; $Context$_get_value
 _ $Context$_get_value((int, slice, int, slice) v) inline;
+
+;; $Order$_not_null
+((slice, int, int, int)) $Order$_not_null(tuple v) inline;
 
 ;; $P2PEscrow$init$_load
 (slice, ((slice))) $P2PEscrow$init$_load(slice sc_0) inline;
 
 ;; $P2PEscrow$_contract_init
-(slice, int) $P2PEscrow$_contract_init(slice $owner) impure inline;
+(slice, slice, cell, int) $P2PEscrow$_contract_init(slice $owner) impure inline;
 
 ;; $P2PEscrow$_contract_load
-(slice, int) $P2PEscrow$_contract_load() impure inline;
+(slice, slice, cell, int) $P2PEscrow$_contract_load() impure inline;
 
 ;; $P2PEscrow$_contract_store
-() $P2PEscrow$_contract_store((slice, int) v) impure inline;
+() $P2PEscrow$_contract_store((slice, slice, cell, int) v) impure inline;
 
-;; $global_emit
-() $global_emit(cell $body) impure inline;
+;; $SendParameters$_constructor_to_value_mode_body
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline;
+
+;; $TokenTransfer$_constructor_queryId_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload
+((int, int, slice, slice, cell, int, slice)) $TokenTransfer$_constructor_queryId_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload(int $queryId, int $amount, slice $destination, slice $response_destination, cell $custom_payload, int $forward_ton_amount, slice $forward_payload) inline;
+
+;; $P2PEscrow$_fun_sendVora
+((slice, slice, cell, int), ()) $P2PEscrow$_fun_sendVora((slice, slice, cell, int) $self, slice $to, int $amount) impure inline_ref;
 
 ;; $MessageParameters$_constructor_bounce_to_value_mode_body
 ((int, cell, int, slice, int)) $MessageParameters$_constructor_bounce_to_value_mode_body(int $bounce, slice $to, int $value, int $mode, cell $body) inline;
 
 ;; $P2PEscrow$_fun_notify
-((slice, int), ()) $P2PEscrow$_fun_notify((slice, int) $self, cell $body) impure inline;
+((slice, slice, cell, int), ()) $P2PEscrow$_fun_notify((slice, slice, cell, int) $self, cell $body) impure inline;
+
+;; $Order$_constructor_seller_amountVora_priceTon_isActive
+((slice, int, int, int)) $Order$_constructor_seller_amountVora_priceTon_isActive(slice $seller, int $amountVora, int $priceTon, int $isActive) inline;
+
+;; $SendParameters$_constructor_to_value_mode_bounce_body
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_bounce_body(slice $to, int $value, int $mode, int $bounce, cell $body) inline;
 
 ;; $DeployOk$_constructor_queryId
 ((int)) $DeployOk$_constructor_queryId(int $queryId) inline;
@@ -60,6 +108,32 @@ global slice __tact_context_sender;
 global cell __tact_child_contract_codes;
 global int __tact_randomized;
 
+(slice, slice) __tact_load_address_opt(slice cs) asm """
+
+            b{00} SDBEGINSQ
+            IF:<{
+              PUSHNULL
+            }>ELSE<{
+              LDMSGADDR
+              SWAP
+            }>
+
+""";
+
+builder __tact_store_addr_none(builder b) asm "b{00} STSLICECONST";
+
+builder __tact_store_address_opt(builder b, slice address) inline {
+    if (null?(address)) {
+        return __tact_store_addr_none(b);
+    } else {
+        return b.store_slice(address);
+    }
+}
+
+forall X -> X __tact_not_null(X x) impure inline {
+    throw_if(128, null?(x)); return x;
+}
+
 (int, slice, int, slice) __tact_context_get() inline {
     return __tact_context;
 }
@@ -68,8 +142,34 @@ slice __tact_context_get_sender() inline {
     return __tact_context_sender;
 }
 
-builder $global_beginCell() impure asm """
-    NEWC
+forall X0, X1, X2, X3 -> tuple __tact_tuple_create_4((X0, X1, X2, X3) v) asm """
+    4 TUPLE
+""";
+
+forall X0, X1, X2, X3 -> (X0, X1, X2, X3) __tact_tuple_destroy_4(tuple v) asm """
+    4 UNTUPLE
+""";
+
+cell __tact_dict_get_int_cell(cell d, int kl, int k) inline {
+    var (r, ok) = idict_get_ref?(d, kl, k);
+    if (ok) {
+        return r;
+    } else {
+        return null();
+    }
+}
+
+(cell, ()) __tact_dict_set_int_cell(cell d, int kl, int k, cell v) inline {
+    if (null?(v)) {
+        var (r, ok) = idict_delete?(d, kl, k);
+        return (r, ());
+    } else {
+        return (idict_set_ref(d, kl, k, v), ());
+    }
+}
+
+slice $global_emptySlice() impure asm """
+    b{} PUSHSLICE
 """;
 
 int $global_myBalance() impure asm """
@@ -100,25 +200,87 @@ int $global_myBalance() impure asm """
     SENDRAWMSG
 """;
 
-() $global_sendRawMessage(cell $msg, int $mode) impure asm """
-    SENDRAWMSG
-""";
+() $global_send((int, cell, cell, cell, int, slice, int) $params) impure asm """
+    NEWC
+    b{01} STSLICECONST  // store tag = $0 and ihr_disabled = true
+    1 STI               // store `bounce`
+    b{000} STSLICECONST // store bounced = false and src = addr_none
+    STSLICE             // store `to`
+    SWAP
+    STGRAMS             // store `value`
+    105 PUSHINT         // 1 + 4 + 4 + 64 + 32
+    STZEROES            // store currency_collection, ihr_fee, fwd_fee, created_lt and created_at
+    // → Stack state
+    // s0: Builder
+    // s1: `data`
+    // s2: `code`
+    // s3: `body`
+    // s4: `mode`
 
-cell $Builder$_fun_endCell(builder $self) impure asm """
+    // Group 2: Placing the Builder after code and data, then checking those for nullability
+    s2 XCHG0
+    DUP2
+    ISNULL
+    SWAP
+    ISNULL
+    AND
+    // → Stack state
+    // s0: -1 (true) if `data` and `code` are both null, 0 (false) otherwise
+    // s1: `code`
+    // s2: `data`
+    // s3: Builder
+    // s4: `body`
+    // s5: `mode`
+
+    // Group 3: Left branch of the IFELSE, executed if s0 is -1 (true)
+    <{
+        DROP2 // drop `data` and `code`, since either of those is null
+        b{0} STSLICECONST
+    }> PUSHCONT
+
+    // Group 3: Right branch of the IFELSE, executed if s0 is 0 (false)
+    <{
+        // _ split_depth:(Maybe (## 5))
+        //   special:(Maybe TickTock)
+        //   code:(Maybe ^Cell)
+        //   data:(Maybe ^Cell)
+        //   library:(Maybe ^Cell)
+        // = StateInit;
+        ROT                // place message Builder on top
+        b{10} STSLICECONST // store Maybe = true, Either = false
+        // Start composing inlined StateInit
+        b{00} STSLICECONST // store split_depth and special first
+        STDICT             // store code
+        STDICT             // store data
+        b{0} STSLICECONST  // store library
+    }> PUSHCONT
+
+    // Group 3: IFELSE that does the branching shown above
+    IFELSE
+    // → Stack state
+    // s0: Builder
+    // s1: null or StateInit
+    // s2: `body`
+    // s3: `mode`
+
+    // Group 4: Finalizing the message
+    STDICT // store `body` as ref with an extra Maybe bit, since `body` might be null
     ENDC
+    // → Stack state
+    // s0: Cell
+    // s1: `mode`
+
+    // Group 5: Sending the message, with `mode` on top
+    SWAP
+    SENDRAWMSG // https://github.com/tact-lang/tact/issues/1558
 """;
 
-builder $Builder$_fun_storeRef(cell $cell, builder $self) impure asm """
-    STREF
+(slice, int) $Slice$_fun_loadCoins(slice $self) impure asm( -> 1 0) """
+    LDVARUINT16
 """;
 
-() $global_emit(cell $body) impure inline {
-    cell $c = $Builder$_fun_endCell($Builder$_fun_storeRef($body, store_uint($global_beginCell(), 15211807202738752817960438464513, 104)));
-    $global_sendRawMessage($c, 0);
-}
-
-((slice, int), ()) $P2PEscrow$_fun_notify((slice, int) $self, cell $body) impure inline {
-    var (($self'owner, $self'orderCounter)) = $self;
+((slice, slice, cell, int), ()) $P2PEscrow$_fun_notify((slice, slice, cell, int) $self, cell $body) impure inline {
+    var (($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter)) = $self;
     slice $to = __tact_context_get_sender();
     int $bounce = false;
     if (false) {
@@ -127,27 +289,17 @@ builder $Builder$_fun_storeRef(cell $cell, builder $self) impure asm """
         if (($balanceBeforeMessage < 0)) {
             $global_nativeReserve(0, 0);
             $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 130, $body));
-            return (($self'owner, $self'orderCounter), ());
+            return (($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter), ());
         }
     }
     $global_message($MessageParameters$_constructor_bounce_to_value_mode_body($bounce, $to, 0, 66, $body));
-    return (($self'owner, $self'orderCounter), ());
+    return (($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter), ());
 }
 
 ;; P2PEscrow_P2PEscrow.constants.fc
-;; Cell a4V+csTNj/oC3lhHjbRQP6hBohzFhH0smywE9W1U4Js=
-cell __gen_cell_cell_6b857e72c4cd8ffa02de58478db4503fa841a21cc5847d2c9b2c04f56d54e09b() asm """
-    B{b5ee9c7241010101001f00003a00000000503250204f72646572204c69737465642026204c6f636b65647139160c} B>boc PUSHREF
-""";
-
-;; Cell 1RIYq59jF4To+eqK5s39jgFzokGWeyq/7g47QcNoc1Y=
-cell __gen_cell_cell_d51218ab9f631784e8f9ea8ae6cdfd8e0173a241967b2abfee0e3b41c3687356() asm """
-    B{b5ee9c7241010101001700002a0000000050325020537761702045786563757465645115c68a} B>boc PUSHREF
-""";
-
-;; Cell EC1HG6Ri8PmZ9vf/rCdAPc4N4hiX+oyZFdOl9NdO3HI=
-cell __gen_cell_cell_102d471ba462f0f999f6f7ffac27403dce0de21897fa8c9915d3a5f4d74edc72() asm """
-    B{b5ee9c7241010101001a00003000000000503250204c697374696e6720556e6c6f636b6564b834cb8f} B>boc PUSHREF
+;; Cell /txQnnbKgnwLZMVjXURzxddgzTUQFNyifMrsqhm/6nE=
+cell __gen_cell_cell_fedc509e76ca827c0b64c5635d4473c5d760cd351014dca27ccaecaa19bfea71() asm """
+    B{b5ee9c7241010101001100001e00000000503250205061796d656e74aeb98db8} B>boc PUSHREF
 """;
 
 ;; P2PEscrow_P2PEscrow.storage.fc
@@ -159,6 +311,19 @@ cell __gen_cell_cell_102d471ba462f0f999f6f7ffac27403dce0de21897fa8c9915d3a5f4d74
 _ $Context$_get_value((int, slice, int, slice) v) inline {
     var (v'bounceable, v'sender, v'value, v'raw) = v;
     return v'value;
+}
+
+;;
+;; Type: SendParameters
+;; TLB: _ mode:int257 body:Maybe ^cell code:Maybe ^cell data:Maybe ^cell value:int257 to:address bounce:bool = SendParameters
+;;
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_body(slice $to, int $value, int $mode, cell $body) inline {
+    return ($mode, $body, null(), null(), $value, $to, true);
+}
+
+((int, cell, cell, cell, int, slice, int)) $SendParameters$_constructor_to_value_mode_bounce_body(slice $to, int $value, int $mode, int $bounce, cell $body) inline {
+    return ($mode, $body, null(), null(), $value, $to, $bounce);
 }
 
 ;;
@@ -192,21 +357,101 @@ cell $DeployOk$_store_cell((int) v, builder b) inline {
 }
 
 ;;
-;; Type: P2PEscrow
-;; TLB: _ owner:address orderCounter:int257 = P2PEscrow
+;; Type: TokenTransfer
+;; Header: 0x0f8a7ea5
+;; TLB: token_transfer#0f8a7ea5 queryId:uint64 amount:coins destination:address response_destination:address custom_payload:Maybe ^cell forward_ton_amount:coins forward_payload:remainder<slice> = TokenTransfer
 ;;
 
-builder $P2PEscrow$_store(builder build_0, (slice, int) v) inline {
-    var (v'owner, v'orderCounter) = v;
+builder $TokenTransfer$_store(builder build_0, (int, int, slice, slice, cell, int, slice) v) inline {
+    var (v'queryId, v'amount, v'destination, v'response_destination, v'custom_payload, v'forward_ton_amount, v'forward_payload) = v;
+    build_0 = store_uint(build_0, 260734629, 32);
+    build_0 = build_0.store_uint(v'queryId, 64);
+    build_0 = build_0.store_varuint16(v'amount);
+    build_0 = build_0.store_slice(v'destination);
+    build_0 = __tact_store_address_opt(build_0, v'response_destination);
+    build_0 = build_0.store_maybe_ref(v'custom_payload);
+    build_0 = build_0.store_varuint16(v'forward_ton_amount);
+    build_0 = build_0.store_slice(v'forward_payload);
+    return build_0;
+}
+
+cell $TokenTransfer$_store_cell((int, int, slice, slice, cell, int, slice) v, builder b) inline {
+    return $TokenTransfer$_store(b, v).end_cell();
+}
+
+((int, int, slice, slice, cell, int, slice)) $TokenTransfer$_constructor_queryId_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload(int $queryId, int $amount, slice $destination, slice $response_destination, cell $custom_payload, int $forward_ton_amount, slice $forward_payload) inline {
+    return ($queryId, $amount, $destination, $response_destination, $custom_payload, $forward_ton_amount, $forward_payload);
+}
+
+;;
+;; Type: Order
+;; TLB: _ seller:address amountVora:int257 priceTon:int257 isActive:bool = Order
+;;
+
+builder $Order$_store(builder build_0, (slice, int, int, int) v) inline {
+    var (v'seller, v'amountVora, v'priceTon, v'isActive) = v;
+    build_0 = build_0.store_slice(v'seller);
+    build_0 = build_0.store_int(v'amountVora, 257);
+    build_0 = build_0.store_int(v'priceTon, 257);
+    build_0 = build_0.store_int(v'isActive, 1);
+    return build_0;
+}
+
+cell $Order$_store_cell((slice, int, int, int) v, builder b) inline {
+    return $Order$_store(b, v).end_cell();
+}
+
+(slice, ((slice, int, int, int))) $Order$_load(slice sc_0) inline {
+    var v'seller = sc_0~load_msg_addr();
+    var v'amountVora = sc_0~load_int(257);
+    var v'priceTon = sc_0~load_int(257);
+    var v'isActive = sc_0~load_int(1);
+    return (sc_0, (v'seller, v'amountVora, v'priceTon, v'isActive));
+}
+
+tuple $Order$_as_optional((slice, int, int, int) v) inline {
+    var (v'seller, v'amountVora, v'priceTon, v'isActive) = v;
+    return __tact_tuple_create_4(v'seller, v'amountVora, v'priceTon, v'isActive);
+}
+
+tuple $Order$_load_opt(cell cl) inline {
+    if (null?(cl)) {
+        return null();
+    }
+    var sc = cl.begin_parse();
+    return $Order$_as_optional(sc~$Order$_load());
+}
+
+((slice, int, int, int)) $Order$_not_null(tuple v) inline {
+    throw_if(128, null?(v));
+    var (slice vvv'seller, int vvv'amountVora, int vvv'priceTon, int vvv'isActive) = __tact_tuple_destroy_4(v);
+    return (vvv'seller, vvv'amountVora, vvv'priceTon, vvv'isActive);
+}
+
+((slice, int, int, int)) $Order$_constructor_seller_amountVora_priceTon_isActive(slice $seller, int $amountVora, int $priceTon, int $isActive) inline {
+    return ($seller, $amountVora, $priceTon, $isActive);
+}
+
+;;
+;; Type: P2PEscrow
+;; TLB: _ owner:address vora_jetton_wallet:address orders:dict<int, ^Order{seller:address,amountVora:int257,priceTon:int257,isActive:bool}> orderCounter:int257 = P2PEscrow
+;;
+
+builder $P2PEscrow$_store(builder build_0, (slice, slice, cell, int) v) inline {
+    var (v'owner, v'vora_jetton_wallet, v'orders, v'orderCounter) = v;
     build_0 = build_0.store_slice(v'owner);
+    build_0 = __tact_store_address_opt(build_0, v'vora_jetton_wallet);
+    build_0 = build_0.store_dict(v'orders);
     build_0 = build_0.store_int(v'orderCounter, 257);
     return build_0;
 }
 
-(slice, ((slice, int))) $P2PEscrow$_load(slice sc_0) inline {
+(slice, ((slice, slice, cell, int))) $P2PEscrow$_load(slice sc_0) inline {
     var v'owner = sc_0~load_msg_addr();
+    var v'vora_jetton_wallet = sc_0~__tact_load_address_opt();
+    var v'orders = sc_0~load_dict();
     var v'orderCounter = sc_0~load_int(257);
-    return (sc_0, (v'owner, v'orderCounter));
+    return (sc_0, (v'owner, v'vora_jetton_wallet, v'orders, v'orderCounter));
 }
 
 (slice, ((slice))) $P2PEscrow$init$_load(slice sc_0) inline {
@@ -214,7 +459,7 @@ builder $P2PEscrow$_store(builder build_0, (slice, int) v) inline {
     return (sc_0, (v'owner));
 }
 
-(slice, int) $P2PEscrow$_contract_load() impure inline {
+(slice, slice, cell, int) $P2PEscrow$_contract_load() impure inline {
     slice $sc = get_data().begin_parse();
     int $loaded = $sc~load_int(1);
     if ($loaded) {
@@ -227,7 +472,7 @@ builder $P2PEscrow$_store(builder build_0, (slice, int) v) inline {
     }
 }
 
-() $P2PEscrow$_contract_store((slice, int) v) impure inline {
+() $P2PEscrow$_contract_store((slice, slice, cell, int) v) impure inline {
     builder b = begin_cell();
     b = b.store_int(true, 1);
     b = $P2PEscrow$_store(b, v);
@@ -238,11 +483,16 @@ builder $P2PEscrow$_store(builder build_0, (slice, int) v) inline {
 ;; Contract P2PEscrow functions
 ;;
 
-(slice, int) $P2PEscrow$_contract_init(slice $owner) impure inline {
-    var (($self'owner, $self'orderCounter)) = (null(), null());
+(slice, slice, cell, int) $P2PEscrow$_contract_init(slice $owner) impure inline {
+    var (($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter)) = (null(), null(), null(), 0);
     $self'owner = $owner;
-    $self'orderCounter = 0;
-    return ($self'owner, $self'orderCounter);
+    return ($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter);
+}
+
+((slice, slice, cell, int), ()) $P2PEscrow$_fun_sendVora((slice, slice, cell, int) $self, slice $to, int $amount) impure inline_ref {
+    var (($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter)) = $self;
+    $global_send($SendParameters$_constructor_to_value_mode_body(__tact_not_null($self'vora_jetton_wallet), 50000000, 2, $TokenTransfer$_store_cell($TokenTransfer$_constructor_queryId_amount_destination_response_destination_custom_payload_forward_ton_amount_forward_payload(0, $amount, $to, null(), null(), 0, $global_emptySlice()), begin_cell())));
+    return (($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter), ());
 }
 
 ;;
@@ -269,23 +519,39 @@ builder $P2PEscrow$_store(builder build_0, (slice, int) v) inline {
     __tact_context_sender = msg_sender_addr;
     
     ;; Load contract data
-    var ($self'owner, $self'orderCounter) = $P2PEscrow$_contract_load();
+    var ($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter) = $P2PEscrow$_contract_load();
     
     ;; Handle bounced messages
     if (msg_bounced) { return (); }
     var op = in_msg~load_opcode_internal();
-    ;; Receive ListOrder message
-    if (op == 4222358337) {
-        var $msg'amountVora = in_msg~load_int(257);
-        var $msg'priceTon = in_msg~load_int(257);
-        var $msg'backendSignature = in_msg~load_ref().begin_parse();
+    ;; Receive SetWallet message
+    if (op == 1558246425) {
+        var $msg'wallet = in_msg~load_msg_addr();
         var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
-        int $value = $ctx'value;
-        int $usdEst = ($msg'amountVora * 10);
-        int $lockTime = (($usdEst > 10000) ? 259200 : 86400);
-        $self'orderCounter = ($self'orderCounter + 1);
-        $global_emit(__gen_cell_cell_6b857e72c4cd8ffa02de58478db4503fa841a21cc5847d2c9b2c04f56d54e09b());
-        $P2PEscrow$_contract_store(($self'owner, $self'orderCounter));
+        throw_unless(14534, ( equal_slices_bits($ctx'sender, $self'owner) ));
+        $self'vora_jetton_wallet = $msg'wallet;
+        $P2PEscrow$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter));
+        return ();
+    }
+    
+    ;; Receive TokenNotification message
+    if (op == 0x7362d09c) {
+        var $msg'queryId = in_msg~load_uint(64);
+        var $msg'amount = in_msg~load_varuint16();
+        var $msg'from = in_msg~load_msg_addr();
+        var $msg'forward_payload = in_msg;
+        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        throw_unless(59007, ( ((~ null?($self'vora_jetton_wallet))) ? (( equal_slices_bits($ctx'sender, __tact_not_null($self'vora_jetton_wallet)) )) : (false) ));
+        slice $slice = $msg'forward_payload;
+        int $op = $slice~load_uint(32);
+        if (($op == 1)) {
+            int $priceTon = $slice~$Slice$_fun_loadCoins();
+            $self'orderCounter = ($self'orderCounter + 1);
+            $self'orders~__tact_dict_set_int_cell(257, $self'orderCounter, $Order$_store_cell($Order$_constructor_seller_amountVora_priceTon_isActive($msg'from, $msg'amount, $priceTon, true), begin_cell()));
+        } else {
+            ($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter)~$P2PEscrow$_fun_sendVora($msg'from, $msg'amount);
+        }
+        $P2PEscrow$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter));
         return ();
     }
     
@@ -293,25 +559,38 @@ builder $P2PEscrow$_store(builder build_0, (slice, int) v) inline {
     if (op == 2174048283) {
         var $msg'orderId = in_msg~load_int(257);
         var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
-        int $value = $ctx'value;
-        $global_emit(__gen_cell_cell_d51218ab9f631784e8f9ea8ae6cdfd8e0173a241967b2abfee0e3b41c3687356());
-        $P2PEscrow$_contract_store(($self'owner, $self'orderCounter));
+        tuple $order = $Order$_load_opt(__tact_dict_get_int_cell($self'orders, 257, $msg'orderId));
+        throw_unless(18518, (~ null?($order)));
+        var ($o'seller, $o'amountVora, $o'priceTon, $o'isActive) = $Order$_not_null($order);
+        throw_unless(62658, $o'isActive);
+        throw_unless(48341, ($ctx'value >= $o'priceTon));
+        $global_send($SendParameters$_constructor_to_value_mode_bounce_body($o'seller, $o'priceTon, 2, false, __gen_cell_cell_fedc509e76ca827c0b64c5635d4473c5d760cd351014dca27ccaecaa19bfea71()));
+        ($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter)~$P2PEscrow$_fun_sendVora($ctx'sender, $o'amountVora);
+        $self'orders~__tact_dict_set_int_cell(257, $msg'orderId, $Order$_store_cell($Order$_constructor_seller_amountVora_priceTon_isActive($o'seller, $o'amountVora, $o'priceTon, false), begin_cell()));
+        $P2PEscrow$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter));
         return ();
     }
     
-    ;; Receive FinalizeWithdrawal message
-    if (op == 2159817007) {
+    ;; Receive CancelOrder message
+    if (op == 2170307283) {
         var $msg'orderId = in_msg~load_int(257);
-        $global_emit(__gen_cell_cell_102d471ba462f0f999f6f7ffac27403dce0de21897fa8c9915d3a5f4d74edc72());
-        $P2PEscrow$_contract_store(($self'owner, $self'orderCounter));
+        var ($ctx'bounceable, $ctx'sender, $ctx'value, $ctx'raw) = __tact_context_get();
+        tuple $order = $Order$_load_opt(__tact_dict_get_int_cell($self'orders, 257, $msg'orderId));
+        throw_unless(18518, (~ null?($order)));
+        var ($o'seller, $o'amountVora, $o'priceTon, $o'isActive) = $Order$_not_null($order);
+        throw_unless(62658, $o'isActive);
+        throw_unless(42435, ( (( equal_slices_bits($ctx'sender, $o'seller) )) ? (true) : (( equal_slices_bits($ctx'sender, $self'owner) )) ));
+        ($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter)~$P2PEscrow$_fun_sendVora($o'seller, $o'amountVora);
+        $self'orders~__tact_dict_set_int_cell(257, $msg'orderId, $Order$_store_cell($Order$_constructor_seller_amountVora_priceTon_isActive($o'seller, $o'amountVora, $o'priceTon, false), begin_cell()));
+        $P2PEscrow$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter));
         return ();
     }
     
     ;; Receive Deploy message
     if (op == 0x946a98b6) {
         var $deploy'queryId = in_msg~load_uint(64);
-        ($self'owner, $self'orderCounter)~$P2PEscrow$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
-        $P2PEscrow$_contract_store(($self'owner, $self'orderCounter));
+        ($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter)~$P2PEscrow$_fun_notify($DeployOk$_store_cell($DeployOk$_constructor_queryId($deploy'queryId), begin_cell()));
+        $P2PEscrow$_contract_store(($self'owner, $self'vora_jetton_wallet, $self'orders, $self'orderCounter));
         return ();
     }
     

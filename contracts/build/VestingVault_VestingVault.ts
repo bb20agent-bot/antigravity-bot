@@ -15,6 +15,8 @@ import {
     Contract,
     ContractABI,
     ABIType,
+    ABIGetter,
+    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -1198,7 +1200,7 @@ const VestingVault_opcodes = {
     "AdjustMultiplier": 3866411903,
 }
 
-const VestingVault_getters: any[] = [
+const VestingVault_getters: ABIGetter[] = [
 ]
 
 export const VestingVault_getterMapping: { [key: string]: string } = {

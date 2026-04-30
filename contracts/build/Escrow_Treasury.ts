@@ -15,6 +15,8 @@ import {
     Contract,
     ContractABI,
     ABIType,
+    ABIGetter,
+    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -1679,7 +1681,7 @@ const Treasury_opcodes = {
     "CancelTrade": 3059028097,
 }
 
-const Treasury_getters: any[] = [
+const Treasury_getters: ABIGetter[] = [
     {"name":"get_balance","methodId":130343,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
 ]
 

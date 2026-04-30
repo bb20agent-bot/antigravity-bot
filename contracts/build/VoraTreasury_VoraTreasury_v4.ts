@@ -15,6 +15,8 @@ import {
     Contract,
     ContractABI,
     ABIType,
+    ABIGetter,
+    ABIReceiver,
     TupleBuilder,
     DictionaryValue
 } from '@ton/core';
@@ -1604,7 +1606,7 @@ const VoraTreasury_v4_opcodes = {
     "PayoutAdvisor": 2966411870,
 }
 
-const VoraTreasury_v4_getters: any[] = [
+const VoraTreasury_v4_getters: ABIGetter[] = [
     {"name":"get_dnft_tier","methodId":76743,"arguments":[{"name":"user","type":{"kind":"simple","type":"address","optional":false}}],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"get_stats","methodId":74074,"arguments":[],"returnType":{"kind":"simple","type":"int","optional":false,"format":257}},
     {"name":"owner","methodId":83229,"arguments":[],"returnType":{"kind":"simple","type":"address","optional":false}},

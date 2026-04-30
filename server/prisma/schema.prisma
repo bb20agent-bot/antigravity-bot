@@ -60,6 +60,10 @@ model User {
   isDaoMember           Boolean  @default(false)
   
   isRestricted          Boolean  @default(false)
+  isLinkSuspended       Boolean  @default(false)
+  suspensionReason      String?
+  kycStatus             String   @default("UNVERIFIED") // UNVERIFIED, PENDING, APPROVED, REJECTED
+  
   lastSettlementDate    DateTime?
   unpaidContributionUsdt Float   @default(0)
   
@@ -121,4 +125,17 @@ model DaoProposal {
   votesAgainst          Int      @default(0)
   
   createdAt             DateTime @default(now())
+}
+
+// P2P Trade Escrow
+model P2PTrade {
+  id                    Int      @id @default(autoincrement())
+  sellerId              Int
+  buyerId               Int
+  amount                Float
+  priceTon              Float
+  status                String   @default("PENDING") // PENDING | ADMIN_APPROVED | COMPLETED | CANCELED
+  txHash                String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @default(now()) @updatedAt
 }
