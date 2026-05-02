@@ -1,0 +1,3 @@
+## 2024-05-18 - Unreliable System-level Toasts in Telegram Mini Apps
+**Learning:** System-level toast notifications in Telegram Mini Apps are often unreliable. Relying solely on `navigator.clipboard` or `document.execCommand('copy')` without providing an explicit inline UI indication of success (e.g. swapping the icon) leaves the user confused about whether the text was actually copied.
+**Action:** When implementing copy functionality in a TMA context, always provide explicit inline visual feedback (like swapping the 'Copy' icon to a 'CheckCircle' icon) and dynamically update `aria-label` attributes to communicate success instead of depending on system or standard browser toasts.
