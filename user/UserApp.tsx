@@ -66,6 +66,48 @@ enum NavTab {
 
 // --- Components ---
 
+const CopyLinkButton: React.FC<{ link: string }> = ({ link }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(link);
+        } else {
+            // Fallback for Telegram Mini Apps and non-secure contexts
+            const textArea = document.createElement("textarea");
+            textArea.value = link;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            textArea.remove();
+        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-[#0088cc] outline-none"
+            aria-label={copied ? "Copied" : "Copy Fandom Link"}
+        >
+            {copied ? (
+                <CheckCircle size={16} className="text-green-500" />
+            ) : (
+                <Copy size={16} className="text-white" />
+            )}
+        </button>
+    );
+};
+
 const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
     <button
         onClick={onClick}
@@ -1369,15 +1411,18 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
 
                         {/* Referral Link & Tool */}
                         <div className="px-2">
-                            <div className="bg-[#111] border border-white/10 rounded-2xl p-4 flex items-center justify-between">
-                                <div>
-                                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
-                                    <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
-                                </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
-                                </button>
-                            </div>
+                            {(() => {
+                                const fandomLink = `t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
+                                return (
+                                    <div className="bg-[#111] border border-white/10 rounded-2xl p-4 flex items-center justify-between">
+                                        <div>
+                                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
+                                            <p className="text-xs font-mono text-cyan-400">{fandomLink}</p>
+                                        </div>
+                                        <CopyLinkButton link={fandomLink} />
+                                    </div>
+                                );
+                            })()}
                         </div>
 
                         {/* Uni-Level Tiers Breakdown */}
