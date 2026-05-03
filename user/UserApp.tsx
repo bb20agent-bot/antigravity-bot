@@ -248,6 +248,50 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
 
     // Community State
     const [communitySubTab, setCommunitySubTab] = useState<'docs' | 'dao' | 'media'>('docs');
+
+    // Clipboard State
+    const [isCopied, setIsCopied] = useState(false);
+
+    const handleCopyLink = () => {
+        const link = `t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
+
+        const fallbackCopyTextToClipboard = (text: string) => {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.width = "2em";
+            textArea.style.height = "2em";
+            textArea.style.padding = "0";
+            textArea.style.border = "none";
+            textArea.style.outline = "none";
+            textArea.style.boxShadow = "none";
+            textArea.style.background = "transparent";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+            document.body.removeChild(textArea);
+        };
+
+        if (!navigator.clipboard) {
+            fallbackCopyTextToClipboard(link);
+        } else {
+            navigator.clipboard.writeText(link).catch(err => {
+                console.error('Async: Could not copy text: ', err);
+                fallbackCopyTextToClipboard(link);
+            });
+        }
+
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+    };
     const [selectedCrew, setSelectedCrew] = useState<any>(null);
     const [chatMessages, setChatMessages] = useState<any[]>([
         { id: 1, user: 'Manager Brown', text: 'Welcome to the crew!', time: '10:00' },
@@ -1374,8 +1418,16 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    onClick={handleCopyLink}
+                                    aria-label={isCopied ? "Link copied" : "Copy fandom link"}
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors"
+                                >
+                                    {isCopied ? (
+                                        <CheckCircle size={16} className="text-green-400" />
+                                    ) : (
+                                        <Copy size={16} className="text-white" />
+                                    )}
                                 </button>
                             </div>
                         </div>
