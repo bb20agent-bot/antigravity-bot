@@ -151,6 +151,34 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const navigate = useNavigate();
     const wallet = useTonWallet();
     const [tonConnectUI] = useTonConnectUI();
+    const [isLinkCopied, setIsLinkCopied] = useState(false);
+
+    const handleCopyLink = () => {
+        const link = `t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
+
+        // Fallback for Telegram Mini App
+        const textArea = document.createElement("textarea");
+        textArea.value = link;
+
+        // Avoid scrolling to bottom
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            document.execCommand('copy');
+            setIsLinkCopied(true);
+            setTimeout(() => setIsLinkCopied(false), 2000);
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+        }
+
+        document.body.removeChild(textArea);
+    };
 
     const handlePurchase = async (pkg: any) => {
         if (!wallet) {
@@ -1374,8 +1402,16 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    onClick={handleCopyLink}
+                                    aria-label={isLinkCopied ? "Copied!" : "Copy Fandom Link"}
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors"
+                                >
+                                    {isLinkCopied ? (
+                                        <CheckCircle size={16} className="text-green-500" />
+                                    ) : (
+                                        <Copy size={16} className="text-white" />
+                                    )}
                                 </button>
                             </div>
                         </div>
