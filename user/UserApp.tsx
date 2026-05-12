@@ -143,6 +143,49 @@ const StrategyVideoCard: React.FC<{ strategy: any; onClick?: () => void }> = ({ 
     );
 };
 
+const CopyButton: React.FC<{ textToCopy: string; className?: string }> = ({ textToCopy, className = "" }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(textToCopy).catch(err => {
+                    console.error("Clipboard copy failed", err);
+                });
+            } else {
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error("Fallback copy failed", err);
+                }
+                document.body.removeChild(textArea);
+            }
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("Failed to copy", err);
+        }
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            className={`transition-colors flex items-center justify-center ${className}`}
+            aria-label={copied ? "Link copied" : "Copy link"}
+        >
+            {copied ? <CheckCircle size={16} className="text-green-400" /> : <Copy size={16} className="text-white" />}
+        </button>
+    );
+};
+
 // Import VoraLivePage component here
 import VoraLivePage from '../pages/VoraLivePage';
 import { FandomSubscriptionPage } from '../src/pages/FandomSubscriptionPage';
@@ -1374,9 +1417,10 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
-                                </button>
+                                <CopyButton
+                                    textToCopy={`t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`}
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors"
+                                />
                             </div>
                         </div>
 

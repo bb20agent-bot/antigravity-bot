@@ -1,0 +1,3 @@
+## 2024-05-12 - Telegram Mini App Clipboard Copy Pattern
+**Learning:** System-level toast notifications shouldn't be relied upon for clipboard copy actions in Telegram Mini App environments, as their display can be inconsistent or blocked by the webview. Furthermore, standard `navigator.clipboard` access is unreliable.
+**Action:** Always provide inline visual feedback (e.g. swapping a Copy icon to a Check icon with a temporary text state change or `aria-label` update) immediately upon user action. Implement a fallback copying mechanism that creates a temporary, off-screen text area to `document.execCommand('copy')` if standard clipboard write fails or isn't available.
