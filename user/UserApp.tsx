@@ -195,6 +195,36 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
         }
     };
 
+    const fallbackCopyTextToClipboard = (text: string) => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            setIsLinkCopied(true);
+            setTimeout(() => setIsLinkCopied(false), 2000);
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+        }
+        document.body.removeChild(textArea);
+    };
+
+    const handleCopyLink = () => {
+        const link = `t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).then(() => {
+                setIsLinkCopied(true);
+                setTimeout(() => setIsLinkCopied(false), 2000);
+            }).catch(() => {
+                fallbackCopyTextToClipboard(link);
+            });
+        } else {
+            fallbackCopyTextToClipboard(link);
+        }
+    };
+
     const handleMockUpload = (type: string) => {
         const input = document.createElement('input');
         input.type = 'file';
@@ -254,6 +284,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
         { id: 2, user: 'ShadowDucker', text: 'Let\'s hunt some points!', time: '10:05' },
     ]);
     const [chatInput, setChatInput] = useState('');
+    const [isLinkCopied, setIsLinkCopied] = useState(false);
 
     // Mock Data State for Dashboard & Store
     const [assets, setAssets] = useState<any>({
@@ -1374,8 +1405,12 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    onClick={handleCopyLink}
+                                    aria-label={isLinkCopied ? "Link copied to clipboard" : "Copy fandom link"}
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors"
+                                >
+                                    {isLinkCopied ? <CheckCircle size={16} className="text-green-400" /> : <Copy size={16} className="text-white" />}
                                 </button>
                             </div>
                         </div>
