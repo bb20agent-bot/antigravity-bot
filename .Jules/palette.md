@@ -1,0 +1,3 @@
+## 2024-05-16 - Telegram Mini Apps Clipboard Copy Feedback
+**Learning:** `navigator.clipboard` is often unreliable or fails silently in insecure contexts or embedded webviews like Telegram Mini Apps (TMAs). Additionally, TMAs do not reliably display system-level toast notifications.
+**Action:** When implementing clipboard copy functionality, always provide a fallback mechanism using `document.execCommand('copy')` with a temporary `textarea`. Instead of relying on toast notifications for feedback, explicitly provide inline visual feedback (e.g., swapping a Copy icon to a Check icon) and dynamically update `aria-label` attributes to communicate success to assistive technologies.
