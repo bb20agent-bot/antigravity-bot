@@ -1,0 +1,27 @@
+--- user/UserApp.tsx
++++ user/UserApp.tsx
+@@ -218,6 +218,23 @@
+     const [isCopied, setIsCopied] = useState(false);
+     const fileInputRef = React.useRef<HTMLInputElement>(null);
+
++    const handleCopy = () => {
++        const link = `t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
++
++        // Fallback for Telegram Mini Apps
++        const textArea = document.createElement("textarea");
++        textArea.value = link;
++        document.body.appendChild(textArea);
++        textArea.focus();
++        textArea.select();
++        try {
++            document.execCommand('copy');
++            setIsCopied(true);
++            setTimeout(() => setIsCopied(false), 2000);
++        } catch (err) {
++            console.error('Fallback: Oops, unable to copy', err);
++        }
++        document.body.removeChild(textArea);
++    };
++
+     // Protocol State
+     const [protocolConfig, setProtocolConfig] = useState({ t2eTimerEnd: 0 });
