@@ -1,0 +1,10 @@
+--- user/UserApp.tsx
++++ user/UserApp.tsx
+@@ -211,6 +211,7 @@
+     const [activeTab, setActiveTab] = useState<NavTab>(NavTab.HOME);
+     const [officeSubTab, setOfficeSubTab] = useState<'profile' | 'community' | 'dnft'>('profile');
+     const [profileImg, setProfileImg] = useState<string | null>(null);
++    const [isCopied, setIsCopied] = useState(false);
+     const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+     // Protocol State
