@@ -1,0 +1,3 @@
+## 2024-05-18 - [Telegram Mini App Clipboard Copy Fallbacks]
+**Learning:** System toasts are unreliable in Telegram Mini Apps and `navigator.clipboard` often fails without a secure context. Because of this, it's critical to provide a fallback copy mechanism using a dynamically created `textarea` and `document.execCommand('copy')`. Additionally, inline visual feedback (like swapping a copy icon to a checkmark) and updating ARIA attributes are necessary to communicate success to users, especially for accessibility.
+**Action:** When implementing copy functionality, always include the `textarea` fallback method and ensure the UI provides inline visual indication (e.g., swapping to `<CheckCircle />`) rather than relying on `alert()` or system notifications.
