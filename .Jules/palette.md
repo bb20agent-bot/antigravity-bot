@@ -1,0 +1,5 @@
+# Palette's UX Journal
+
+## 2024-05-19 - Fallback mechanism for clipboard copy in TMA
+**Learning:** `navigator.clipboard.writeText` often fails silently in embedded webviews like Telegram Mini Apps (TMA) when used without a proper fallback mechanism. The promise structure needs a robust `.catch` and even fallback logic using `document.execCommand('copy')` on a dynamically created `<textarea>` to ensure the text actually gets copied in these restrictive environments. Furthermore, relying on system-level toasts is unreliable in TMA, necessitating explicit, inline UI changes (like changing the icon and `aria-label`) to provide user feedback upon a successful copy operation.
+**Action:** Always implement a two-tier approach (modern clipboard API followed by `execCommand` fallback) for copy-to-clipboard actions in TMA environments. Prioritize dynamic, inline visual feedback in the component itself rather than relying solely on global/system notifications. Ensure the `aria-label` updates to communicate success to screen reader users.
