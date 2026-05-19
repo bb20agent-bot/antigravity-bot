@@ -20,6 +20,7 @@ import {
     TrendingUp,
     AlertTriangle,
     Copy,
+    Check,
     ShieldCheck,
     Star,
     Globe,
@@ -270,6 +271,49 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     });
 
     const [referrals, setReferrals] = useState({ l1: 0, l2: 0, shadowVolume: 0 });
+    const [isCopied, setIsCopied] = useState(false);
+
+    const handleCopyReferral = () => {
+        const telegramId = (window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER';
+        const referralLink = `t.me/Vora_Brown_bot?start=${telegramId}`;
+
+        const handleSuccess = () => {
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        };
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(referralLink)
+                .then(handleSuccess)
+                .catch((err) => {
+                    console.error("Clipboard API failed, falling back", err);
+                    fallbackCopy(referralLink, handleSuccess);
+                });
+        } else {
+            fallbackCopy(referralLink, handleSuccess);
+        }
+    };
+
+    const fallbackCopy = (text: string, onSuccess: () => void) => {
+        try {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            const successful = document.execCommand('copy');
+            if (successful) {
+                onSuccess();
+            }
+            textArea.remove();
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+        }
+    };
 
     useEffect(() => {
         const fetchReferrals = async () => {
@@ -1374,8 +1418,12 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500 outline-none"
+                                    onClick={handleCopyReferral}
+                                    aria-label={isCopied ? "Referral link copied to clipboard" : "Copy referral link to clipboard"}
+                                >
+                                    {isCopied ? <Check size={16} className="text-green-500" /> : <Copy size={16} className="text-white" />}
                                 </button>
                             </div>
                         </div>
