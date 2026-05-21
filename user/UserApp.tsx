@@ -152,6 +152,46 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const wallet = useTonWallet();
     const [tonConnectUI] = useTonConnectUI();
 
+    const handleCopyLink = () => {
+        const link = `t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
+
+        const fallbackCopy = (text: string) => {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                setIsCopied(true);
+                if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+                copyTimeoutRef.current = setTimeout(() => setIsCopied(false), 2000);
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+
+            document.body.removeChild(textArea);
+        };
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(link)
+                .then(() => {
+                    setIsCopied(true);
+                    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+                    copyTimeoutRef.current = setTimeout(() => setIsCopied(false), 2000);
+                })
+                .catch((err) => {
+                    console.error('Async: Could not copy text: ', err);
+                    fallbackCopy(link);
+                });
+        } else {
+            fallbackCopy(link);
+        }
+    };
+
     const handlePurchase = async (pkg: any) => {
         if (!wallet) {
             alert("Please connect your TON wallet first!");
@@ -213,6 +253,8 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const t = translations[lang] || translations['ko'];
 
     // State
+    const [isCopied, setIsCopied] = useState(false);
+    const copyTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
     const [activeTab, setActiveTab] = useState<NavTab>(NavTab.HOME);
     const [officeSubTab, setOfficeSubTab] = useState<'profile' | 'community' | 'dnft'>('profile');
     const [profileImg, setProfileImg] = useState<string | null>(null);
@@ -1374,8 +1416,17 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    onClick={handleCopyLink}
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500 outline-none"
+                                    aria-label={isCopied ? "Link copied to clipboard" : "Copy referral link"}
+                                    title={isCopied ? "Copied!" : "Copy link"}
+                                >
+                                    {isCopied ? (
+                                        <CheckCircle size={16} className="text-green-500" />
+                                    ) : (
+                                        <Copy size={16} className="text-white" />
+                                    )}
                                 </button>
                             </div>
                         </div>
