@@ -66,10 +66,12 @@ enum NavTab {
 
 // --- Components ---
 
-const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
+const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; label?: string }> = ({ icon, active, onClick, label }) => (
     <button
         onClick={onClick}
         className={`p-2 transition-all relative ${active ? 'scale-125 text-[#0088cc]' : 'text-gray-600'}`}
+        aria-label={label}
+        title={label}
     >
         <span className={active ? 'text-[#0088cc]' : ''}>{icon}</span>
         {active && (
@@ -1132,7 +1134,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
             return (
                 <div className="space-y-4 pt-4 px-1 pb-24 h-full flex flex-col">
                     <div className="px-2 flex items-center gap-3">
-                        <button className="text-slate-400 hover:text-white" onClick={() => setSelectedCrew(null)}>
+                        <button className="text-slate-400 hover:text-white" onClick={() => setSelectedCrew(null)} aria-label="Back to Crew List" title="Back to Crew List">
                             <ChevronRight size={24} className="rotate-180" />
                         </button>
                         <div>
@@ -1559,11 +1561,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<LayoutDashboard size={20} />}
                             active={activeTab === NavTab.HOME}
                             onClick={() => setActiveTab(NavTab.HOME)}
+                            label="Home"
                         />
                         <NavItem
                             icon={<Trophy size={20} />}
                             active={activeTab === NavTab.CREW}
                             onClick={() => { setActiveTab(NavTab.CREW); setSelectedCrew(null); }}
+                            label="Crew Ranking"
                         />
 
                         {/* MYPAGE (Center Red V Button) */}
@@ -1574,6 +1578,8 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     ? 'from-red-600 to-red-900 ring-4 ring-red-500/50 ring-offset-2 ring-offset-[#050505] scale-110'
                                     : 'from-slate-800 to-black hover:from-red-800 hover:to-red-900'
                                     }`}
+                                aria-label="My Office"
+                                title="My Office"
                             >
                                 <span className={`text-2xl font-black italic tracking-tighter ${activeTab === NavTab.OFFICE ? 'text-white drop-shadow-[0_0_10px_white]' : 'text-slate-500'}`}>V</span>
                             </button>
@@ -1583,11 +1589,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<Crown size={20} />}
                             active={activeTab === NavTab.INFO}
                             onClick={() => setActiveTab(NavTab.INFO)}
+                            label="Fandom Info"
                         />
                         <NavItem
                             icon={<Gamepad2 size={20} />}
                             active={activeTab === NavTab.GAME}
                             onClick={() => setActiveTab(NavTab.GAME)}
+                            label="Game"
                         />
                     </nav>
                 </div>
