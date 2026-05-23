@@ -255,6 +255,8 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     ]);
     const [chatInput, setChatInput] = useState('');
 
+    const [isCopied, setIsCopied] = useState(false);
+
     // Mock Data State for Dashboard & Store
     const [assets, setAssets] = useState<any>({
         ton: 124.52,
@@ -430,6 +432,52 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
             const reader = new FileReader();
             reader.onload = (ev) => setProfileImg(ev.target?.result as string);
             reader.readAsDataURL(e.target.files[0]);
+        }
+    };
+
+    const handleCopyLink = () => {
+        const link = `https://t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`;
+
+        // We will try both approaches synchronously to handle the promise catch edge case where
+        // execCommand fails due to lacking user gesture if executed late.
+        let isFallbackSuccessful = false;
+
+        // Run fallback approach first to ensure user gesture context is preserved.
+        const textArea = document.createElement("textarea");
+        textArea.value = link;
+
+        // Avoid scrolling to bottom and prevent virtual keyboard popups
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        textArea.readOnly = true;
+
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        try {
+            isFallbackSuccessful = document.execCommand('copy');
+        } catch (err) {
+            console.error('Fallback: Oops, unable to copy', err);
+        }
+
+        document.body.removeChild(textArea);
+
+        if (isFallbackSuccessful) {
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        } else if (navigator.clipboard && window.isSecureContext) {
+            // Try modern clipboard API if fallback failed
+            navigator.clipboard.writeText(link)
+                .then(() => {
+                    setIsCopied(true);
+                    setTimeout(() => setIsCopied(false), 2000);
+                })
+                .catch((err) => {
+                    console.error("Clipboard API failed", err);
+                });
         }
     };
 
@@ -1372,10 +1420,18 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             <div className="bg-[#111] border border-white/10 rounded-2xl p-4 flex items-center justify-between">
                                 <div>
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
-                                    <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
+                                    <p className="text-xs font-mono text-cyan-400">https://t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
+                                <button
+                                    onClick={handleCopyLink}
+                                    aria-label={isCopied ? "Link copied to clipboard" : "Copy referral link"}
+                                    className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-cyan-500"
+                                >
+                                    {isCopied ? (
+                                        <CheckCircle size={16} className="text-green-500" />
+                                    ) : (
+                                        <Copy size={16} className="text-white" />
+                                    )}
                                 </button>
                             </div>
                         </div>
