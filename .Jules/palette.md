@@ -1,0 +1,3 @@
+## 2024-11-20 - Telegram Mini App Clipboard Fallback
+**Learning:** System toast notifications for clipboard actions are unreliable in Telegram Mini Apps and embedded webviews. Always provide explicit visual feedback (e.g., swapping a Copy icon for a Check icon) for these actions. The `document.execCommand('copy')` fallback must execute synchronously and use a `textarea` with `readOnly = true` to avoid invoking the virtual keyboard.
+**Action:** When implementing copy functionality in embedded contexts, pair `navigator.clipboard` with a synchronous `execCommand` fallback. Manage dynamic icon switching and `aria-label` updates to provide clear success feedback and ensure accessible, interactive states.
