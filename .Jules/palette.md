@@ -1,0 +1,3 @@
+## 2024-05-28 - Fallback Clipboard in Telegram Mini Apps
+**Learning:** In restrictive environments like Telegram Mini Apps or embedded webviews, `navigator.clipboard.writeText` often fails due to permission issues or missing APIs. Relying solely on the modern Clipboard API leads to a broken experience for sharing referral links.
+**Action:** Always provide a fallback using `document.execCommand('copy')` with a temporary, dynamically created `textarea` (with `readOnly = true` to prevent keyboard popup). Ensure inline visual feedback (e.g., icon swap) and dynamic `aria-label` updates to communicate success.
