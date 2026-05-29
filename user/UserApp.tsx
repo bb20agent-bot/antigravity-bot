@@ -66,9 +66,55 @@ enum NavTab {
 
 // --- Components ---
 
-const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
+const CopyButton: React.FC<{ link: string }> = ({ link }) => {
+    const [isCopied, setIsCopied] = useState(false);
+    const timeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleCopy = () => {
+        const fallbackCopy = (text: string) => {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.readOnly = true;
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try { document.execCommand('copy'); } catch (err) {}
+            document.body.removeChild(textArea);
+        };
+
+        const showCopied = () => {
+            setIsCopied(true);
+            if (timeoutRef.current) clearTimeout(timeoutRef.current);
+            timeoutRef.current = setTimeout(() => setIsCopied(false), 2000);
+        };
+
+        if (!navigator.clipboard) {
+            fallbackCopy(link);
+            showCopied();
+        } else {
+            navigator.clipboard.writeText(link).then(showCopied).catch(() => {
+                fallbackCopy(link);
+                showCopied();
+            });
+        }
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            aria-label={isCopied ? "Link copied" : "Copy referral link"}
+            className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors"
+        >
+            {isCopied ? <CheckCircle size={16} className="text-green-400" /> : <Copy size={16} className="text-white" />}
+        </button>
+    );
+};
+
+const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; ariaLabel?: string }> = ({ icon, active, onClick, ariaLabel }) => (
     <button
         onClick={onClick}
+        aria-label={ariaLabel}
         className={`p-2 transition-all relative ${active ? 'scale-125 text-[#0088cc]' : 'text-gray-600'}`}
     >
         <span className={active ? 'text-[#0088cc]' : ''}>{icon}</span>
@@ -1374,9 +1420,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
-                                </button>
+                                <CopyButton link={`https://t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`} />
                             </div>
                         </div>
 
@@ -1559,17 +1603,20 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<LayoutDashboard size={20} />}
                             active={activeTab === NavTab.HOME}
                             onClick={() => setActiveTab(NavTab.HOME)}
+                            ariaLabel="Home"
                         />
                         <NavItem
                             icon={<Trophy size={20} />}
                             active={activeTab === NavTab.CREW}
                             onClick={() => { setActiveTab(NavTab.CREW); setSelectedCrew(null); }}
+                            ariaLabel="Crew Ranking"
                         />
 
                         {/* MYPAGE (Center Red V Button) */}
                         <div className="relative -top-6">
                             <button
                                 onClick={() => setActiveTab(NavTab.OFFICE)}
+                                aria-label="My Office"
                                 className={`w-14 h-14 rounded-full bg-gradient-to-br border-4 border-[#050505] shadow-[0_4px_25px_rgba(220,38,38,0.5)] flex items-center justify-center transition-transform ${activeTab === NavTab.OFFICE
                                     ? 'from-red-600 to-red-900 ring-4 ring-red-500/50 ring-offset-2 ring-offset-[#050505] scale-110'
                                     : 'from-slate-800 to-black hover:from-red-800 hover:to-red-900'
@@ -1583,11 +1630,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<Crown size={20} />}
                             active={activeTab === NavTab.INFO}
                             onClick={() => setActiveTab(NavTab.INFO)}
+                            ariaLabel="Info"
                         />
                         <NavItem
                             icon={<Gamepad2 size={20} />}
                             active={activeTab === NavTab.GAME}
                             onClick={() => setActiveTab(NavTab.GAME)}
+                            ariaLabel="Game"
                         />
                     </nav>
                 </div>
