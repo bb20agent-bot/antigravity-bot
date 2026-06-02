@@ -1,0 +1,3 @@
+## 2024-06-02 - Inline Feedback for Clipboard Interactions
+**Learning:** System-level toast notifications are unreliable in embedded webviews like Telegram Mini Apps. Users are often left wondering if a "Copy to Clipboard" action succeeded. Providing clear, immediate inline visual feedback (like swapping a copy icon to a check icon) is essential for a complete and confident user interaction in this environment.
+**Action:** When adding clipboard interactions or async button clicks in embedded environments, always include localized, inline visual feedback instead of relying on external system UI.
