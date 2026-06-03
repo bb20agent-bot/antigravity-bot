@@ -66,9 +66,10 @@ enum NavTab {
 
 // --- Components ---
 
-const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void }> = ({ icon, active, onClick }) => (
+const NavItem: React.FC<{ icon: React.ReactNode; active: boolean; onClick: () => void; 'aria-label'?: string }> = ({ icon, active, onClick, 'aria-label': ariaLabel }) => (
     <button
         onClick={onClick}
+        aria-label={ariaLabel}
         className={`p-2 transition-all relative ${active ? 'scale-125 text-[#0088cc]' : 'text-gray-600'}`}
     >
         <span className={active ? 'text-[#0088cc]' : ''}>{icon}</span>
@@ -1203,6 +1204,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     }
                                 }}
                                 className="bg-amber-500 text-black p-2 rounded-xl"
+                                aria-label="Send message"
                             >
                                 <Play size={16} className="ml-0.5" />
                             </button>
@@ -1241,7 +1243,9 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                     <div className="bg-[#111] border border-white/10 rounded-3xl p-5">
                         <div className="flex justify-between items-center mb-2">
                             <h4 className="text-base font-black text-white">Top 20 Crews</h4>
-                            <Search size={16} className="text-slate-500 cursor-pointer hover:text-white transition-colors" />
+                            <button aria-label="Search crews" className="text-slate-500 hover:text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded">
+                                <Search size={16} />
+                            </button>
                         </div>
 
                         <div className="space-y-3 mt-4">
@@ -1374,7 +1378,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
+                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors" aria-label="Copy referral link">
                                     <Copy size={16} className="text-white" />
                                 </button>
                             </div>
@@ -1479,8 +1483,17 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                 <div className="relative z-10 px-6 pt-8 pb-6 flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <div
+                            role="button"
+                            tabIndex={0}
+                            aria-label="Upload profile image"
                             onClick={handleProfileClick}
-                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-900/20 border border-emerald-500/30 flex items-center justify-center cursor-pointer relative overflow-hidden group shadow-lg"
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    handleProfileClick();
+                                }
+                            }}
+                            className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-900/20 border border-emerald-500/30 flex items-center justify-center cursor-pointer relative overflow-hidden group shadow-lg focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none"
                         >
                             {profileImg ? (
                                 <img src={profileImg} alt="Profile" className="w-full h-full object-cover" />
@@ -1559,17 +1572,20 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<LayoutDashboard size={20} />}
                             active={activeTab === NavTab.HOME}
                             onClick={() => setActiveTab(NavTab.HOME)}
+                            aria-label="Home"
                         />
                         <NavItem
                             icon={<Trophy size={20} />}
                             active={activeTab === NavTab.CREW}
                             onClick={() => { setActiveTab(NavTab.CREW); setSelectedCrew(null); }}
+                            aria-label="Crew"
                         />
 
                         {/* MYPAGE (Center Red V Button) */}
                         <div className="relative -top-6">
                             <button
                                 onClick={() => setActiveTab(NavTab.OFFICE)}
+                                aria-label="My Office"
                                 className={`w-14 h-14 rounded-full bg-gradient-to-br border-4 border-[#050505] shadow-[0_4px_25px_rgba(220,38,38,0.5)] flex items-center justify-center transition-transform ${activeTab === NavTab.OFFICE
                                     ? 'from-red-600 to-red-900 ring-4 ring-red-500/50 ring-offset-2 ring-offset-[#050505] scale-110'
                                     : 'from-slate-800 to-black hover:from-red-800 hover:to-red-900'
@@ -1583,11 +1599,13 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                             icon={<Crown size={20} />}
                             active={activeTab === NavTab.INFO}
                             onClick={() => setActiveTab(NavTab.INFO)}
+                            aria-label="Info"
                         />
                         <NavItem
                             icon={<Gamepad2 size={20} />}
                             active={activeTab === NavTab.GAME}
                             onClick={() => setActiveTab(NavTab.GAME)}
+                            aria-label="Game"
                         />
                     </nav>
                 </div>
