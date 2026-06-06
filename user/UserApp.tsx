@@ -20,6 +20,7 @@ import {
     TrendingUp,
     AlertTriangle,
     Copy,
+    Check,
     ShieldCheck,
     Star,
     Globe,
@@ -83,6 +84,60 @@ const formatTime = (seconds: number) => {
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+};
+
+const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
+    const [isCopied, setIsCopied] = useState(false);
+
+    const handleCopy = () => {
+        const fallbackCopy = () => {
+            const textArea = document.createElement("textarea");
+            textArea.value = textToCopy;
+            textArea.readOnly = true; // Prevent virtual keyboard
+            textArea.style.position = "absolute";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                setIsCopied(true);
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            document.body.removeChild(textArea);
+        };
+
+        if (!navigator.clipboard) {
+            fallbackCopy();
+        } else {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                setIsCopied(true);
+            }).catch(() => {
+                fallbackCopy();
+            });
+        }
+    };
+
+    useEffect(() => {
+        if (isCopied) {
+            const timer = setTimeout(() => setIsCopied(false), 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [isCopied]);
+
+    return (
+        <button
+            onClick={handleCopy}
+            className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500"
+            aria-label={isCopied ? "Link copied" : "Copy link"}
+        >
+            {isCopied ? (
+                <Check size={16} className="text-green-400" />
+            ) : (
+                <Copy size={16} className="text-white" />
+            )}
+        </button>
+    );
 };
 
 const StrategyVideoCard: React.FC<{ strategy: any; onClick?: () => void }> = ({ strategy, onClick }) => {
@@ -1374,9 +1429,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
-                                </button>
+                                <CopyButton textToCopy={`https://t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`} />
                             </div>
                         </div>
 
