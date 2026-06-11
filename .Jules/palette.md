@@ -1,0 +1,4 @@
+
+## 2023-10-27 - Inline Visual Feedback for TMA Clipboard Interactions
+**Learning:** Telegram Mini Apps (TMA) embedded webviews often lack reliable native system toast notifications for clipboard operations (`navigator.clipboard.writeText`), and can sometimes silently fail in non-secure contexts. Moreover, a large parent component means we shouldn't place rapidly toggling UI state (like `isCopied` boolean timers) at its root to avoid performance issues.
+**Action:** When implementing copy-to-clipboard interactions, encapsulate the interaction into an isolated component (like `CopyButton`) to avoid full-page re-renders. Use `document.execCommand('copy')` with a hidden textarea as a robust fallback. For accessibility and usability, provide inline visual feedback (swapping the icon) and dynamically update `aria-label` / `title` attributes (e.g. from "Copy" to "Copied!") to guarantee the user receives confirmation regardless of system capabilities.
