@@ -1,0 +1,3 @@
+## 2024-06-12 - [Accessible Clipboard Fallback for Telegram Mini Apps]
+**Learning:** In Telegram Mini Apps, system toast notifications are unreliable, and `navigator.clipboard` often fails without a secure context. Hardcoding `document.execCommand('copy')` directly without testing limits can lead to exceptions or poor UX. Simply adding `aria-label` to a static copy button is insufficient because the state doesn't reflect the action's success.
+**Action:** Created a `CopyButton` component that uses a safe `textarea` fallback for `document.execCommand('copy')`, visually swaps the `Copy` icon for a `CheckCircle` upon success (giving clear inline feedback), and dynamically updates the `aria-label` to "Copied" to provide appropriate accessibility cues.
