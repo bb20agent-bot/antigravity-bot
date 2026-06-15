@@ -147,6 +147,55 @@ const StrategyVideoCard: React.FC<{ strategy: any; onClick?: () => void }> = ({ 
 import VoraLivePage from '../pages/VoraLivePage';
 import { FandomSubscriptionPage } from '../src/pages/FandomSubscriptionPage';
 
+const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
+    const [isCopied, setIsCopied] = useState(false);
+
+    const handleCopy = () => {
+        const fallbackCopyTextToClipboard = (text: string) => {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "absolute";
+            textArea.style.left = "-9999px";
+            textArea.readOnly = true;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                setIsCopied(true);
+                setTimeout(() => setIsCopied(false), 2000);
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+            document.body.removeChild(textArea);
+        };
+
+        if (!navigator.clipboard || !window.isSecureContext) {
+            fallbackCopyTextToClipboard(textToCopy);
+            return;
+        }
+
+        navigator.clipboard.writeText(textToCopy)
+            .then(() => {
+                setIsCopied(true);
+                setTimeout(() => setIsCopied(false), 2000);
+            })
+            .catch((err) => {
+                console.error('Async: Could not copy text: ', err);
+                fallbackCopyTextToClipboard(textToCopy);
+            });
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors"
+            aria-label={isCopied ? "Copied!" : "Copy link"}
+        >
+            {isCopied ? <CheckCircle size={16} className="text-green-500" /> : <Copy size={16} className="text-white" />}
+        </button>
+    );
+};
+
 const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const navigate = useNavigate();
     const wallet = useTonWallet();
@@ -1374,9 +1423,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
-                                </button>
+                                <CopyButton textToCopy={`t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`} />
                             </div>
                         </div>
 
