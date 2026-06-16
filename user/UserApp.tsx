@@ -9,6 +9,7 @@ import {
     Trophy,
     Clock,
     CheckCircle,
+    Check,
     MessageSquare,
     LayoutDashboard,
     Gamepad2,
@@ -146,6 +147,57 @@ const StrategyVideoCard: React.FC<{ strategy: any; onClick?: () => void }> = ({ 
 // Import VoraLivePage component here
 import VoraLivePage from '../pages/VoraLivePage';
 import { FandomSubscriptionPage } from '../src/pages/FandomSubscriptionPage';
+
+const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = () => {
+        const fallbackCopy = () => {
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            textArea.readOnly = true;
+            textArea.style.position = 'absolute';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                setCopied(true);
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            document.body.removeChild(textArea);
+        };
+
+        if (window.isSecureContext && navigator.clipboard) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                setCopied(true);
+            }).catch(() => {
+                fallbackCopy();
+            });
+        } else {
+            fallbackCopy();
+        }
+    };
+
+    useEffect(() => {
+        if (copied) {
+            const timer = setTimeout(() => setCopied(false), 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [copied]);
+
+    return (
+        <button
+            onClick={handleCopy}
+            className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors"
+            aria-label={copied ? "Copied to clipboard" : "Copy Fandom Link"}
+            title={copied ? "Copied!" : "Copy"}
+        >
+            {copied ? <Check size={16} className="text-green-500" /> : <Copy size={16} className="text-white" />}
+        </button>
+    );
+};
 
 const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const navigate = useNavigate();
@@ -1374,9 +1426,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
-                                </button>
+                                <CopyButton textToCopy={`t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`} />
                             </div>
                         </div>
 
