@@ -1,0 +1,4 @@
+
+## 2024-06-17 - Robust Clipboard Copy in Telegram Mini Apps
+**Learning:** System-level clipboard functionality (`navigator.clipboard`) frequently fails or throws permission errors within embedded webviews like Telegram Mini Apps (TMA) and insecure contexts. Additionally, placing temporary visual feedback state (like `isCopied`) in a massive monolithic root component (`UserApp.tsx`) causes severe performance degradation due to unnecessary re-renders.
+**Action:** Always extract copy-to-clipboard interactions into dedicated, smaller micro-components (e.g., `CopyButton`). Implement a bulletproof fallback using a dynamically created, off-screen, `readOnly` `<textarea>` with `document.execCommand('copy')`. Ensure the micro-component manages its own `isCopied` state and updates `aria-label` dynamically to communicate success visually and to screen readers without triggering app-wide re-renders.
