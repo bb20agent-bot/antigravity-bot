@@ -36,6 +36,7 @@ import {
 import { translations, Language } from '../services/i18nService';
 import { protocolService } from '../services/protocolService';
 import { VoraLogo } from '../components/VoraLogo';
+import { CopyButton } from './components/CopyButton';
 
 // --- Types & Interfaces ---
 declare global {
@@ -1132,7 +1133,11 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
             return (
                 <div className="space-y-4 pt-4 px-1 pb-24 h-full flex flex-col">
                     <div className="px-2 flex items-center gap-3">
-                        <button className="text-slate-400 hover:text-white" onClick={() => setSelectedCrew(null)}>
+                        <button
+                            className="text-slate-400 hover:text-white"
+                            onClick={() => setSelectedCrew(null)}
+                            aria-label="Go back to Crew list"
+                        >
                             <ChevronRight size={24} className="rotate-180" />
                         </button>
                         <div>
@@ -1374,9 +1379,10 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
-                                </button>
+                                <CopyButton
+                                    textToCopy={`https://t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`}
+                                    ariaLabel="Copy Fandom Link"
+                                />
                             </div>
                         </div>
 
