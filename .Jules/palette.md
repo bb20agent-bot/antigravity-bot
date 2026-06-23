@@ -1,0 +1,3 @@
+## 2024-06-23 - Telegram Mini App Clipboard Fallbacks
+**Learning:** System-level toast notifications and `navigator.clipboard` are often unreliable or fail silently in Telegram Mini Apps (TMA) and secure webviews. Providing visual feedback solely through system toasts or assuming the modern clipboard API works is an accessibility anti-pattern here.
+**Action:** When building copy functionality for TMAs, always implement a `document.execCommand('copy')` fallback with a hidden, absolute-positioned `textarea` (readOnly=true to prevent keyboard popup). Furthermore, always provide robust *inline* visual feedback (e.g., swapping a Copy icon to a Check icon) rather than relying on external toasts.
