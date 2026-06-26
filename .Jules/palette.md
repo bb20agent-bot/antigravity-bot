@@ -1,0 +1,3 @@
+## 2024-06-26 - [Clipboard Copy Fallback in Telegram Mini Apps]
+**Learning:** `navigator.clipboard.writeText()` frequently fails in Telegram Mini Apps because they operate in embedded webviews that may lack secure context (`window.isSecureContext`) or appropriate permissions.
+**Action:** When implementing copy-to-clipboard functionality, always provide a fallback using `document.execCommand('copy')` with a temporary, off-screen, `readonly` `<textarea>`. Additionally, extracting micro-interactions like clipboard copying into smaller components (`CopyButton`) with their own state avoids triggering re-renders on the massive `UserApp` root component.
