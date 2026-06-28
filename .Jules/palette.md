@@ -1,0 +1,3 @@
+## 2024-06-28 - Telegram Mini App Clipboard Copy Pattern
+**Learning:** In Telegram Mini Apps (and potentially other embedded webviews), `navigator.clipboard` functionality can be unreliable due to `window.isSecureContext` being false or missing permissions, and system-level toasts are inconsistent.
+**Action:** Always provide a robust fallback mechanism using `document.execCommand('copy')` with a temporary `<textarea>` element positioned off-screen. Since system toasts aren't guaranteed, build visual confirmation directly into the component (e.g., briefly swapping a copy icon for a checkmark and updating the `aria-label` dynamically) to ensure accessible and visible feedback. This pattern was implemented in the reusable `CopyButton` component.
