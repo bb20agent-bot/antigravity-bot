@@ -1,0 +1,3 @@
+## 2024-07-04 - [Abstracted Inline Copy Button]
+**Learning:** Extracting inline copy to clipboard functionality into its own reusable `CopyButton` functional component allows for proper temporary dynamic UI feedback such as state timers without needlessly triggering massive and expensive application re-renders at the root level. Fallbacks to `document.execCommand('copy')` combined with the dynamic `aria-label` swaps guarantees accessibility and clipboard reliability in webviews like Telegram Mini Apps.
+**Action:** Always extract UX micro-interactions (like timers and feedback icons) into small decoupled child components when working within monolithic top-level components to ensure performant state updates.
