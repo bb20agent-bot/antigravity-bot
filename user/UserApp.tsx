@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TonConnectButton, useTonWallet, useTonConnectUI } from '@tonconnect/ui-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -83,6 +83,65 @@ const formatTime = (seconds: number) => {
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+};
+
+const CopyButton: React.FC<{ textToCopy: string; className?: string }> = ({ textToCopy, className }) => {
+    const [isCopied, setIsCopied] = useState(false);
+    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const handleCopy = () => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+
+        const fallbackCopy = () => {
+            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                textArea.readOnly = true;
+                textArea.style.position = 'absolute';
+                textArea.style.left = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                return true;
+            } catch (e) {
+                return false;
+            }
+        };
+
+        if (window.isSecureContext && navigator.clipboard) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                showSuccess();
+            }).catch(() => {
+                if (fallbackCopy()) showSuccess();
+            });
+        } else {
+            if (fallbackCopy()) showSuccess();
+        }
+    };
+
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, []);
+
+    const showSuccess = () => {
+        setIsCopied(true);
+        timerRef.current = setTimeout(() => {
+            setIsCopied(false);
+        }, 2000);
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            aria-label={isCopied ? "Copied to clipboard" : "Copy to clipboard"}
+            className={className || "bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors"}
+        >
+            {isCopied ? <CheckCircle size={16} className="text-green-400" /> : <Copy size={16} className="text-white" />}
+        </button>
+    );
 };
 
 const StrategyVideoCard: React.FC<{ strategy: any; onClick?: () => void }> = ({ strategy, onClick }) => {
@@ -1374,9 +1433,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
-                                </button>
+                                <CopyButton textToCopy={`t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`} />
                             </div>
                         </div>
 
