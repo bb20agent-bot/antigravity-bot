@@ -1,0 +1,3 @@
+## 2023-10-27 - [Bottom Navigation Accessibility]
+**Learning:** In the Vite/React setup (specifically `user/UserApp.tsx`), the bottom navigation (`NavItem` components) heavily relies on `lucide-react` icons for visual cues but inherently lacked `aria-label` definitions and explicit `focus-visible` styling, making it entirely opaque to screen readers and difficult to navigate via keyboard.
+**Action:** Always verify custom icon-only navigation bars for `aria-label` attributes and implement explicit `focus-visible` styles (`focus-visible:ring-2`) to ensure both semantic clarity and keyboard accessibility. Pass a `label` prop down to reusable generic components like `NavItem`.
