@@ -147,6 +147,61 @@ const StrategyVideoCard: React.FC<{ strategy: any; onClick?: () => void }> = ({ 
 import VoraLivePage from '../pages/VoraLivePage';
 import { FandomSubscriptionPage } from '../src/pages/FandomSubscriptionPage';
 
+
+const CopyButton: React.FC<{ textToCopy: string }> = ({ textToCopy }) => {
+    const [isCopied, setIsCopied] = useState(false);
+    const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, []);
+
+    const handleCopy = () => {
+        const fallbackCopy = () => {
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            textArea.readOnly = true;
+            textArea.style.position = 'absolute';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showSuccess();
+            } catch (err) {
+                console.error('Fallback copy failed', err);
+            }
+            document.body.removeChild(textArea);
+        };
+
+        const showSuccess = () => {
+            setIsCopied(true);
+            if (timerRef.current) clearTimeout(timerRef.current);
+            timerRef.current = setTimeout(() => setIsCopied(false), 2000);
+        };
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(textToCopy)
+                .then(showSuccess)
+                .catch(fallbackCopy);
+        } else {
+            fallbackCopy();
+        }
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            aria-label={isCopied ? "Copied!" : "Copy referral link"}
+            className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors focus-visible:ring-2 focus-visible:ring-cyan-400 focus:outline-none"
+        >
+            {isCopied ? <CheckCircle size={16} className="text-green-500" /> : <Copy size={16} className="text-white" />}
+        </button>
+    );
+};
+
 const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
     const navigate = useNavigate();
     const wallet = useTonWallet();
@@ -1374,9 +1429,7 @@ const UserApp: React.FC<{ lang?: Language }> = ({ lang = 'ko' }) => {
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Your Fandom Link</p>
                                     <p className="text-xs font-mono text-cyan-400">t.me/Vora_Brown_bot?start={(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}</p>
                                 </div>
-                                <button className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition-colors">
-                                    <Copy size={16} className="text-white" />
-                                </button>
+                                <CopyButton textToCopy={`t.me/Vora_Brown_bot?start=${(window as any).Telegram?.WebApp?.initDataUnsafe?.user?.id || 'TESTUSER'}`} />
                             </div>
                         </div>
 
