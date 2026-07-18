@@ -1,0 +1,3 @@
+## 2024-05-18 - Accessible Copy Feedback in Telegram Mini Apps
+**Learning:** System-level toast notifications and native clipboard operations (`navigator.clipboard`) are highly unreliable inside embedded webviews like Telegram Mini Apps. Fallbacks using `document.execCommand('copy')` with dynamically created textareas are critical, and they require explicit state management (`useRef` timeouts) to provide inline visual feedback (like icon swapping) combined with dynamic `aria-label` updates, since users cannot rely on system prompts.
+**Action:** When implementing copy-to-clipboard functionality, abstract it into a reusable component that implements this robust fallback mechanism and guarantees self-contained visual feedback via icon changes and aria-label updates.
