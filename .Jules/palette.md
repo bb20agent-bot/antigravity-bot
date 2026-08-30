@@ -1,0 +1,3 @@
+## 2024-05-24 - Clipboard Accessibility in Telegram Mini Apps
+**Learning:** System-level clipboard actions (like toast notifications) are unreliable in Telegram Mini Apps and embedded contexts. The `document.execCommand('copy')` fallback can cause unintended side effects if not carefully managed (e.g., keyboard popups if the temporary textarea isn't read-only, or layout jumps if it isn't absolute positioned).
+**Action:** When implementing copy-to-clipboard functionality, abstract it into a reusable component (like `CopyButton`) that explicitly manages inline visual feedback (e.g., a checkmark icon swapping in) and sets appropriate `aria-label` attributes to communicate success. Ensure the fallback logic handles temporary DOM elements correctly.
