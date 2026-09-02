@@ -1,0 +1,3 @@
+## 2026-09-02 - Added accessible focus styles and labels to bottom navigation menu
+**Learning:** The bottom navigation bar in this app lacked explicit ARIA labels and focus visibility on its `NavItem` components and the central 'My Page' button. Without these, the core navigation experience could be confusing for screen reader users, and un-navigable via keyboard.
+**Action:** Extended the reusable `NavItem` component to accept an optional `label` prop, mapping it to `aria-label`, and added explicit `focus-visible` utility classes for clear keyboard focus states to all bottom navigation elements.
