@@ -1,0 +1,3 @@
+## 2024-10-31 - Clipboard Copy in Telegram Mini Apps
+**Learning:** System-level toast notifications and native `navigator.clipboard` are often unreliable or unsupported inside embedded webviews like Telegram Mini Apps (especially iOS). Users often tap a copy button and receive no feedback if the promise silently rejects or toasts are blocked.
+**Action:** Always provide inline visual feedback (e.g. swapping a Copy icon to a Check icon on the button itself) rather than relying on external toasts. Furthermore, always wrap `navigator.clipboard.writeText` in a try/catch or `.catch()` block that falls back to a hidden textarea with `document.execCommand('copy')` to ensure robust copying across environments.
