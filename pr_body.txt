@@ -1,0 +1,4 @@
+💡 What: Replaced the static Copy button with a new `CopyButton` component that provides a visual checkmark and updates ARIA labels upon clicking.
+🎯 Why: System-level toast notifications are unreliable in Telegram Mini Apps. Users need immediate, localized visual feedback to confirm their referral link was successfully copied to the clipboard.
+📸 Before/After: Visual checkmark is now temporarily shown upon a successful copy action.
+♿ Accessibility: Added dynamic `aria-label` attributes that update from "Copy link to clipboard" to "Copied to clipboard" when clicked. Also added `focus-visible:ring-2` for keyboard navigation.
