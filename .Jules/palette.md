@@ -1,0 +1,3 @@
+## 2024-05-14 - Telegram WebApp Clipboard Interaction
+**Learning:** Telegram WebApp environment can have restrictive or flaky navigator.clipboard implementation, especially outside secure contexts. Because system toast notifications aren't reliable here, localized feedback (icon swap) on a copy button is a more accessible and clearer UX pattern than relying on external toasts.
+**Action:** When creating copy functionalities in TMA, abstract them into a functional component (e.g. `CopyButton`) that includes both visual feedback (`Check` icon swap + `aria-label` update) and a fallback copy mechanism using a hidden textarea and `execCommand`.
